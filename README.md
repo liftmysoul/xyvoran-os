@@ -186,6 +186,8 @@ The coach system prompt is in `src/lib/ai-coach.ts`. It requires educational wel
 3. Keep the detected framework as **Next.js**.
 4. Use the repository root as the Root Directory.
 5. Use `npm run build` as the Build Command. No custom Output Directory is required.
+   - In Vercel Project Settings -> Build and Deployment, clear the Output Directory field completely.
+   - Do not set the Output Directory to `public`, `.next`, or `out` for this application.
 6. Add these variables to both Preview and Production environments:
 
 ```text
