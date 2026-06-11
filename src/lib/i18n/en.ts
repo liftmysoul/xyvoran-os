@@ -36,7 +36,7 @@ export const en = {
   },
   nav: {
     dashboard: "Dashboard", biomarkers: "Biomarkers", labs: "Labs", coach: "AI Coach", protocols: "Protocols",
-    profile: "Profile", settings: "Settings", layer: "Optimization Layer", system: "Human Optimization OS",
+    membership: "Membership", profile: "Profile", settings: "Settings", layer: "Optimization Layer", system: "Human Optimization OS",
     center: "Command Center", athlete: "Athlete profile", logout: "Log out"
   },
   onboarding: {
@@ -47,7 +47,22 @@ export const en = {
     disclaimer: "I understand XYVORAN OS provides educational wellness guidance only and does not diagnose disease, prescribe treatment, or replace licensed medical care.",
     disclaimerRequired: "Confirm the educational wellness disclaimer to continue.",
     signIn: "Please sign in before onboarding.", migration: "The Phase 5.5 database migration is required before saving",
-    saveError: "Unable to save onboarding data"
+    saveError: "Unable to save onboarding data", memberMigration: "Run the Phase 8 membership migration before saving member details.",
+    ageError: "You must be at least 21 years old to become a member.", consentsRequired: "Accept all four membership consents to continue.",
+    firstName: "First Name", lastName: "Last Name", phone: "Phone Number", dob: "Date of Birth", country: "Country",
+    stateProvince: "State / Province", city: "City", address: "Address", occupation: "Occupation (optional)", email: "Email",
+    identityHelp: "Required for private membership identity and compliance records.", addressHelp: "Enter your primary residential address.",
+    ageConsent: "I certify that I am at least 21 years old.", educationConsent: "I understand that XYVORAN OS provides educational and informational content only.",
+    termsConsent: "I agree to the Terms & Conditions.", privacyConsent: "I agree to the Privacy Policy.", legalConsents: "Membership Consents"
+  },
+  membership: {
+    eyebrow: "Private Membership", title: "Membership Center", description: "Your membership identity, compliance status, and completion progress.",
+    memberId: "Member ID", status: "Membership Status", joinDate: "Join Date", language: "Language Preference", completion: "Profile Completion",
+    pending: "Pending", active: "Active", suspended: "Suspended", expired: "Expired", unavailable: "Membership record unavailable",
+    profileFoundation: "Member Profile", healthFoundation: "Health Foundation", labFoundation: "Lab Intelligence", protocolFoundation: "Protocol History",
+    complete: "Complete", incomplete: "Incomplete", nextStep: "Next recommended step", updateProfile: "Complete member profile",
+    addLabs: "Upload bloodwork", generateProtocol: "Generate a protocol", consentStatus: "Compliance Consents", consentComplete: "All required consents recorded",
+    consentMissing: "Membership consents are incomplete", architectureError: "Membership infrastructure is not ready. Run the Phase 8 Supabase migration."
   },
   dashboard: {
     overall: "Overall Optimization Score", weakest: "Weakest Pillar", priorities: "Top 3 Priority Actions",

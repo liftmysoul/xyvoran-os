@@ -38,7 +38,7 @@ export const es = {
   },
   nav: {
     dashboard: "Panel", biomarkers: "Biomarcadores", labs: "Laboratorios", coach: "Coach de IA", protocols: "Protocolos",
-    profile: "Perfil", settings: "Configuración", layer: "Capa de optimización", system: "SO de optimización humana",
+    membership: "Membresía", profile: "Perfil", settings: "Configuración", layer: "Capa de optimización", system: "SO de optimización humana",
     center: "Centro de control", athlete: "Perfil del usuario", logout: "Cerrar sesión"
   },
   onboarding: {
@@ -49,7 +49,22 @@ export const es = {
     disclaimer: "Entiendo que XYVORAN OS proporciona orientación educativa de bienestar y no diagnostica enfermedades, prescribe tratamientos ni sustituye la atención médica autorizada.",
     disclaimerRequired: "Confirma el aviso educativo de bienestar para continuar.",
     signIn: "Inicia sesión antes de completar la evaluación.", migration: "Se requiere la migración de base de datos de la Fase 5.5 antes de guardar",
-    saveError: "No se pudieron guardar los datos de incorporación"
+    saveError: "No se pudieron guardar los datos de incorporación", memberMigration: "Ejecuta la migración de membresía de la Fase 8 antes de guardar los datos del miembro.",
+    ageError: "Debes tener al menos 21 años para convertirte en miembro.", consentsRequired: "Acepta los cuatro consentimientos de membresía para continuar.",
+    firstName: "Nombre", lastName: "Apellido", phone: "Número de teléfono", dob: "Fecha de nacimiento", country: "País",
+    stateProvince: "Estado / Provincia", city: "Ciudad", address: "Dirección", occupation: "Ocupación (opcional)", email: "Correo electrónico",
+    identityHelp: "Requerido para la identidad de membresía privada y los registros de cumplimiento.", addressHelp: "Ingresa tu dirección residencial principal.",
+    ageConsent: "Certifico que tengo al menos 21 años de edad.", educationConsent: "Entiendo que XYVORAN OS proporciona únicamente contenido educativo e informativo.",
+    termsConsent: "Acepto los Términos y Condiciones.", privacyConsent: "Acepto la Política de Privacidad.", legalConsents: "Consentimientos de membresía"
+  },
+  membership: {
+    eyebrow: "Membresía privada", title: "Centro de membresía", description: "Tu identidad de miembro, estado de cumplimiento y progreso del perfil.",
+    memberId: "ID de miembro", status: "Estado de membresía", joinDate: "Fecha de ingreso", language: "Preferencia de idioma", completion: "Perfil completado",
+    pending: "Pendiente", active: "Activo", suspended: "Suspendido", expired: "Vencido", unavailable: "Registro de membresía no disponible",
+    profileFoundation: "Perfil del miembro", healthFoundation: "Base de salud", labFoundation: "Inteligencia de laboratorio", protocolFoundation: "Historial de protocolos",
+    complete: "Completo", incomplete: "Incompleto", nextStep: "Siguiente paso recomendado", updateProfile: "Completar perfil de miembro",
+    addLabs: "Cargar análisis de sangre", generateProtocol: "Generar un protocolo", consentStatus: "Consentimientos de cumplimiento", consentComplete: "Todos los consentimientos requeridos están registrados",
+    consentMissing: "Los consentimientos de membresía están incompletos", architectureError: "La infraestructura de membresía no está lista. Ejecuta la migración de Supabase de la Fase 8."
   },
   dashboard: {
     overall: "Puntuación general de optimización", weakest: "Pilar prioritario", priorities: "3 acciones prioritarias",

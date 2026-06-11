@@ -6,8 +6,95 @@ export type Profile = {
   id: string;
   email?: string | null;
   language_preference?: LanguagePreference | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  phone_number?: string | null;
+  date_of_birth?: string | null;
+  country?: string | null;
+  state_province?: string | null;
+  city?: string | null;
+  address_line?: string | null;
+  gender?: string | null;
+  height_cm?: number | null;
+  weight_kg?: number | null;
+  occupation?: string | null;
+  member_id?: string | null;
   created_at?: string;
   updated_at?: string;
+};
+
+export type MembershipStatus = "active" | "pending" | "suspended" | "expired";
+
+export type Membership = {
+  id: string;
+  user_id: string;
+  status: MembershipStatus;
+  join_date: string;
+  plan_code?: string | null;
+  billing_provider?: string | null;
+  billing_customer_id?: string | null;
+  billing_subscription_id?: string | null;
+  current_period_end?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type MemberConsent = {
+  id?: string;
+  user_id: string;
+  age_certified_at: string;
+  educational_content_accepted_at: string;
+  terms_accepted_at: string;
+  privacy_accepted_at: string;
+  consent_version: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ComplianceEventType = "consent_accepted" | "consent_updated" | "language_changed" | "profile_updated";
+
+export type ComplianceAuditLog = {
+  id: string;
+  user_id: string;
+  event_type: ComplianceEventType | string;
+  event_data: Json;
+  created_at: string;
+};
+
+export type BiometricsRecord = {
+  id?: string;
+  user_id: string;
+  metric_type: string;
+  value?: number | null;
+  text_value?: string | null;
+  unit?: string | null;
+  source: string;
+  measured_at: string;
+  metadata?: Json;
+  created_at?: string;
+};
+
+export type WearableConnection = {
+  id?: string;
+  user_id: string;
+  provider: string;
+  external_user_id?: string | null;
+  status: "pending" | "connected" | "disconnected" | "error";
+  connected_at?: string | null;
+  last_synced_at?: string | null;
+  metadata?: Json;
+};
+
+export type HealthGoal = {
+  id?: string;
+  user_id: string;
+  title: string;
+  category?: string | null;
+  target_value?: number | null;
+  target_unit?: string | null;
+  target_date?: string | null;
+  status: "active" | "achieved" | "paused" | "archived";
+  metadata?: Json;
 };
 
 export type Sex = "female" | "male" | "intersex" | "prefer_not_to_say";

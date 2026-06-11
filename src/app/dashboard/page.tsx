@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, FlaskConical, MessageSquare, Microscope, ShieldCheck, WandSparkles } from "lucide-react";
+import { ArrowRight, BadgeCheck, FlaskConical, MessageSquare, Microscope, ShieldCheck, WandSparkles } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { PillarGrid } from "@/components/dashboard/PillarGrid";
 import { findWeakestPillar } from "@/lib/protocol";
@@ -94,7 +94,8 @@ export default async function DashboardPage() {
               ["/dashboard/biomarkers", language === "es" ? "Registrar biomarcadores" : "Log biomarkers", FlaskConical],
               ["/dashboard/labs", language === "es" ? "Analizar laboratorio" : "Analyze bloodwork", Microscope],
               ["/dashboard/coach", language === "es" ? "Consultar al Coach de IA" : "Ask the AI Coach", MessageSquare],
-              ["/dashboard/protocols", language === "es" ? "Generar protocolo" : "Generate protocol", WandSparkles]
+              ["/dashboard/protocols", language === "es" ? "Generar protocolo" : "Generate protocol", WandSparkles],
+              ["/dashboard/membership", language === "es" ? "Abrir centro de membresía" : "Open Membership Center", BadgeCheck]
             ].map(([href, label, Icon]) => (
               <Link key={String(href)} href={String(href)} className="flex items-center justify-between rounded-md bg-white/5 p-3 text-sm text-white hover:bg-white/10">
                 <span className="flex items-center gap-2"><Icon className="h-4 w-4 text-emeraldx" />{String(label)}</span>

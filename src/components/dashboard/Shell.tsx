@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, Brain, ChevronRight, Dna, FlaskConical, LayoutDashboard, LogOut, Microscope, Settings, UserRound, WandSparkles } from "lucide-react";
+import { Activity, BadgeCheck, Brain, ChevronRight, Dna, FlaskConical, LayoutDashboard, LogOut, Microscope, Settings, UserRound, WandSparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { cn } from "@/lib/format";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
@@ -19,6 +19,7 @@ export function DashboardShell({ children, email }: { children: React.ReactNode;
     { href: "/dashboard/labs", label: copy.nav.labs, icon: Microscope },
     { href: "/dashboard/coach", label: copy.nav.coach, icon: Brain },
     { href: "/dashboard/protocols", label: copy.nav.protocols, icon: WandSparkles },
+    { href: "/dashboard/membership", label: copy.nav.membership, icon: BadgeCheck },
     { href: "/dashboard/profile", label: copy.nav.profile, icon: UserRound },
     { href: "/dashboard/settings", label: copy.nav.settings, icon: Settings }
   ];

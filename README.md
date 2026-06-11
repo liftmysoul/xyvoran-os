@@ -137,6 +137,7 @@ http://localhost:3001
 - `/dashboard/labs` private bloodwork upload, extraction, and educational analysis
 - `/dashboard/coach` AI Biohacking Coach
 - `/dashboard/protocols` 7-day protocol generator
+- `/dashboard/membership` private membership identity, status, consent, and completion center
 - `/dashboard/profile` profile summary
 - `/dashboard/settings` safety and app settings
 
@@ -151,6 +152,15 @@ http://localhost:3001
 - `ai_chat_messages`
 - `generated_protocols`
 - `lab_reports`
+- `memberships`
+- `member_consents`
+- `compliance_audit_logs`
+- `member_admin_metadata`
+- `biometrics`
+- `wearable_connections`
+- `bloodwork_records`
+- `protocol_history`
+- `health_goals`
 
 All tables have Row Level Security enabled. Authenticated users can only select, insert, update, or delete records where the record belongs to their own `auth.uid()`.
 
@@ -182,6 +192,30 @@ Run `supabase/phase7_language_preference_migration.sql` in the Supabase SQL Edit
 The selected language is stored in the `xyvoran_language` browser cookie and local storage for immediate anonymous persistence. For authenticated users it is also saved to `profiles.language_preference`, allowing the preference to be restored after login. The interface, AI Coach, newly generated protocols, and newly analyzed lab reports use the selected language. Existing English records remain readable and are not modified.
 
 After running the migration, verify English and Spanish on the landing page, age gate, authentication, onboarding, dashboard, Coach, protocols, labs, profile, and settings. Refresh, log out, and log back in to confirm persistence.
+
+## Phase 8 Membership and Compliance Setup
+
+Run `supabase/phase8_membership_compliance_migration.sql` in the Supabase SQL Editor. It is safe to rerun and performs the following work:
+
+- Expands `profiles` with private-member identity and address fields.
+- Assigns permanent, unique IDs in the `XYV-000001` format.
+- Enforces a minimum date-of-birth age of 21 at the database layer.
+- Creates protected membership status and future billing fields.
+- Stores four independent legal consent timestamps and a consent version.
+- Activates pending memberships after all required consents are recorded; suspended or expired memberships are never automatically reactivated.
+- Records consent, language, and profile audit events through database triggers.
+- Creates admin-only compliance metadata without exposing it through authenticated-user policies.
+- Prepares normalized future tables for biometrics, wearables, bloodwork, protocol history, and health goals.
+
+After the migration, run `supabase/phase8_verification.sql`. Then complete onboarding in both English and Spanish and confirm:
+
+1. A date of birth under age 21 is rejected with the localized message.
+2. All four consent checkboxes are required.
+3. `profiles.member_id` is populated and remains unchanged after profile edits.
+4. `/dashboard/membership` displays ID, status, join date, language, and completion percentage.
+5. `member_consents` contains all four timestamps.
+6. `compliance_audit_logs` records `consent_accepted`, `consent_updated`, `profile_updated`, and `language_changed` events.
+7. Members can read but cannot update `memberships`, and cannot access `member_admin_metadata` through the anon/authenticated API.
 
 ## AI Coach Safety
 

@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase-server";
-import type { OnboardingData } from "@/types/database";
+import type { OnboardingData, Profile } from "@/types/database";
 import { getServerI18n } from "@/lib/i18n/server";
 
 export default async function ProfilePage() {
@@ -8,11 +8,20 @@ export default async function ProfilePage() {
   const label = (en: string, es: string) => language === "es" ? es : en;
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
-  const { data: profile } = await supabase.from("onboarding_data").select("*").eq("user_id", auth.user?.id).maybeSingle<OnboardingData>();
+  const [{ data: profile }, { data: memberProfile }] = await Promise.all([
+    supabase.from("onboarding_data").select("*").eq("user_id", auth.user?.id).maybeSingle<OnboardingData>(),
+    supabase.from("profiles").select("*").eq("id", auth.user?.id).maybeSingle<Profile>()
+  ]);
 
   const rows = profile
     ? [
-        [label("Name", "Nombre"), profile.full_name],
+        [label("Member ID", "ID de miembro"), memberProfile?.member_id ?? copy.common.notSet],
+        [label("Name", "Nombre"), memberProfile?.first_name && memberProfile?.last_name ? `${memberProfile.first_name} ${memberProfile.last_name}` : profile.full_name],
+        [label("Email", "Correo electrónico"), memberProfile?.email ?? copy.common.notSet],
+        [label("Phone", "Teléfono"), memberProfile?.phone_number ?? copy.common.notSet],
+        [label("Date of birth", "Fecha de nacimiento"), memberProfile?.date_of_birth ?? copy.common.notSet],
+        [label("Address", "Dirección"), [memberProfile?.address_line, memberProfile?.city, memberProfile?.state_province, memberProfile?.country].filter(Boolean).join(", ") || copy.common.notSet],
+        [label("Occupation", "Ocupación"), memberProfile?.occupation ?? copy.common.notSet],
         [label("Age", "Edad"), profile.age],
         [label("Sex", "Sexo"), profile.sex],
         ["Height", `${profile.height_cm} cm`],
