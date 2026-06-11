@@ -1,5 +1,15 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
+export type LanguagePreference = "en" | "es";
+
+export type Profile = {
+  id: string;
+  email?: string | null;
+  language_preference?: LanguagePreference | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type Sex = "female" | "male" | "intersex" | "prefer_not_to_say";
 
 export type OnboardingData = {

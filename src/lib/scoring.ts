@@ -1,4 +1,44 @@
 import type { BiomarkerEntry, OnboardingData, PillarScore } from "@/types/database";
+import type { Language } from "@/lib/i18n";
+
+const scoreEs: Record<string, string> = {
+  Optimized: "Optimizado", Stable: "Estable", "Needs attention": "Requiere atención", "Foundation first": "Priorizar fundamentos",
+  "Fasting glucose is in a favorable wellness range.": "La glucosa en ayunas está en un rango favorable de bienestar.",
+  "Fasting glucose has not been logged.": "La glucosa en ayunas no está registrada.",
+  "Fasting glucose is above the ideal optimization target.": "La glucosa en ayunas está por encima del objetivo ideal de optimización.",
+  "Energy input is strong.": "El nivel de energía reportado es favorable.",
+  "Sleep quality input is supportive.": "La calidad del sueño reportada es favorable.",
+  "Sleep duration is at or above 7 hours.": "La duración del sueño es de 7 horas o más.",
+  "Stress input is high and likely suppressing recovery.": "El nivel de estrés es alto y probablemente limita la recuperación.",
+  "Sleep duration is below the recovery target.": "La duración del sueño está por debajo del objetivo de recuperación.",
+  "HRV is low; reduce intensity and prioritize recovery.": "El HRV es bajo; reduce la intensidad y prioriza la recuperación.",
+  "CRP has not been logged.": "La CRP no está registrada.",
+  "Vitamin D is below the desired optimization band.": "La vitamina D está por debajo del rango deseado de optimización.",
+  "High stress may impair focus and working memory.": "El estrés alto puede limitar el enfoque y la memoria de trabajo.",
+  "Energy input is limiting cognitive performance.": "El nivel de energía está limitando el rendimiento cognitivo.",
+  "Frequent brain fog is limiting cognitive consistency.": "La niebla mental frecuente limita la constancia cognitiva.",
+  "High caffeine intake may be masking sleep pressure or unstable energy.": "El consumo alto de cafeína puede ocultar presión de sueño o energía inestable.",
+  "Sleep quality supports skin and recovery rhythms.": "La calidad del sueño favorece la piel y los ritmos de recuperación.",
+  "High stress may work against skin and wellness optimization.": "El estrés alto puede limitar la optimización de la piel y el bienestar.",
+  "Low reported hydration is limiting Beauty pillar fundamentals.": "La hidratación reportada es baja y limita los fundamentos del pilar de belleza.",
+  "Anchor protein and fiber at breakfast.": "Prioriza proteína y fibra en el desayuno.",
+  "Add a 10-minute walk after your largest meal.": "Agrega una caminata de 10 minutos después de tu comida principal.",
+  "Set a fixed wake time and a 60-minute low-light wind-down.": "Establece una hora fija para despertar y 60 minutos de relajación con luz tenue.",
+  "Schedule two zone-2 sessions and one strength session this week.": "Programa dos sesiones de zona 2 y una sesión de fuerza esta semana.",
+  "Do your hardest cognitive block before caffeine dose two.": "Realiza tu bloque cognitivo más exigente antes de la segunda dosis de cafeína.",
+  "Prioritize hydration, evening light hygiene, and consistent sleep timing.": "Prioriza hidratación, higiene de luz nocturna y horarios de sueño constantes."
+};
+
+function translateScoreText(text: string, language: Language) {
+  if (language !== "es") return text;
+  if (scoreEs[text]) return scoreEs[text];
+  return text
+    .replace("not logged", "sin registrar").replace("not set", "sin registrar")
+    .replace("Glucose:", "Glucosa:").replace("Sugar cravings:", "Antojos de azúcar:")
+    .replace("Sleep quality:", "Calidad del sueño:").replace("Alcohol:", "Alcohol:").replace("Nicotine:", "Nicotina:")
+    .replace("Focus:", "Enfoque:").replace("Brain fog:", "Niebla mental:").replace("Caffeine:", "Cafeína:")
+    .replace("Skin quality:", "Calidad de la piel:").replace("Hydration:", "Hidratación:");
+}
 
 const clamp = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
 
@@ -34,7 +74,8 @@ function includesAny(value: string | null | undefined, terms: string[]) {
 
 export function calculatePillars(
   onboarding: OnboardingData | null,
-  latestBiomarkers?: BiomarkerEntry | null
+  latestBiomarkers?: BiomarkerEntry | null,
+  language: Language = "en"
 ): PillarScore[] {
   const sleepQuality = onboarding?.sleep_quality ?? 5;
   const stress = onboarding?.stress_level ?? 5;
@@ -172,7 +213,7 @@ export function calculatePillars(
   addDriver(Boolean(cortisol && cortisol > 22), beautyRisks, "Hormonal concerns should be reviewed with a licensed clinician.");
   const beauty = scoreFrom(66, beautyAdjustments);
 
-  return [
+  const scores: PillarScore[] = [
     {
       pillar: "Metabolic",
       score: metabolic,
@@ -224,4 +265,14 @@ export function calculatePillars(
       nextAction: hydration !== null && hydration <= 5 ? "Set three hydration anchors: waking, midday, and with your final meal." : "Prioritize hydration, evening light hygiene, and consistent sleep timing."
     }
   ];
+  if (language === "en") return scores;
+  return scores.map((pillar) => ({
+    ...pillar,
+    status: translateScoreText(pillar.status, language),
+    metrics: pillar.metrics.map((item) => translateScoreText(item, language)),
+    keyDrivers: pillar.keyDrivers.map((item) => translateScoreText(item, language)),
+    limitingFactors: pillar.limitingFactors.map((item) => translateScoreText(item, language)),
+    riskFlags: pillar.riskFlags.map((item) => translateScoreText(item, language)),
+    nextAction: translateScoreText(pillar.nextAction, language)
+  }));
 }

@@ -7,6 +7,35 @@ import type {
   ProtocolIntensity,
   StructuredProtocol
 } from "@/types/database";
+import type { Language } from "@/lib/i18n";
+import { localizePillar } from "@/lib/i18n";
+
+const goalEs: Record<string, string> = { "Fat loss": "Pérdida de grasa", "Better sleep": "Mejor sueño", "More energy": "Más energía", "Cognitive performance": "Rendimiento cognitivo", Recovery: "Recuperación", Longevity: "Longevidad", "Metabolic health": "Salud metabólica", "Stress resilience": "Resiliencia al estrés", "Beauty / skin optimization": "Optimización de belleza y piel" };
+const protocolEs: Record<string, string> = {
+  "Lock a consistent wake time and get 10-15 minutes of outdoor light within 30 minutes of waking.": "Mantén una hora constante para despertar y recibe 10-15 minutos de luz exterior durante los primeros 30 minutos del día.",
+  "Begin a 60-minute wind-down: dim lights, reduce screens, cool the room, and keep the sleep window consistent.": "Inicia 60 minutos de relajación: reduce la luz y las pantallas, refresca la habitación y mantén constante tu horario de sueño.",
+  "Protect your current sleep window and avoid caffeine within 8 hours of bedtime.": "Protege tu horario de sueño actual y evita cafeína durante las 8 horas previas a dormir.",
+  "Use a 12-hour overnight fasting window, then break the fast with protein, fiber, and hydration.": "Usa una ventana de ayuno nocturno de 12 horas y rompe el ayuno con proteína, fibra e hidratación.",
+  "Build each meal around protein, colorful plants, and slow carbohydrates only around training or walks.": "Estructura cada comida con proteína, vegetales variados y carbohidratos de absorción lenta alrededor del entrenamiento o caminatas.",
+  "Prioritize protein, omega-3 rich foods, mineral hydration, and colorful plants for skin-supportive nutrition.": "Prioriza proteína, alimentos ricos en omega-3, hidratación con minerales y vegetales variados para apoyar la piel.",
+  "Eat protein within 90 minutes of waking and delay caffeine until after hydration and morning light.": "Consume proteína dentro de los primeros 90 minutos del día y retrasa la cafeína hasta después de hidratarte y recibir luz matutina.",
+  "Keep meals protein-forward and avoid large late meals that could suppress recovery.": "Prioriza proteína en tus comidas y evita cenas abundantes que puedan limitar la recuperación.",
+  "Complete 20 minutes of easy mobility plus a relaxed walk.": "Completa 20 minutos de movilidad suave y una caminata relajada.",
+  "Walk 20-30 minutes in zone 2, preferably after a meal.": "Camina 20-30 minutos en zona 2, preferentemente después de una comida.",
+  "Do 25 minutes of zone 2 movement before the deepest work block.": "Realiza 25 minutos de movimiento en zona 2 antes de tu bloque de trabajo más profundo.",
+  "Complete a moderate full-body strength session.": "Completa una sesión moderada de fuerza de cuerpo completo.",
+  "Walk 10 minutes after two meals.": "Camina 10 minutos después de dos comidas.",
+  "Do 5 minutes of slow nasal breathing, then a short mobility flow.": "Realiza 5 minutos de respiración nasal lenta y luego una breve secuencia de movilidad.",
+  "Add a 10-minute decompression block after work: walk, breathe, or stretch without screens.": "Agrega 10 minutos de descarga después del trabajo: camina, respira o estira sin pantallas.",
+  "Schedule one deliberate downshift block: breathwork, mobility, or quiet outdoor walking.": "Programa un bloque deliberado para bajar revoluciones: respiración, movilidad o caminata tranquila al aire libre."
+};
+
+function translateProtocolText(text: string, language: Language) {
+  if (language !== "es") return text;
+  if (protocolEs[text]) return protocolEs[text];
+  if (text.startsWith("Log ")) return text.replace(/^Log /, "Registra ").replace("Note one action that improved the day.", "Anota una acción que mejoró el día.");
+  return text;
+}
 
 const supportedGoals = [
   "Fat loss",
@@ -121,7 +150,9 @@ export function generateStructuredProtocol(args: {
   pillars: PillarScore[];
   recentMessages?: ChatMessage[];
   requestedIntensity?: ProtocolIntensity;
+  language?: Language;
 }): StructuredProtocol {
+  const language = args.language ?? "en";
   const goal = normalizeGoal(args.onboarding?.main_goal);
   const weakest = findWeakestPillar(args.pillars);
   const intensity = chooseProtocolIntensity(args.onboarding, args.biomarkers, weakest, args.requestedIntensity);
@@ -148,16 +179,15 @@ export function generateStructuredProtocol(args: {
     ...(goal === "Beauty / skin optimization" ? ["Deep sleep, hydration, and skin recovery notes"] : [])
   ];
 
-  return {
-    title: `${goal} Starter Protocol: ${weakest.pillar} Reset`,
-    primaryGoal: goal,
+  const protocol: StructuredProtocol = {
+    title: language === "es" ? `Protocolo inicial de ${goalEs[goal] ?? goal}: reinicio de ${localizePillar(weakest.pillar, language)}` : `${goal} Starter Protocol: ${weakest.pillar} Reset`,
+    primaryGoal: language === "es" ? goalEs[goal] ?? goal : goal,
     weakestPillar: weakest.pillar,
     intensity,
     sevenDayActionPlan,
-    safetyDisclaimer:
-      "This protocol is educational wellness guidance only. It does not diagnose disease, prescribe medication, provide peptide dosing, recommend stopping prescribed medications, or replace professional care. Consult a licensed healthcare provider for abnormal biomarkers, symptoms, hormonal concerns, chronic disease, or prescription decisions.",
-    metricsToMonitor,
-    whenToReassess: "Reassess after 7 days, or sooner if sleep worsens, HRV drops sharply, symptoms appear, or biomarkers are abnormal.",
+    safetyDisclaimer: language === "es" ? "Este protocolo ofrece orientación educativa de bienestar únicamente. No diagnostica enfermedades, prescribe medicamentos, proporciona dosificación de péptidos, recomienda suspender medicamentos prescritos ni sustituye la atención profesional. Consulta a un profesional médico autorizado ante biomarcadores anormales, síntomas, inquietudes hormonales, enfermedades crónicas o decisiones de prescripción." : "This protocol is educational wellness guidance only. It does not diagnose disease, prescribe medication, provide peptide dosing, recommend stopping prescribed medications, or replace professional care. Consult a licensed healthcare provider for abnormal biomarkers, symptoms, hormonal concerns, chronic disease, or prescription decisions.",
+    metricsToMonitor: language === "es" ? ["Duración y calidad del sueño", "Energía matutina y bajón de energía por la tarde", "Nivel de estrés y HRV o frecuencia cardiaca en reposo", "Adherencia a las acciones de sueño, nutrición, movimiento y recuperación", ...(goal === "Metabolic health" || goal === "Fat loss" ? ["Tendencia de glucosa en ayunas y caminatas después de comer"] : []), ...(goal === "Beauty / skin optimization" ? ["Sueño profundo, hidratación y notas de recuperación de la piel"] : [])] : metricsToMonitor,
+    whenToReassess: language === "es" ? "Reevalúa después de 7 días, o antes si empeora el sueño, el HRV cae notablemente, aparecen síntomas o hay biomarcadores anormales." : "Reassess after 7 days, or sooner if sleep worsens, HRV drops sharply, symptoms appear, or biomarkers are abnormal.",
     topPriorityActions: [
       weakest.nextAction,
       sevenDayActionPlan[0].sleep,
@@ -175,4 +205,15 @@ export function generateStructuredProtocol(args: {
       ...(recentCoachHint ? [`Recent coach context: ${recentCoachHint}`] : [])
     ]
   };
+  if (language === "es") {
+    protocol.sevenDayActionPlan = protocol.sevenDayActionPlan.map((day) => ({ ...day, sleep: translateProtocolText(day.sleep, language), nutrition: translateProtocolText(day.nutrition, language), movement: translateProtocolText(day.movement, language), recovery: translateProtocolText(day.recovery, language), tracking: translateProtocolText(day.tracking, language) }));
+    protocol.topPriorityActions = protocol.topPriorityActions.map((item) => translateProtocolText(item, language));
+    protocol.contextSummary = [
+      `Objetivo principal: ${goalEs[goal] ?? goal}`, `Pilar prioritario: ${localizePillar(weakest.pillar, language)} (${weakest.score}/100)`,
+      `Calidad del sueño: ${args.onboarding?.sleep_quality ?? "sin registrar"}/10`, `Nivel de estrés: ${args.onboarding?.stress_level ?? "sin registrar"}/10`, `Nivel de energía: ${args.onboarding?.energy_level ?? "sin registrar"}/10`,
+      `Frecuencia de ejercicio: ${args.onboarding?.exercise_frequency ?? "sin registrar"}`, `Estilo de alimentación: ${args.onboarding?.diet_style ?? "sin registrar"}`, `HRV más reciente: ${args.biomarkers?.hrv ?? "sin registrar"}`,
+      ...(recentCoachHint ? [`Contexto reciente del coach: ${recentCoachHint}`] : [])
+    ];
+  }
+  return protocol;
 }

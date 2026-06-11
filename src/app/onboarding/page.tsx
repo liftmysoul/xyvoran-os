@@ -8,10 +8,13 @@ import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase-browser";
 import { isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
 import type { OnboardingData, Sex } from "@/types/database";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import { useI18n } from "@/components/i18n/LanguageProvider";
+import type { Language } from "@/lib/i18n";
 
 const goals = ["Fat loss", "Better sleep", "More energy", "Cognitive performance", "Recovery", "Longevity", "Metabolic health", "Stress resilience", "Beauty / skin optimization"];
 const frequencies = ["Never", "Rarely", "Sometimes", "Often", "Daily"];
-const steps = [
+const baseSteps = [
   { title: "Personal Profile", subtitle: "Your physical baseline", icon: Dna },
   { title: "Goals", subtitle: "What you want to change", icon: Sparkles },
   { title: "Recovery & Sleep", subtitle: "Readiness and restoration", icon: HeartPulse },
@@ -19,6 +22,54 @@ const steps = [
   { title: "Cognitive & Longevity", subtitle: "Performance over time", icon: Brain },
   { title: "Beauty, Stack & Safety", subtitle: "Wellness inputs", icon: Droplets }
 ];
+
+const intakeEs: Record<string, string> = {
+  "Personal Profile": "Perfil personal", "Your physical baseline": "Tu línea base física", Goals: "Objetivos", "What you want to change": "Lo que deseas mejorar",
+  "Recovery & Sleep": "Recuperación y sueño", "Readiness and restoration": "Preparación y restauración", "Metabolic & Nutrition": "Metabolismo y nutrición", "Energy regulation": "Regulación de energía",
+  "Cognitive & Longevity": "Rendimiento cognitivo y longevidad", "Performance over time": "Rendimiento a largo plazo", "Beauty, Stack & Safety": "Belleza, stack y seguridad", "Wellness inputs": "Datos de bienestar",
+  "Full Name": "Nombre completo", "Used to personalize your profile and coach experience.": "Se utiliza para personalizar tu perfil y la experiencia con el coach.",
+  "Age (years)": "Edad (años)", "Helps calibrate recovery and longevity context.": "Ayuda a calibrar el contexto de recuperación y longevidad.",
+  "Biological Sex": "Sexo biológico", "Used only where biological reference context may differ.": "Se utiliza únicamente cuando el contexto biológico de referencia puede variar.",
+  Female: "Femenino", Male: "Masculino", Intersex: "Intersexual", "Prefer not to say": "Prefiero no indicarlo",
+  "Height (cm)": "Estatura (cm)", "Enter your current height in centimeters.": "Ingresa tu estatura actual en centímetros.", "Weight (kg)": "Peso (kg)", "Enter your current weight in kilograms.": "Ingresa tu peso actual en kilogramos.",
+  "Primary Goal": "Objetivo principal", "This becomes the main target for protocols and coaching.": "Será el objetivo central de tus protocolos y orientación.",
+  "Secondary Goals": "Objetivos secundarios", "Select any additional outcomes you want XYVORAN OS to consider.": "Selecciona otros resultados que deseas que XYVORAN OS considere.",
+  "Exercise Frequency": "Frecuencia de ejercicio", "Include planned strength, conditioning, or sustained movement sessions.": "Incluye sesiones planificadas de fuerza, acondicionamiento o movimiento sostenido.",
+  "Average Sleep Duration (hours)": "Duración promedio del sueño (horas)", "Use your typical nightly average, not your best night.": "Usa tu promedio nocturno habitual, no tu mejor noche.",
+  "Sleep Quality (1-10)": "Calidad del sueño (1-10)", "How restorative your sleep generally feels.": "Qué tan reparador suele sentirse tu sueño.",
+  "Stress Level (1-10)": "Nivel de estrés (1-10)", "Your average perceived daily stress load.": "Tu carga diaria promedio de estrés percibido.",
+  "Daily Energy Level (1-10)": "Nivel diario de energía (1-10)", "Your typical usable energy across the day.": "Tu energía utilizable habitual durante el día.",
+  "HRV (optional)": "HRV (opcional)", "Enter your recent average in milliseconds if tracked.": "Ingresa tu promedio reciente en milisegundos si lo registras.",
+  "Resting Heart Rate (optional)": "Frecuencia cardiaca en reposo (opcional)", "Enter your recent average beats per minute.": "Ingresa tu promedio reciente de latidos por minuto.",
+  "Waist Circumference (optional)": "Circunferencia de cintura (opcional)", "Measure at the navel and enter centimeters.": "Mide a la altura del ombligo e ingresa centímetros.",
+  "Estimated Body Fat % (optional)": "% estimado de grasa corporal (opcional)", "Use a recent estimate if available.": "Usa una estimación reciente si está disponible.",
+  "Fasting Hours": "Horas de ayuno", "Typical hours between your final meal and first meal.": "Horas habituales entre tu última comida y la primera del día siguiente.",
+  "Eating Window (hours)": "Ventana de alimentación (horas)", "Typical daily span during which you eat.": "Periodo diario habitual durante el cual consumes alimentos.",
+  "Nutrition Style": "Estilo de alimentación", "Choose the pattern that most closely matches your current diet.": "Elige el patrón que más se parece a tu alimentación actual.",
+  "Sugar Craving Frequency": "Frecuencia de antojos de azúcar", "How often strong sweet-food cravings occur.": "Con qué frecuencia aparecen antojos intensos de alimentos dulces.",
+  "Afternoon Energy Crash Frequency": "Frecuencia de bajones de energía por la tarde", "How often energy drops sharply after lunch or mid-afternoon.": "Con qué frecuencia disminuye notablemente tu energía después del almuerzo o a media tarde.",
+  "Focus Level (1-10)": "Nivel de enfoque (1-10)", "Your ability to sustain focused work without distraction.": "Tu capacidad para mantener trabajo concentrado sin distracciones.",
+  "Brain Fog Frequency": "Frecuencia de niebla mental", "How often thinking feels slow, cloudy, or effortful.": "Con qué frecuencia sientes el pensamiento lento, nublado o demandante.",
+  "Caffeine Intake": "Consumo de cafeína", "Include coffee, tea, energy drinks, and pre-workout.": "Incluye café, té, bebidas energéticas y preentrenos.",
+  "Productivity Goal": "Objetivo de productividad", "Describe the cognitive output you want to improve.": "Describe el rendimiento cognitivo que deseas mejorar.",
+  "Alcohol Use": "Consumo de alcohol", "Select your typical weekly pattern.": "Selecciona tu patrón semanal habitual.",
+  "Nicotine / Tobacco Use": "Consumo de nicotina o tabaco", "Include smoking, vaping, pouches, or other nicotine products.": "Incluye cigarrillos, vapeo, bolsas u otros productos con nicotina.",
+  "Family History Notes (optional)": "Notas de antecedentes familiares (opcional)", "Add relevant patterns you want considered without entering a diagnosis.": "Agrega patrones relevantes que quieras considerar sin registrar un diagnóstico.",
+  "Main Longevity Concern": "Principal inquietud de longevidad", "What long-term healthspan area matters most to you?": "¿Qué área de salud a largo plazo es más importante para ti?",
+  "Skin Quality (1-10)": "Calidad de la piel (1-10)", "Your overall perception of clarity, texture, and resilience.": "Tu percepción general de claridad, textura y resiliencia.",
+  "Hydration Level (1-10)": "Nivel de hidratación (1-10)", "How consistently hydrated you feel across the day.": "Qué tan constante es tu sensación de hidratación durante el día.",
+  "Hair / Skin / Body Composition Concern": "Inquietud sobre cabello, piel o composición corporal", "Describe the main wellness or appearance outcome you want to support.": "Describe el principal resultado de bienestar o apariencia que deseas apoyar.",
+  Supplements: "Suplementos", "List current supplements and typical timing.": "Enumera tus suplementos actuales y horarios habituales.", Medications: "Medicamentos", "Optional context only. XYVORAN OS will not alter prescriptions.": "Contexto opcional. XYVORAN OS no modificará prescripciones.",
+  Peptides: "Péptidos", "Optional context only. Dosing advice is outside the platform's scope.": "Contexto opcional. La dosificación está fuera del alcance de la plataforma.",
+  "Wearables Used": "Dispositivos utilizados", "List devices supplying sleep, HRV, activity, or glucose data.": "Enumera los dispositivos que aportan datos de sueño, HRV, actividad o glucosa.",
+  Never: "Nunca", Rarely: "Rara vez", Sometimes: "A veces", Often: "A menudo", Daily: "Diariamente", None: "Ninguno", Occasional: "Ocasional", "Former user": "Exusuario",
+  "Fat loss": "Pérdida de grasa", "Better sleep": "Mejor sueño", "More energy": "Más energía", "Cognitive performance": "Rendimiento cognitivo", Recovery: "Recuperación", Longevity: "Longevidad", "Metabolic health": "Salud metabólica", "Stress resilience": "Resiliencia al estrés", "Beauty / skin optimization": "Optimización de belleza y piel"
+  ,"Select nutrition style": "Selecciona un estilo de alimentación", "Balanced whole foods": "Alimentos integrales equilibrados", "High protein": "Alto en proteína", Mediterranean: "Mediterránea", "Low carbohydrate": "Baja en carbohidratos", Ketogenic: "Cetogénica", "Plant-forward": "Con predominio vegetal", Vegan: "Vegana", "Intermittent fasting": "Ayuno intermitente", "No consistent pattern": "Sin patrón constante",
+  "1-2 servings/day": "1-2 porciones al día", "3-4 servings/day": "3-4 porciones al día", "5+ servings/day": "5+ porciones al día", "Varies significantly": "Varía considerablemente",
+  "1-2 drinks/week": "1-2 bebidas por semana", "3-6 drinks/week": "3-6 bebidas por semana", "7-14 drinks/week": "7-14 bebidas por semana", "15+ drinks/week": "15+ bebidas por semana"
+};
+
+function intakeText(text: string, language: Language) { return language === "es" ? intakeEs[text] ?? text : text; }
 
 type FormState = Record<string, string | boolean | string[]> & { sex: Sex; secondary_goals: string[]; disclaimer_confirmed: boolean };
 
@@ -32,7 +83,8 @@ const initialForm: FormState = {
 };
 
 function Field({ label, helper, children }: { label: string; helper: string; children: React.ReactNode }) {
-  return <label className="block"><span className="text-sm font-medium text-white">{label}</span><span className="mt-1 block text-xs leading-5 text-chrome">{helper}</span><span className="mt-2 block">{children}</span></label>;
+  const { language } = useI18n();
+  return <label className="block"><span className="text-sm font-medium text-white">{intakeText(label, language)}</span><span className="mt-1 block text-xs leading-5 text-chrome">{intakeText(helper, language)}</span><span className="mt-2 block">{children}</span></label>;
 }
 
 function RangeField({ label, helper, name, value, update }: { label: string; helper: string; name: string; value: string; update: (name: string, value: string) => void }) {
@@ -45,6 +97,9 @@ function optionalNumber(value: string | boolean | string[]) {
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { copy, language } = useI18n();
+  const tr = (text: string) => intakeText(text, language);
+  const steps = baseSteps.map((item) => ({ ...item, title: tr(item.title), subtitle: tr(item.subtitle) }));
   const [supabase] = useState(() => createClient());
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(initialForm);
@@ -91,8 +146,8 @@ export default function OnboardingPage() {
       3: [["diet_style", "Nutrition Style"]]
     };
     const missing = (required[currentStep] ?? []).find(([name]) => !String(form[name] ?? "").trim());
-    if (missing) { setError(`${missing[1]} is required.`); return false; }
-    if (currentStep === 5 && !form.disclaimer_confirmed) { setError("Confirm the educational wellness disclaimer to continue."); return false; }
+    if (missing) { setError(language === "es" ? `${tr(missing[1])} es obligatorio.` : `${missing[1]} is required.`); return false; }
+    if (currentStep === 5 && !form.disclaimer_confirmed) { setError(copy.onboarding.disclaimerRequired); return false; }
     return true;
   }
 
@@ -108,7 +163,7 @@ export default function OnboardingPage() {
     setLoading(true);
     setError("");
     const { data: auth, error: authError } = await supabase.auth.getUser();
-    if (authError || !auth.user) { setLoading(false); return setError(authError ? `Unable to verify your session: ${authError.message}` : "Please sign in before onboarding."); }
+    if (authError || !auth.user) { setLoading(false); return setError(authError ? `${copy.biomarkers.sessionError}: ${authError.message}` : copy.onboarding.signIn); }
     const payload = {
       user_id: auth.user.id,
       full_name: String(form.full_name).trim(), age: Number(form.age), sex: form.sex, height_cm: Number(form.height_cm), weight_kg: Number(form.weight_kg),
@@ -120,7 +175,7 @@ export default function OnboardingPage() {
     };
     const { error: dbError } = await supabase.from("onboarding_data").upsert(payload, { onConflict: "user_id" });
     setLoading(false);
-    if (dbError) return setError(dbError.message.includes("column") ? `The Phase 5.5 database migration is required before saving: ${dbError.message}` : `Unable to save onboarding data: ${dbError.message}`);
+    if (dbError) return setError(dbError.message.includes("column") ? `${copy.onboarding.migration}: ${dbError.message}` : `${copy.onboarding.saveError}: ${dbError.message}`);
     router.replace("/dashboard");
     router.refresh();
   }
@@ -135,11 +190,11 @@ export default function OnboardingPage() {
     <main className="min-h-screen px-4 py-8 md:px-8">
       <div className="mx-auto max-w-6xl">
         <header className="mb-7 flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-6">
-          <div><p className="text-xs uppercase tracking-[0.28em] text-emeraldx">XYVORAN Optimization Intake</p><h1 className="mt-2 text-3xl font-semibold text-white">Build your operating baseline</h1><p className="mt-2 max-w-2xl text-sm text-chrome">Six focused steps connect your lifestyle inputs directly to the five optimization pillars.</p></div>
-          <p className="text-sm text-chrome">Step <span className="text-white">{step + 1}</span> of {steps.length}</p>
+          <div><p className="text-xs uppercase tracking-[0.28em] text-emeraldx">{copy.onboarding.eyebrow}</p><h1 className="mt-2 text-3xl font-semibold text-white">{copy.onboarding.title}</h1><p className="mt-2 max-w-2xl text-sm text-chrome">{copy.onboarding.intro}</p></div>
+          <div className="flex items-center gap-4"><p className="text-sm text-chrome">{copy.onboarding.step} <span className="text-white">{step + 1}</span> {copy.onboarding.of} {steps.length}</p><LanguageSwitcher compact /></div>
         </header>
 
-        <div className="mb-6 grid grid-cols-6 gap-2" aria-label="Onboarding progress">
+        <div className="mb-6 grid grid-cols-6 gap-2" aria-label={copy.onboarding.progress}>
           {steps.map((item, index) => <button key={item.title} type="button" onClick={() => index <= step && setStep(index)} className={`h-2 rounded-sm ${index <= step ? "bg-emeraldx" : "bg-white/10"}`} aria-label={`Go to ${item.title}`} />)}
         </div>
 
@@ -152,15 +207,15 @@ export default function OnboardingPage() {
             {step === 0 && <div className="grid gap-5 md:grid-cols-2">
               <Field label="Full Name" helper="Used to personalize your profile and coach experience."><input className={commonInput} placeholder="e.g. Jordan Lee" value={text("full_name")} onChange={(e) => update("full_name", e.target.value)} /></Field>
               <Field label="Age (years)" helper="Helps calibrate recovery and longevity context."><input className={commonInput} type="number" min="13" max="120" placeholder="e.g. 35" value={text("age")} onChange={(e) => update("age", e.target.value)} /></Field>
-              <Field label="Biological Sex" helper="Used only where biological reference context may differ."><select className={commonInput} value={form.sex} onChange={(e) => update("sex", e.target.value)}><option value="female">Female</option><option value="male">Male</option><option value="intersex">Intersex</option><option value="prefer_not_to_say">Prefer not to say</option></select></Field>
+              <Field label="Biological Sex" helper="Used only where biological reference context may differ."><select className={commonInput} value={form.sex} onChange={(e) => update("sex", e.target.value)}><option value="female">{tr("Female")}</option><option value="male">{tr("Male")}</option><option value="intersex">{tr("Intersex")}</option><option value="prefer_not_to_say">{tr("Prefer not to say")}</option></select></Field>
               <Field label="Height (cm)" helper="Enter your current height in centimeters."><input className={commonInput} type="number" min="100" max="250" placeholder="e.g. 178" value={text("height_cm")} onChange={(e) => update("height_cm", e.target.value)} /></Field>
               <Field label="Weight (kg)" helper="Enter your current weight in kilograms."><input className={commonInput} type="number" min="30" max="350" step="0.1" placeholder="e.g. 78.5" value={text("weight_kg")} onChange={(e) => update("weight_kg", e.target.value)} /></Field>
             </div>}
 
             {step === 1 && <div className="space-y-6">
-              <Field label="Primary Goal" helper="This becomes the main target for protocols and coaching."><select className={commonInput} value={text("main_goal")} onChange={(e) => update("main_goal", e.target.value)}>{goals.map((goal) => <option key={goal}>{goal}</option>)}</select></Field>
-              <Field label="Secondary Goals" helper="Select any additional outcomes you want XYVORAN OS to consider."><div className="grid gap-2 sm:grid-cols-2">{goals.filter((goal) => goal !== form.main_goal).map((goal) => <button key={goal} type="button" onClick={() => toggleGoal(goal)} className={`flex min-h-11 items-center justify-between rounded-md border px-3 text-left text-sm ${form.secondary_goals.includes(goal) ? "border-emeraldx bg-emeraldx/10 text-white" : "border-white/10 bg-white/5 text-chrome"}`}>{goal}{form.secondary_goals.includes(goal) && <Check className="h-4 w-4 text-emeraldx" />}</button>)}</div></Field>
-              <Field label="Exercise Frequency" helper="Include planned strength, conditioning, or sustained movement sessions."><select className={commonInput} value={text("exercise_frequency")} onChange={(e) => update("exercise_frequency", e.target.value)}><option>Rarely</option><option>1x/week</option><option>2-3x/week</option><option>4-5x/week</option><option>6+x/week</option></select></Field>
+              <Field label="Primary Goal" helper="This becomes the main target for protocols and coaching."><select className={commonInput} value={text("main_goal")} onChange={(e) => update("main_goal", e.target.value)}>{goals.map((goal) => <option key={goal} value={goal}>{tr(goal)}</option>)}</select></Field>
+              <Field label="Secondary Goals" helper="Select any additional outcomes you want XYVORAN OS to consider."><div className="grid gap-2 sm:grid-cols-2">{goals.filter((goal) => goal !== form.main_goal).map((goal) => <button key={goal} type="button" onClick={() => toggleGoal(goal)} className={`flex min-h-11 items-center justify-between rounded-md border px-3 text-left text-sm ${form.secondary_goals.includes(goal) ? "border-emeraldx bg-emeraldx/10 text-white" : "border-white/10 bg-white/5 text-chrome"}`}>{tr(goal)}{form.secondary_goals.includes(goal) && <Check className="h-4 w-4 text-emeraldx" />}</button>)}</div></Field>
+              <Field label="Exercise Frequency" helper="Include planned strength, conditioning, or sustained movement sessions."><select className={commonInput} value={text("exercise_frequency")} onChange={(e) => update("exercise_frequency", e.target.value)}>{["Rarely", "1x/week", "2-3x/week", "4-5x/week", "6+x/week"].map((item) => <option key={item} value={item}>{tr(item)}</option>)}</select></Field>
             </div>}
 
             {step === 2 && <div className="grid gap-6 md:grid-cols-2">
@@ -177,18 +232,18 @@ export default function OnboardingPage() {
               <Field label="Estimated Body Fat % (optional)" helper="Use a recent estimate if available."><input className={commonInput} type="number" min="2" max="70" step="0.1" placeholder="e.g. 18%" value={text("body_fat_percent")} onChange={(e) => update("body_fat_percent", e.target.value)} /></Field>
               <Field label="Fasting Hours" helper="Typical hours between your final meal and first meal."><input className={commonInput} type="number" min="0" max="24" step="0.5" placeholder="e.g. 12" value={text("fasting_hours")} onChange={(e) => update("fasting_hours", e.target.value)} /></Field>
               <Field label="Eating Window (hours)" helper="Typical daily span during which you eat."><input className={commonInput} type="number" min="1" max="24" step="0.5" placeholder="e.g. 10" value={text("eating_window_hours")} onChange={(e) => update("eating_window_hours", e.target.value)} /></Field>
-              <Field label="Nutrition Style" helper="Choose the pattern that most closely matches your current diet."><select className={commonInput} value={text("diet_style")} onChange={(e) => update("diet_style", e.target.value)}><option value="">Select nutrition style</option><option>Balanced whole foods</option><option>High protein</option><option>Mediterranean</option><option>Low carbohydrate</option><option>Ketogenic</option><option>Plant-forward</option><option>Vegan</option><option>Intermittent fasting</option><option>No consistent pattern</option></select></Field>
-              <Field label="Sugar Craving Frequency" helper="How often strong sweet-food cravings occur."><select className={commonInput} value={text("sugar_craving_frequency")} onChange={(e) => update("sugar_craving_frequency", e.target.value)}>{frequencies.map((item) => <option key={item}>{item}</option>)}</select></Field>
-              <Field label="Afternoon Energy Crash Frequency" helper="How often energy drops sharply after lunch or mid-afternoon."><select className={commonInput} value={text("afternoon_energy_crash_frequency")} onChange={(e) => update("afternoon_energy_crash_frequency", e.target.value)}>{frequencies.map((item) => <option key={item}>{item}</option>)}</select></Field>
+              <Field label="Nutrition Style" helper="Choose the pattern that most closely matches your current diet."><select className={commonInput} value={text("diet_style")} onChange={(e) => update("diet_style", e.target.value)}>{["", "Balanced whole foods", "High protein", "Mediterranean", "Low carbohydrate", "Ketogenic", "Plant-forward", "Vegan", "Intermittent fasting", "No consistent pattern"].map((item) => <option key={item || "empty"} value={item}>{tr(item || "Select nutrition style")}</option>)}</select></Field>
+              <Field label="Sugar Craving Frequency" helper="How often strong sweet-food cravings occur."><select className={commonInput} value={text("sugar_craving_frequency")} onChange={(e) => update("sugar_craving_frequency", e.target.value)}>{frequencies.map((item) => <option key={item} value={item}>{tr(item)}</option>)}</select></Field>
+              <Field label="Afternoon Energy Crash Frequency" helper="How often energy drops sharply after lunch or mid-afternoon."><select className={commonInput} value={text("afternoon_energy_crash_frequency")} onChange={(e) => update("afternoon_energy_crash_frequency", e.target.value)}>{frequencies.map((item) => <option key={item} value={item}>{tr(item)}</option>)}</select></Field>
             </div>}
 
             {step === 4 && <div className="grid gap-5 md:grid-cols-2">
               <RangeField label="Focus Level (1-10)" helper="Your ability to sustain focused work without distraction." name="focus_level" value={text("focus_level")} update={update} />
-              <Field label="Brain Fog Frequency" helper="How often thinking feels slow, cloudy, or effortful."><select className={commonInput} value={text("brain_fog_frequency")} onChange={(e) => update("brain_fog_frequency", e.target.value)}>{frequencies.map((item) => <option key={item}>{item}</option>)}</select></Field>
-              <Field label="Caffeine Intake" helper="Include coffee, tea, energy drinks, and pre-workout."><select className={commonInput} value={text("caffeine_intake")} onChange={(e) => update("caffeine_intake", e.target.value)}><option>None</option><option>1-2 servings/day</option><option>3-4 servings/day</option><option>5+ servings/day</option><option>Varies significantly</option></select></Field>
+              <Field label="Brain Fog Frequency" helper="How often thinking feels slow, cloudy, or effortful."><select className={commonInput} value={text("brain_fog_frequency")} onChange={(e) => update("brain_fog_frequency", e.target.value)}>{frequencies.map((item) => <option key={item} value={item}>{tr(item)}</option>)}</select></Field>
+              <Field label="Caffeine Intake" helper="Include coffee, tea, energy drinks, and pre-workout."><select className={commonInput} value={text("caffeine_intake")} onChange={(e) => update("caffeine_intake", e.target.value)}>{["None", "1-2 servings/day", "3-4 servings/day", "5+ servings/day", "Varies significantly"].map((item) => <option key={item} value={item}>{tr(item)}</option>)}</select></Field>
               <Field label="Productivity Goal" helper="Describe the cognitive output you want to improve."><input className={commonInput} placeholder="e.g. Two focused 90-minute work blocks" value={text("productivity_goal")} onChange={(e) => update("productivity_goal", e.target.value)} /></Field>
-              <Field label="Alcohol Use" helper="Select your typical weekly pattern."><select className={commonInput} value={text("alcohol_use")} onChange={(e) => update("alcohol_use", e.target.value)}><option>None</option><option>1-2 drinks/week</option><option>3-6 drinks/week</option><option>7-14 drinks/week</option><option>15+ drinks/week</option></select></Field>
-              <Field label="Nicotine / Tobacco Use" helper="Include smoking, vaping, pouches, or other nicotine products."><select className={commonInput} value={text("nicotine_use")} onChange={(e) => update("nicotine_use", e.target.value)}><option>None</option><option>Occasional</option><option>Daily</option><option>Former user</option></select></Field>
+              <Field label="Alcohol Use" helper="Select your typical weekly pattern."><select className={commonInput} value={text("alcohol_use")} onChange={(e) => update("alcohol_use", e.target.value)}>{["None", "1-2 drinks/week", "3-6 drinks/week", "7-14 drinks/week", "15+ drinks/week"].map((item) => <option key={item} value={item}>{tr(item)}</option>)}</select></Field>
+              <Field label="Nicotine / Tobacco Use" helper="Include smoking, vaping, pouches, or other nicotine products."><select className={commonInput} value={text("nicotine_use")} onChange={(e) => update("nicotine_use", e.target.value)}>{["None", "Occasional", "Daily", "Former user"].map((item) => <option key={item} value={item}>{tr(item)}</option>)}</select></Field>
               <Field label="Family History Notes (optional)" helper="Add relevant patterns you want considered without entering a diagnosis."><textarea className={commonInput} rows={3} placeholder="e.g. Cardiometabolic concerns in immediate family" value={text("family_history_notes")} onChange={(e) => update("family_history_notes", e.target.value)} /></Field>
               <Field label="Main Longevity Concern" helper="What long-term healthspan area matters most to you?"><textarea className={commonInput} rows={3} placeholder="e.g. Maintaining cardiovascular fitness and mobility" value={text("longevity_concern")} onChange={(e) => update("longevity_concern", e.target.value)} /></Field>
             </div>}
@@ -201,14 +256,14 @@ export default function OnboardingPage() {
               <Field label="Medications" helper="Optional context only. XYVORAN OS will not alter prescriptions."><textarea className={commonInput} rows={3} placeholder="List medications or leave blank" value={text("medications")} onChange={(e) => update("medications", e.target.value)} /></Field>
               <Field label="Peptides" helper="Optional context only. Dosing advice is outside the platform's scope."><textarea className={commonInput} rows={3} placeholder="List current peptides or leave blank" value={text("peptides")} onChange={(e) => update("peptides", e.target.value)} /></Field>
               <Field label="Wearables Used" helper="List devices supplying sleep, HRV, activity, or glucose data."><input className={commonInput} placeholder="e.g. Oura Ring, Apple Watch, CGM" value={text("wearables_used")} onChange={(e) => update("wearables_used", e.target.value)} /></Field>
-              <label className="flex gap-3 rounded-md border border-emeraldx/25 bg-emeraldx/5 p-4 text-sm text-chrome md:col-span-2"><input className="mt-1 accent-emeraldx" type="checkbox" checked={form.disclaimer_confirmed} onChange={(e) => update("disclaimer_confirmed", e.target.checked)} /><span><span className="block font-medium text-white">Educational wellness disclaimer</span><span className="mt-1 block leading-5">I understand XYVORAN OS provides educational wellness guidance only and does not diagnose disease, prescribe treatment, or replace licensed medical care.</span></span></label>
+              <label className="flex gap-3 rounded-md border border-emeraldx/25 bg-emeraldx/5 p-4 text-sm text-chrome md:col-span-2"><input className="mt-1 accent-emeraldx" type="checkbox" checked={form.disclaimer_confirmed} onChange={(e) => update("disclaimer_confirmed", e.target.checked)} /><span><span className="block font-medium text-white">{copy.onboarding.disclaimerTitle}</span><span className="mt-1 block leading-5">{copy.onboarding.disclaimer}</span></span></label>
             </div>}
 
             {error && <p className="mt-6 rounded-md border border-red-300/20 bg-red-300/10 p-3 text-sm text-red-200" role="alert">{error}</p>}
             {!isSupabaseConfigured() && <p className="mt-6 text-sm text-amber-200">{supabaseConfigMessage()}</p>}
             <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-5">
-              <button type="button" onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0} className="inline-flex min-h-11 items-center gap-2 rounded-md px-3 text-sm text-chrome disabled:opacity-30"><ChevronLeft className="h-4 w-4" /> Back</button>
-              {step < steps.length - 1 ? <Button type="button" onClick={next}>Continue <ChevronRight className="h-4 w-4" /></Button> : <Button type="button" onClick={submit} disabled={loading}>{loading ? <><LoaderCircle className="h-4 w-4 animate-spin" /> Saving intake...</> : "Complete Intake"}</Button>}
+              <button type="button" onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0} className="inline-flex min-h-11 items-center gap-2 rounded-md px-3 text-sm text-chrome disabled:opacity-30"><ChevronLeft className="h-4 w-4" /> {copy.common.back}</button>
+              {step < steps.length - 1 ? <Button type="button" onClick={next}>{copy.common.continue} <ChevronRight className="h-4 w-4" /></Button> : <Button type="button" onClick={submit} disabled={loading}>{loading ? <><LoaderCircle className="h-4 w-4 animate-spin" /> {copy.onboarding.saving}</> : copy.onboarding.complete}</Button>}
             </div>
           </Card>
         </div>

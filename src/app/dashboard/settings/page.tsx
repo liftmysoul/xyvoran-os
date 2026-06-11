@@ -1,20 +1,28 @@
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import { getServerI18n } from "@/lib/i18n/server";
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const { copy } = await getServerI18n();
   return (
     <div className="space-y-6">
       <Card>
-        <h2 className="text-xl font-semibold text-white">Settings</h2>
-        <p className="mt-3 text-chrome">MVP configuration is managed through Supabase Auth, environment variables, and Row Level Security.</p>
+        <h2 className="text-xl font-semibold text-white">{copy.settings.title}</h2>
+        <p className="mt-3 text-chrome">{copy.settings.description}</p>
       </Card>
       <Card>
-        <h3 className="font-semibold text-white">Medical Safety Boundary</h3>
+        <h3 className="font-semibold text-white">{copy.settings.language}</h3>
+        <p className="mb-4 mt-2 text-sm text-chrome">{copy.settings.languageHelp}</p>
+        <LanguageSwitcher />
+      </Card>
+      <Card>
+        <h3 className="font-semibold text-white">{copy.settings.safetyTitle}</h3>
         <p className="mt-3 text-sm leading-6 text-chrome">
-          XYVORAN OS provides educational wellness guidance only. It does not diagnose, prescribe, or replace licensed medical care.
+          {copy.settings.safety}
         </p>
         <Link href="/onboarding" className="mt-5 inline-block rounded-md border border-white/15 px-4 py-2 text-sm text-white hover:bg-white/5">
-          Update Onboarding
+          {copy.settings.update}
         </Link>
       </Card>
     </div>

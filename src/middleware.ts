@@ -11,7 +11,7 @@ type CookieToSet = {
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const ageGateExempt = pathname === "/age-gate" || pathname === "/api/age-verification" || pathname === "/api/health";
+  const ageGateExempt = pathname === "/age-gate" || pathname === "/api/age-verification" || pathname === "/api/language" || pathname === "/api/health";
   const ageConfirmed = request.cookies.get(ageGateCookieName)?.value === ageConfirmedValue;
 
   if (!ageGateExempt && !ageConfirmed) {

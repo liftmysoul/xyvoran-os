@@ -4,9 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Dna, LoaderCircle, ShieldCheck } from "lucide-react";
 import { Card } from "@/components/ui/Card";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import { useI18n } from "@/components/i18n/LanguageProvider";
 
 export function AgeGate({ denied, nextPath }: { denied: boolean; nextPath: string }) {
   const router = useRouter();
+  const { copy } = useI18n();
   const [blocked, setBlocked] = useState(denied);
   const [loading, setLoading] = useState<"confirmed" | "underage" | null>(null);
   const [error, setError] = useState("");
@@ -21,7 +24,7 @@ export function AgeGate({ denied, nextPath }: { denied: boolean; nextPath: strin
         body: JSON.stringify({ choice, next: nextPath })
       });
       const body = await response.json();
-      if (!response.ok) throw new Error(body.error ?? "Unable to save age confirmation.");
+      if (!response.ok) throw new Error(body.error ?? copy.ageGate.saveError);
       if (!body.allowed) {
         setBlocked(true);
         setLoading(null);
@@ -30,7 +33,7 @@ export function AgeGate({ denied, nextPath }: { denied: boolean; nextPath: strin
       router.replace(body.redirectTo);
       router.refresh();
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Unable to save age confirmation.");
+      setError(requestError instanceof Error ? requestError.message : copy.ageGate.saveError);
       setLoading(null);
     }
   }
@@ -46,23 +49,23 @@ export function AgeGate({ denied, nextPath }: { denied: boolean; nextPath: strin
             </span>
             <div>
               <p className="font-semibold tracking-wide text-white">XYVORAN OS</p>
-              <p className="text-xs uppercase tracking-[0.2em] text-emeraldx">Age Verification</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-emeraldx">{copy.ageGate.verification}</p>
             </div>
           </div>
-          <ShieldCheck className="h-5 w-5 text-chrome" />
+          <div className="flex items-center gap-3"><LanguageSwitcher compact /><ShieldCheck className="hidden h-5 w-5 text-chrome sm:block" /></div>
         </div>
 
         {blocked ? (
           <div className="mt-8 border-t border-white/10 pt-7">
-            <p className="text-xs uppercase tracking-[0.22em] text-emeraldx">Access Restricted</p>
-            <h1 className="mt-3 text-2xl font-semibold text-white">XYVORAN OS is only available to users 21 years of age or older.</h1>
-            <p className="mt-4 text-sm leading-6 text-chrome">Signup, login, dashboard, labs, protocols, and AI Coach access are unavailable.</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-emeraldx">{copy.ageGate.restricted}</p>
+            <h1 className="mt-3 text-2xl font-semibold text-white">{copy.ageGate.blocked}</h1>
+            <p className="mt-4 text-sm leading-6 text-chrome">{copy.ageGate.blockedDetail}</p>
           </div>
         ) : (
           <div className="mt-8 border-t border-white/10 pt-7">
-            <p className="text-xs uppercase tracking-[0.22em] text-emeraldx">Private Beta Access</p>
-            <h1 className="mt-3 text-3xl font-semibold text-white">Confirm your age</h1>
-            <p className="mt-4 text-base leading-7 text-chrome">I confirm that I am 21 years of age or older.</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-emeraldx">{copy.ageGate.beta}</p>
+            <h1 className="mt-3 text-3xl font-semibold text-white">{copy.ageGate.title}</h1>
+            <p className="mt-4 text-base leading-7 text-chrome">{copy.ageGate.confirmation}</p>
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
               <button
                 type="button"
@@ -71,7 +74,7 @@ export function AgeGate({ denied, nextPath }: { denied: boolean; nextPath: strin
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-emeraldx px-4 text-sm font-semibold text-obsidian transition hover:bg-signal disabled:opacity-55"
               >
                 {loading === "confirmed" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-                I am 21 or older
+                {copy.ageGate.adult}
               </button>
               <button
                 type="button"
@@ -79,7 +82,7 @@ export function AgeGate({ denied, nextPath }: { denied: boolean; nextPath: strin
                 disabled={Boolean(loading)}
                 className="min-h-12 rounded-md border border-white/15 bg-white/5 px-4 text-sm font-medium text-chrome transition hover:bg-white/10 hover:text-white disabled:opacity-55"
               >
-                I am under 21
+                {copy.ageGate.underage}
               </button>
             </div>
           </div>

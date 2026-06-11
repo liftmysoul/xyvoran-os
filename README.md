@@ -175,6 +175,14 @@ The upload route enforces a 4 MB limit because Vercel Functions have a 4.5 MB re
 
 For an existing Supabase project, run `supabase/phase55_onboarding_migration.sql` in the SQL Editor before saving the upgraded Optimization Intake. The migration adds nullable pillar-specific fields and preserves all existing onboarding rows. It is safe to rerun.
 
+## Phase 7 Language Setup
+
+Run `supabase/phase7_language_preference_migration.sql` in the Supabase SQL Editor. It safely adds `profiles.language_preference`, defaults existing users to English, and permits only `en` or `es`.
+
+The selected language is stored in the `xyvoran_language` browser cookie and local storage for immediate anonymous persistence. For authenticated users it is also saved to `profiles.language_preference`, allowing the preference to be restored after login. The interface, AI Coach, newly generated protocols, and newly analyzed lab reports use the selected language. Existing English records remain readable and are not modified.
+
+After running the migration, verify English and Spanish on the landing page, age gate, authentication, onboarding, dashboard, Coach, protocols, labs, profile, and settings. Refresh, log out, and log back in to confirm persistence.
+
 ## AI Coach Safety
 
 The coach system prompt is in `src/lib/ai-coach.ts`. It requires educational wellness framing and blocks diagnosis, prescriptions, medication changes, and dangerous peptide/hormone/drug dosing instructions. It recommends licensed healthcare providers for abnormal labs, symptoms, medical conditions, and prescription decisions.

@@ -6,6 +6,9 @@ import { extractLabMarkers } from "@/lib/labs/extract";
 import { createClient } from "@/lib/supabase-server";
 import { getSupabaseAnonKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
 import type { LabReport } from "@/types/database";
+import type { Profile } from "@/types/database";
+import { normalizeLanguage } from "@/lib/i18n";
+import { getServerLanguage } from "@/lib/i18n/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -26,6 +29,8 @@ export async function POST(request: Request) {
         auth: { persistSession: false, autoRefreshToken: false }
       })
     : supabase;
+  const { data: profile } = await dataClient.from("profiles").select("id,language_preference").eq("id", auth.user.id).maybeSingle<Profile>();
+  const language = normalizeLanguage(profile?.language_preference ?? await getServerLanguage());
 
   const form = await request.formData();
   const file = form.get("file");
@@ -54,7 +59,7 @@ export async function POST(request: Request) {
 
   try {
     const biomarkers = await extractLabMarkers(buffer, file.type);
-    const analysis = analyzeLabMarkers(biomarkers);
+    const analysis = analyzeLabMarkers(biomarkers, language);
     const { data: completed, error: updateError } = await dataClient
       .from("lab_reports")
       .update({ processing_status: "completed", analysis_json: analysis })

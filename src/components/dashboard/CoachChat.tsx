@@ -5,8 +5,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import type { ChatMessage } from "@/types/database";
+import { useI18n } from "@/components/i18n/LanguageProvider";
 
 export function CoachChat({ initialMessages }: { initialMessages: ChatMessage[] }) {
+  const { copy } = useI18n();
   const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,7 +32,7 @@ export function CoachChat({ initialMessages }: { initialMessages: ChatMessage[] 
       setMessages((current) => [...current, { role: "assistant", content: data.reply }]);
     }
     if (!response.ok) {
-      setError(data.error ?? "Coach unavailable.");
+      setError(data.error ?? copy.coach.unavailable);
       return;
     }
   }
@@ -41,21 +43,21 @@ export function CoachChat({ initialMessages }: { initialMessages: ChatMessage[] 
   }
 
   async function runContextTest() {
-    await sendMessage("Test my coach context. Reference my main goal, sleep, stress, energy, latest biomarkers, pillar scores, and one previous chat insight if available.");
+    await sendMessage(copy.coach.testPrompt);
   }
 
   return (
     <Card className="flex min-h-[72vh] flex-col">
       <div>
-        <h2 className="text-xl font-semibold text-white">AI Biohacking Coach</h2>
-        <p className="mt-2 text-sm text-chrome">Educational wellness guidance personalized to your profile, biomarkers, and pillar scores.</p>
+        <h2 className="text-xl font-semibold text-white">{copy.coach.title}</h2>
+        <p className="mt-2 text-sm text-chrome">{copy.coach.description}</p>
         <button
           type="button"
           onClick={runContextTest}
           disabled={loading}
           className="mt-4 rounded-md border border-emeraldx/30 px-3 py-2 text-sm text-emeraldx transition hover:bg-emeraldx/10 disabled:cursor-not-allowed disabled:opacity-55"
         >
-          Test Coach Context
+          {copy.coach.test}
         </button>
       </div>
       <div className="mt-6 flex-1 space-y-3 overflow-y-auto">
@@ -66,13 +68,13 @@ export function CoachChat({ initialMessages }: { initialMessages: ChatMessage[] 
             </div>
           </div>
         ))}
-        {!messages.length && <p className="rounded-md bg-white/5 p-4 text-sm text-chrome">Ask about sleep, fasting, HRV, stress resilience, cognitive performance, or a 7-day plan.</p>}
-        {loading && <p className="text-sm text-emeraldx">Coach is analyzing your optimization context...</p>}
+        {!messages.length && <p className="rounded-md bg-white/5 p-4 text-sm text-chrome">{copy.coach.empty}</p>}
+        {loading && <p className="text-sm text-emeraldx">{copy.coach.analyzing}</p>}
         {error && <p className="text-sm text-red-300">{error}</p>}
       </div>
       <form onSubmit={send} className="mt-5 flex gap-3">
-        <input className="field" placeholder="Ask your coach..." value={input} onChange={(e) => setInput(e.target.value)} />
-        <Button disabled={loading} aria-label="Send"><Send className="h-4 w-4" /></Button>
+        <input className="field" placeholder={copy.coach.placeholder} value={input} onChange={(e) => setInput(e.target.value)} />
+        <Button disabled={loading} aria-label={copy.coach.send}><Send className="h-4 w-4" /></Button>
       </form>
     </Card>
   );

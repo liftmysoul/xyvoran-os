@@ -4,8 +4,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import type { ProtocolIntensity } from "@/types/database";
+import { useI18n } from "@/components/i18n/LanguageProvider";
+import { localizeIntensity } from "@/lib/i18n";
 
 export function ProtocolGenerator() {
+  const { copy, language } = useI18n();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,8 +26,8 @@ export function ProtocolGenerator() {
     });
     const data = await response.json();
     setLoading(false);
-    if (!response.ok) return setError(data.error ?? "Unable to generate protocol.");
-    setSuccess(`${data.protocol?.title ?? "Protocol"} generated.`);
+    if (!response.ok) return setError(data.error ?? copy.protocols.unable);
+    setSuccess(`${data.protocol?.title ?? copy.nav.protocols} ${copy.protocols.generated}`);
     router.refresh();
   }
 
@@ -38,11 +41,11 @@ export function ProtocolGenerator() {
             onClick={() => setIntensity(option)}
             className={`rounded px-3 py-2 text-xs font-semibold transition ${intensity === option ? "bg-emeraldx text-obsidian" : "text-chrome hover:bg-white/10"}`}
           >
-            {option}
+            {localizeIntensity(option, language)}
           </button>
         ))}
       </div>
-      <Button onClick={generate} disabled={loading}>{loading ? "Generating..." : "Generate Protocol"}</Button>
+      <Button onClick={generate} disabled={loading}>{loading ? copy.common.generating : copy.protocols.generate}</Button>
       {error && <p className="mt-3 text-sm text-red-300">{error}</p>}
       {success && <p className="mt-3 text-sm text-emeraldx">{success}</p>}
     </div>

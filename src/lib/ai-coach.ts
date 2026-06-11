@@ -1,4 +1,5 @@
-import type { BiomarkerEntry, ChatMessage, Json, LabReport, OnboardingData, PillarName } from "@/types/database";
+import type { BiomarkerEntry, ChatMessage, Json, LabReport, LanguagePreference, OnboardingData, PillarName } from "@/types/database";
+import type { Language } from "@/lib/i18n";
 
 export type PersistedPillarScore = {
   pillar: PillarName;
@@ -13,13 +14,14 @@ export type PersistedPillarScore = {
 export type UserProfile = {
   id: string;
   email: string | null;
+  language_preference?: LanguagePreference | null;
   created_at?: string;
   updated_at?: string;
 };
 
 export const coachNotConfiguredMessage = "AI Coach is not configured yet. Add OPENAI_API_KEY to enable real responses.";
 
-export const coachSystemPrompt = `You are XYVORAN OS - Elite Human Optimization Coach.
+const coachSystemPromptBase = `You are XYVORAN OS - Elite Human Optimization Coach.
 
 Your role:
 - Provide personalized, practical, non-medical wellness guidance based on the user's profile, onboarding data, biomarkers, pillar scores, goals, and recent conversation.
@@ -44,6 +46,10 @@ Response style:
 - Use concise sections, clear priorities, and specific action steps.
 - Include a brief safety note when labs or medical topics are involved.`;
 
+export function coachSystemPrompt(language: Language) {
+  return `${coachSystemPromptBase}\n\nLanguage directive:\n${language === "es" ? "Respond entirely in polished, professional, natural Latin American Spanish. Do not mix English except for standard technical terms such as HRV, HbA1c, REM, or established biomarker names. Use the safety language: orientación educativa de bienestar; no sustituye asesoría médica profesional." : "Respond entirely in polished professional English."}`;
+}
+
 export function buildCoachContext(args: {
   profile: UserProfile | null;
   onboarding: OnboardingData | null;
@@ -51,6 +57,7 @@ export function buildCoachContext(args: {
   latestLabReport?: LabReport | null;
   pillarScores: PersistedPillarScore[];
   history: ChatMessage[];
+  language?: Language;
 }) {
   const onboarding = args.onboarding;
   const latestBiomarkers = args.latestBiomarkers;
@@ -63,6 +70,7 @@ export function buildCoachContext(args: {
   }));
 
   return {
+    selectedLanguage: args.language ?? "en",
     userProfile: args.profile,
     onboarding,
     contextQuality: {

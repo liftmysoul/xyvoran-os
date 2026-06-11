@@ -5,6 +5,9 @@ import { calculatePillars } from "@/lib/scoring";
 import { createClient } from "@/lib/supabase-server";
 import { getSupabaseAnonKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
 import type { BiomarkerEntry, ChatMessage, OnboardingData, PillarScore, ProtocolIntensity } from "@/types/database";
+import type { Profile } from "@/types/database";
+import { normalizeLanguage } from "@/lib/i18n";
+import { getServerLanguage } from "@/lib/i18n/server";
 
 type StoredPillar = {
   pillar: PillarScore["pillar"];
@@ -40,11 +43,13 @@ export async function POST(request: Request) {
       : supabase;
 
   const [
+    { data: profile },
     { data: onboarding, error: onboardingError },
     { data: latestBiomarkers, error: biomarkerError },
     { data: storedPillars, error: pillarsError },
     { data: recentMessages, error: messagesError }
   ] = await Promise.all([
+    dataClient.from("profiles").select("id,email,language_preference").eq("id", auth.user.id).maybeSingle<Profile>(),
     dataClient.from("onboarding_data").select("*").eq("user_id", auth.user.id).maybeSingle<OnboardingData>(),
     dataClient.from("biomarker_entries").select("*").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle<BiomarkerEntry>(),
     dataClient.from("pillar_scores").select("pillar,score,status,metrics,suggested_next_action").eq("user_id", auth.user.id).returns<StoredPillar[]>(),
@@ -55,7 +60,8 @@ export async function POST(request: Request) {
 
   if (!onboarding) return NextResponse.json({ error: "Complete onboarding before generating a protocol." }, { status: 400 });
 
-  const calculatedPillars = calculatePillars(onboarding, latestBiomarkers);
+  const language = normalizeLanguage(profile?.language_preference ?? await getServerLanguage());
+  const calculatedPillars = calculatePillars(onboarding, latestBiomarkers, language);
   const pillarByName = new Map(calculatedPillars.map((pillar) => [pillar.pillar, pillar]));
   const pillars = storedPillars?.length
     ? storedPillars.map((pillar) => ({
@@ -73,7 +79,8 @@ export async function POST(request: Request) {
     biomarkers: latestBiomarkers,
     pillars,
     recentMessages: (recentMessages ?? []).reverse(),
-    requestedIntensity
+    requestedIntensity,
+    language
   });
 
   const insertPayload = {

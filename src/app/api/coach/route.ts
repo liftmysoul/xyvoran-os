@@ -11,6 +11,8 @@ import {
 import { createClient } from "@/lib/supabase-server";
 import { getSupabaseAnonKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
 import type { BiomarkerEntry, ChatMessage, LabReport, OnboardingData } from "@/types/database";
+import { getDictionary, normalizeLanguage } from "@/lib/i18n";
+import { getServerLanguage } from "@/lib/i18n/server";
 
 export const maxDuration = 60;
 
@@ -67,13 +69,15 @@ export async function POST(request: Request) {
 
     const history = historyResult ?? [];
     const pillarScores = pillarScoresResult ?? [];
-    const context = buildCoachContext({ profile, onboarding, latestBiomarkers, latestLabReport, pillarScores, history });
+    const language = normalizeLanguage(profile?.language_preference ?? await getServerLanguage());
+    const copy = getDictionary(language);
+    const context = buildCoachContext({ profile, onboarding, latestBiomarkers, latestLabReport, pillarScores, history, language });
 
     const { error: userMessageError } = await dataClient.from("ai_chat_messages").insert({ user_id: auth.user.id, role: "user", content: message });
     if (userMessageError) return NextResponse.json({ error: `Unable to save your message: ${userMessageError.message}` }, { status: 500 });
 
     if (!process.env.OPENAI_API_KEY?.trim()) {
-      const fallback = coachNotConfiguredMessage;
+      const fallback = language === "es" ? copy.coach.notConfigured : coachNotConfiguredMessage;
       const { error: fallbackError } = await dataClient.from("ai_chat_messages").insert({ user_id: auth.user.id, role: "assistant", content: fallback });
       if (fallbackError) return NextResponse.json({ error: `Unable to save coach reply: ${fallbackError.message}` }, { status: 500 });
       return NextResponse.json({ reply: fallback, configured: false }, { status: 503 });
@@ -86,17 +90,17 @@ export async function POST(request: Request) {
         model: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
         temperature: 0.55,
         messages: [
-          { role: "system", content: coachSystemPrompt },
+          { role: "system", content: coachSystemPrompt(language) },
           { role: "system", content: `User optimization context JSON:\n${JSON.stringify(context, null, 2)}` },
           ...history.slice(-8).map((item) => ({ role: item.role, content: item.content })),
           { role: "user", content: message }
         ],
         max_tokens: 900
       });
-      reply = completion.choices[0]?.message.content ?? "I could not generate a response. Try again with a more specific question.";
+      reply = completion.choices[0]?.message.content ?? (language === "es" ? "No pude generar una respuesta. Inténtalo de nuevo con una pregunta más específica." : "I could not generate a response. Try again with a more specific question.");
     } catch (error) {
       const openaiMessage = error instanceof Error ? error.message : "Unknown OpenAI API error.";
-      reply = `AI Coach could not complete the OpenAI request. Check your OpenAI billing, quota, and API key settings. OpenAI error: ${openaiMessage}`;
+      reply = language === "es" ? `El Coach de IA no pudo completar la solicitud. Revisa la facturación, cuota y configuración de la clave de OpenAI. Error de OpenAI: ${openaiMessage}` : `AI Coach could not complete the OpenAI request. Check your OpenAI billing, quota, and API key settings. OpenAI error: ${openaiMessage}`;
       const { error: assistantError } = await dataClient.from("ai_chat_messages").insert({ user_id: auth.user.id, role: "assistant", content: reply });
       if (assistantError) return NextResponse.json({ error: `OpenAI failed and the error reply could not be saved: ${assistantError.message}` }, { status: 500 });
       return NextResponse.json({ error: reply, reply, configured: true }, { status: 502 });

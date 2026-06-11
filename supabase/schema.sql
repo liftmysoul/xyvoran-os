@@ -3,9 +3,18 @@ create extension if not exists "pgcrypto";
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text,
+  language_preference text default 'en' check (language_preference is null or language_preference in ('en', 'es')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.profiles add column if not exists language_preference text default 'en';
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'profiles_language_preference_check' and conrelid = 'public.profiles'::regclass) then
+    alter table public.profiles add constraint profiles_language_preference_check check (language_preference is null or language_preference in ('en', 'es'));
+  end if;
+end $$;
 
 create table if not exists public.onboarding_data (
   id uuid primary key default gen_random_uuid(),

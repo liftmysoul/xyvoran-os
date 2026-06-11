@@ -5,21 +5,23 @@ import { usePathname, useRouter } from "next/navigation";
 import { Activity, Brain, ChevronRight, Dna, FlaskConical, LayoutDashboard, LogOut, Microscope, Settings, UserRound, WandSparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { cn } from "@/lib/format";
-
-const nav = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/biomarkers", label: "Biomarkers", icon: FlaskConical },
-  { href: "/dashboard/labs", label: "Labs", icon: Microscope },
-  { href: "/dashboard/coach", label: "AI Coach", icon: Brain },
-  { href: "/dashboard/protocols", label: "Protocols", icon: WandSparkles },
-  { href: "/dashboard/profile", label: "Profile", icon: UserRound },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings }
-];
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import { useI18n } from "@/components/i18n/LanguageProvider";
 
 export function DashboardShell({ children, email }: { children: React.ReactNode; email?: string | null }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const { copy } = useI18n();
+  const nav = [
+    { href: "/dashboard", label: copy.nav.dashboard, icon: LayoutDashboard },
+    { href: "/dashboard/biomarkers", label: copy.nav.biomarkers, icon: FlaskConical },
+    { href: "/dashboard/labs", label: copy.nav.labs, icon: Microscope },
+    { href: "/dashboard/coach", label: copy.nav.coach, icon: Brain },
+    { href: "/dashboard/protocols", label: copy.nav.protocols, icon: WandSparkles },
+    { href: "/dashboard/profile", label: copy.nav.profile, icon: UserRound },
+    { href: "/dashboard/settings", label: copy.nav.settings, icon: Settings }
+  ];
 
   async function logout() {
     await supabase.auth.signOut();
@@ -36,7 +38,7 @@ export function DashboardShell({ children, email }: { children: React.ReactNode;
           </span>
           <span>
             <span className="block text-lg font-bold tracking-wide">XYVORAN OS</span>
-            <span className="text-xs uppercase text-emeraldx/80">Optimization Layer</span>
+            <span className="text-xs uppercase text-emeraldx/80">{copy.nav.layer}</span>
           </span>
         </Link>
         <nav className="mt-10 space-y-2">
@@ -66,19 +68,20 @@ export function DashboardShell({ children, email }: { children: React.ReactNode;
         <header className="sticky top-0 z-10 border-b border-white/10 bg-obsidian/86 px-4 py-4 backdrop-blur md:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-emeraldx/80">Human Optimization OS</p>
-              <h1 className="text-xl font-semibold text-white md:text-2xl">Command Center</h1>
+              <p className="text-xs uppercase tracking-[0.28em] text-emeraldx/80">{copy.nav.system}</p>
+              <h1 className="text-xl font-semibold text-white md:text-2xl">{copy.nav.center}</h1>
             </div>
             <div className="flex items-center gap-3">
               <div className="hidden items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white md:flex">
                 <Activity className="h-4 w-4 text-emeraldx" />
-                {email ?? "Athlete profile"}
+                {email ?? copy.nav.athlete}
               </div>
+              <LanguageSwitcher compact />
               <button
                 onClick={logout}
                 className="grid h-10 w-10 place-items-center rounded-md border border-white/10 bg-white/5 text-chrome hover:text-white"
-                aria-label="Log out"
-                title="Log out"
+                aria-label={copy.nav.logout}
+                title={copy.nav.logout}
               >
                 <LogOut className="h-4 w-4" />
               </button>
