@@ -1,44 +1,5 @@
 import type { BiomarkerEntry, OnboardingData, PillarScore } from "@/types/database";
-import type { Language } from "@/lib/i18n";
-
-const scoreEs: Record<string, string> = {
-  Optimized: "Optimizado", Stable: "Estable", "Needs attention": "Requiere atención", "Foundation first": "Priorizar fundamentos",
-  "Fasting glucose is in a favorable wellness range.": "La glucosa en ayunas está en un rango favorable de bienestar.",
-  "Fasting glucose has not been logged.": "La glucosa en ayunas no está registrada.",
-  "Fasting glucose is above the ideal optimization target.": "La glucosa en ayunas está por encima del objetivo ideal de optimización.",
-  "Energy input is strong.": "El nivel de energía reportado es favorable.",
-  "Sleep quality input is supportive.": "La calidad del sueño reportada es favorable.",
-  "Sleep duration is at or above 7 hours.": "La duración del sueño es de 7 horas o más.",
-  "Stress input is high and likely suppressing recovery.": "El nivel de estrés es alto y probablemente limita la recuperación.",
-  "Sleep duration is below the recovery target.": "La duración del sueño está por debajo del objetivo de recuperación.",
-  "HRV is low; reduce intensity and prioritize recovery.": "El HRV es bajo; reduce la intensidad y prioriza la recuperación.",
-  "CRP has not been logged.": "La CRP no está registrada.",
-  "Vitamin D is below the desired optimization band.": "La vitamina D está por debajo del rango deseado de optimización.",
-  "High stress may impair focus and working memory.": "El estrés alto puede limitar el enfoque y la memoria de trabajo.",
-  "Energy input is limiting cognitive performance.": "El nivel de energía está limitando el rendimiento cognitivo.",
-  "Frequent brain fog is limiting cognitive consistency.": "La niebla mental frecuente limita la constancia cognitiva.",
-  "High caffeine intake may be masking sleep pressure or unstable energy.": "El consumo alto de cafeína puede ocultar presión de sueño o energía inestable.",
-  "Sleep quality supports skin and recovery rhythms.": "La calidad del sueño favorece la piel y los ritmos de recuperación.",
-  "High stress may work against skin and wellness optimization.": "El estrés alto puede limitar la optimización de la piel y el bienestar.",
-  "Low reported hydration is limiting Beauty pillar fundamentals.": "La hidratación reportada es baja y limita los fundamentos del pilar de belleza.",
-  "Anchor protein and fiber at breakfast.": "Prioriza proteína y fibra en el desayuno.",
-  "Add a 10-minute walk after your largest meal.": "Agrega una caminata de 10 minutos después de tu comida principal.",
-  "Set a fixed wake time and a 60-minute low-light wind-down.": "Establece una hora fija para despertar y 60 minutos de relajación con luz tenue.",
-  "Schedule two zone-2 sessions and one strength session this week.": "Programa dos sesiones de zona 2 y una sesión de fuerza esta semana.",
-  "Do your hardest cognitive block before caffeine dose two.": "Realiza tu bloque cognitivo más exigente antes de la segunda dosis de cafeína.",
-  "Prioritize hydration, evening light hygiene, and consistent sleep timing.": "Prioriza hidratación, higiene de luz nocturna y horarios de sueño constantes."
-};
-
-function translateScoreText(text: string, language: Language) {
-  if (language !== "es") return text;
-  if (scoreEs[text]) return scoreEs[text];
-  return text
-    .replace("not logged", "sin registrar").replace("not set", "sin registrar")
-    .replace("Glucose:", "Glucosa:").replace("Sugar cravings:", "Antojos de azúcar:")
-    .replace("Sleep quality:", "Calidad del sueño:").replace("Alcohol:", "Alcohol:").replace("Nicotine:", "Nicotina:")
-    .replace("Focus:", "Enfoque:").replace("Brain fog:", "Niebla mental:").replace("Caffeine:", "Cafeína:")
-    .replace("Skin quality:", "Calidad de la piel:").replace("Hydration:", "Hidratación:");
-}
+import { getDictionary, type Language } from "@/lib/i18n";
 
 const clamp = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
 
@@ -47,11 +8,11 @@ function latestValue(entry: BiomarkerEntry | null | undefined, key: keyof Biomar
   return typeof value === "number" ? value : null;
 }
 
-function status(score: number) {
-  if (score >= 82) return "Optimized";
-  if (score >= 66) return "Stable";
-  if (score >= 48) return "Needs attention";
-  return "Foundation first";
+function status(score: number, copy: ReturnType<typeof getDictionary>["optimization"]["scoring"]) {
+  if (score >= 82) return copy.optimized;
+  if (score >= 66) return copy.stable;
+  if (score >= 48) return copy.needsAttention;
+  return copy.foundationFirst;
 }
 
 function addDriver(condition: boolean, target: string[], message: string) {
@@ -77,6 +38,7 @@ export function calculatePillars(
   latestBiomarkers?: BiomarkerEntry | null,
   language: Language = "en"
 ): PillarScore[] {
+  const t = getDictionary(language).optimization.scoring;
   const sleepQuality = onboarding?.sleep_quality ?? 5;
   const stress = onboarding?.stress_level ?? 5;
   const energy = onboarding?.energy_level ?? 5;
@@ -115,16 +77,16 @@ export function calculatePillars(
     frequencyPenalty(crashes, 2),
     fastingHours !== null ? (fastingHours >= 12 ? 4 : fastingHours < 10 ? -4 : 0) : 0
   ];
-  addDriver(Boolean(glucose && glucose <= 95), metabolicDrivers, "Fasting glucose is in a favorable wellness range.");
-  addDriver(Boolean(hba1c && hba1c <= 5.4), metabolicDrivers, "HbA1c supports stable metabolic trend tracking.");
-  addDriver(energy >= 7, metabolicDrivers, "Energy input is strong.");
-  addDriver(Boolean(fastingHours && fastingHours >= 12), metabolicDrivers, "A consistent 12-hour overnight fasting interval supports metabolic rhythm.");
-  addDriver(!glucose, metabolicLimits, "Fasting glucose has not been logged.");
-  addDriver(Boolean(glucose && glucose > 100), metabolicLimits, "Fasting glucose is above the ideal optimization target.");
-  addDriver(Boolean(hba1c && hba1c > 5.7), metabolicRisks, "HbA1c is elevated; discuss abnormal labs with a licensed clinician.");
-  addDriver(Boolean(insulin && insulin > 15), metabolicLimits, "Insulin is above the desired optimization range.");
-  addDriver(includesAny(cravings, ["often", "daily"]), metabolicLimits, "Frequent sugar cravings may signal inconsistent satiety or meal composition.");
-  addDriver(includesAny(crashes, ["often", "daily"]), metabolicLimits, "Frequent afternoon energy crashes are limiting metabolic flexibility.");
+  addDriver(Boolean(glucose && glucose <= 95), metabolicDrivers, t.glucoseFavorable);
+  addDriver(Boolean(hba1c && hba1c <= 5.4), metabolicDrivers, t.hba1cFavorable);
+  addDriver(energy >= 7, metabolicDrivers, t.energyStrong);
+  addDriver(Boolean(fastingHours && fastingHours >= 12), metabolicDrivers, t.fastingRhythm);
+  addDriver(!glucose, metabolicLimits, t.glucoseMissing);
+  addDriver(Boolean(glucose && glucose > 100), metabolicLimits, t.glucoseHigh);
+  addDriver(Boolean(hba1c && hba1c > 5.7), metabolicRisks, t.hba1cHigh);
+  addDriver(Boolean(insulin && insulin > 15), metabolicLimits, t.insulinHigh);
+  addDriver(includesAny(cravings, ["often", "daily"]), metabolicLimits, t.cravingsFrequent);
+  addDriver(includesAny(crashes, ["often", "daily"]), metabolicLimits, t.crashesFrequent);
   const metabolic = scoreFrom(70, metabolicAdjustments);
 
   const recoveryDrivers: string[] = [];
@@ -138,13 +100,13 @@ export function calculatePillars(
     -stress * 2,
     sleepDuration !== null && sleepDuration < 6 ? -4 : 0
   ];
-  addDriver(sleepQuality >= 7, recoveryDrivers, "Sleep quality input is supportive.");
-  addDriver(Boolean(sleepDuration && sleepDuration >= 7), recoveryDrivers, "Sleep duration is at or above 7 hours.");
-  addDriver(Boolean(hrv && hrv >= 55), recoveryDrivers, "HRV suggests solid readiness.");
-  addDriver(stress >= 7, recoveryLimits, "Stress input is high and likely suppressing recovery.");
-  addDriver(Boolean(sleepDuration && sleepDuration < 7), recoveryLimits, "Sleep duration is below the recovery target.");
-  addDriver(Boolean(hrv && hrv < 35), recoveryRisks, "HRV is low; reduce intensity and prioritize recovery.");
-  addDriver(Boolean(rhr && rhr > 75), recoveryLimits, "Resting heart rate is elevated relative to the optimization target.");
+  addDriver(sleepQuality >= 7, recoveryDrivers, t.sleepSupportive);
+  addDriver(Boolean(sleepDuration && sleepDuration >= 7), recoveryDrivers, t.sleepDurationGood);
+  addDriver(Boolean(hrv && hrv >= 55), recoveryDrivers, t.hrvReady);
+  addDriver(stress >= 7, recoveryLimits, t.stressRecovery);
+  addDriver(Boolean(sleepDuration && sleepDuration < 7), recoveryLimits, t.sleepDurationLow);
+  addDriver(Boolean(hrv && hrv < 35), recoveryRisks, t.hrvLow);
+  addDriver(Boolean(rhr && rhr > 75), recoveryLimits, t.rhrHigh);
   const recovery = scoreFrom(62, recoveryAdjustments);
 
   const longevityDrivers: string[] = [];
@@ -157,15 +119,15 @@ export function calculatePillars(
     includesAny(alcohol, ["7-14", "15+"]) ? -8 : includesAny(alcohol, ["3-6"]) ? -3 : 0,
     nicotine && !includesAny(nicotine, ["none", "former"]) ? -12 : 0
   ];
-  addDriver(Boolean(crp && crp <= 1), longevityDrivers, "CRP is in a favorable wellness range.");
-  addDriver(Boolean(vitaminD && vitaminD >= 35 && vitaminD <= 70), longevityDrivers, "Vitamin D is in the target optimization band.");
-  addDriver(exercise.toLowerCase().includes("4") || exercise.toLowerCase().includes("5"), longevityDrivers, "Exercise frequency supports longevity fundamentals.");
-  addDriver(!crp, longevityLimits, "CRP has not been logged.");
-  addDriver(Boolean(crp && crp > 3), longevityRisks, "CRP is elevated; consult a licensed clinician for abnormal inflammatory markers.");
-  addDriver(Boolean(vitaminD && vitaminD < 30), longevityLimits, "Vitamin D is below the desired optimization band.");
-  addDriver(includesAny(alcohol, ["7-14", "15+"]), longevityLimits, "Current alcohol frequency works against recovery and longevity fundamentals.");
-  addDriver(Boolean(nicotine && !includesAny(nicotine, ["none", "former"])), longevityRisks, "Nicotine or tobacco use is a high-priority longevity risk factor.");
-  addDriver(Boolean(onboarding?.family_history_notes), longevityLimits, "Family history context supports proactive screening conversations with a licensed clinician.");
+  addDriver(Boolean(crp && crp <= 1), longevityDrivers, t.crpFavorable);
+  addDriver(Boolean(vitaminD && vitaminD >= 35 && vitaminD <= 70), longevityDrivers, t.vitaminDTarget);
+  addDriver(exercise.toLowerCase().includes("4") || exercise.toLowerCase().includes("5"), longevityDrivers, t.exerciseLongevity);
+  addDriver(!crp, longevityLimits, t.crpMissing);
+  addDriver(Boolean(crp && crp > 3), longevityRisks, t.crpHigh);
+  addDriver(Boolean(vitaminD && vitaminD < 30), longevityLimits, t.vitaminDLow);
+  addDriver(includesAny(alcohol, ["7-14", "15+"]), longevityLimits, t.alcoholHigh);
+  addDriver(Boolean(nicotine && !includesAny(nicotine, ["none", "former"])), longevityRisks, t.nicotineRisk);
+  addDriver(Boolean(onboarding?.family_history_notes), longevityLimits, t.familyHistory);
   const longevity = scoreFrom(68, longevityAdjustments);
 
   const cognitiveDrivers: string[] = [];
@@ -180,15 +142,15 @@ export function calculatePillars(
     frequencyPenalty(brainFog, 2),
     includesAny(caffeine, ["3-4", "5+"]) ? -6 : 0
   ];
-  addDriver(energy >= 7, cognitiveDrivers, "Energy input supports cognitive output.");
-  addDriver(Boolean(remSleep && remSleep >= 90), cognitiveDrivers, "REM sleep supports cognitive recovery.");
-  addDriver(Boolean(focus && focus >= 8), cognitiveDrivers, "Reported focus capacity is strong.");
-  addDriver(stress >= 7, cognitiveLimits, "High stress may impair focus and working memory.");
-  addDriver(energy <= 5, cognitiveLimits, "Energy input is limiting cognitive performance.");
-  addDriver(Boolean(remSleep && remSleep < 75), cognitiveLimits, "REM sleep is below the preferred optimization target.");
-  addDriver(includesAny(brainFog, ["often", "daily"]), cognitiveLimits, "Frequent brain fog is limiting cognitive consistency.");
-  addDriver(includesAny(caffeine, ["3-4", "5+"]), cognitiveLimits, "High caffeine intake may be masking sleep pressure or unstable energy.");
-  addDriver(Boolean(cortisol && cortisol > 22), cognitiveRisks, "Cortisol appears elevated; discuss hormone concerns with a licensed clinician.");
+  addDriver(energy >= 7, cognitiveDrivers, t.energyCognitive);
+  addDriver(Boolean(remSleep && remSleep >= 90), cognitiveDrivers, t.remSupportive);
+  addDriver(Boolean(focus && focus >= 8), cognitiveDrivers, t.focusStrong);
+  addDriver(stress >= 7, cognitiveLimits, t.stressCognitive);
+  addDriver(energy <= 5, cognitiveLimits, t.energyLimiting);
+  addDriver(Boolean(remSleep && remSleep < 75), cognitiveLimits, t.remLow);
+  addDriver(includesAny(brainFog, ["often", "daily"]), cognitiveLimits, t.brainFogFrequent);
+  addDriver(includesAny(caffeine, ["3-4", "5+"]), cognitiveLimits, t.caffeineHigh);
+  addDriver(Boolean(cortisol && cortisol > 22), cognitiveRisks, t.cortisolHigh);
   const cognitive = scoreFrom(64, cognitiveAdjustments);
 
   const beautyDrivers: string[] = [];
@@ -202,77 +164,68 @@ export function calculatePillars(
     skinQuality !== null ? (skinQuality - 5) * 2 : 0,
     hydration !== null ? (hydration - 5) * 2 : 0
   ];
-  addDriver(sleepQuality >= 7, beautyDrivers, "Sleep quality supports skin and recovery rhythms.");
-  addDriver(Boolean(deepSleep && deepSleep >= 75), beautyDrivers, "Deep sleep supports tissue repair and recovery.");
-  addDriver(Boolean(hydration && hydration >= 8), beautyDrivers, "Reported hydration consistency supports skin and tissue wellness.");
-  addDriver(stress >= 7, beautyLimits, "High stress may work against skin and wellness optimization.");
-  addDriver(Boolean(deepSleep && deepSleep < 60), beautyLimits, "Deep sleep is below the preferred recovery target.");
-  addDriver(Boolean(vitaminD && vitaminD < 30), beautyLimits, "Vitamin D is below the desired wellness band.");
-  addDriver(Boolean(hydration && hydration <= 4), beautyLimits, "Low reported hydration is limiting Beauty pillar fundamentals.");
-  addDriver(Boolean(skinQuality && skinQuality <= 4), beautyLimits, "Skin quality is below the user's desired wellness baseline.");
-  addDriver(Boolean(cortisol && cortisol > 22), beautyRisks, "Hormonal concerns should be reviewed with a licensed clinician.");
+  addDriver(sleepQuality >= 7, beautyDrivers, t.sleepSkin);
+  addDriver(Boolean(deepSleep && deepSleep >= 75), beautyDrivers, t.deepSleepRepair);
+  addDriver(Boolean(hydration && hydration >= 8), beautyDrivers, t.hydrationSupportive);
+  addDriver(stress >= 7, beautyLimits, t.stressBeauty);
+  addDriver(Boolean(deepSleep && deepSleep < 60), beautyLimits, t.deepSleepLow);
+  addDriver(Boolean(vitaminD && vitaminD < 30), beautyLimits, t.vitaminDWellnessLow);
+  addDriver(Boolean(hydration && hydration <= 4), beautyLimits, t.hydrationLow);
+  addDriver(Boolean(skinQuality && skinQuality <= 4), beautyLimits, t.skinLow);
+  addDriver(Boolean(cortisol && cortisol > 22), beautyRisks, t.hormoneReview);
   const beauty = scoreFrom(66, beautyAdjustments);
 
   const scores: PillarScore[] = [
     {
       pillar: "Metabolic",
       score: metabolic,
-      status: status(metabolic),
-      metrics: [`Glucose: ${glucose ?? "not logged"}`, `HbA1c: ${hba1c ?? "not logged"}`, `Sugar cravings: ${cravings ?? "not set"}`],
-      keyDrivers: metabolicDrivers.length ? metabolicDrivers : ["Metabolic score is based on glucose, HbA1c, insulin, and energy inputs."],
+      status: status(metabolic, t),
+      metrics: [`${t.glucose}: ${glucose ?? t.notLogged}`, `HbA1c: ${hba1c ?? t.notLogged}`, `${t.sugarCravings}: ${cravings ?? t.notSet}`],
+      keyDrivers: metabolicDrivers.length ? metabolicDrivers : [t.metabolicBasis],
       limitingFactors: metabolicLimits,
       riskFlags: metabolicRisks,
-      nextAction: includesAny(cravings, ["often", "daily"]) || includesAny(crashes, ["often", "daily"]) ? "Build the first two meals around protein, fiber, and a 10-minute post-meal walk." : glucose && glucose > 100 ? "Add a 10-minute walk after your largest meal." : "Anchor protein and fiber at breakfast."
+      nextAction: includesAny(cravings, ["often", "daily"]) || includesAny(crashes, ["often", "daily"]) ? t.metabolicMeals : glucose && glucose > 100 ? t.postMealWalk : t.proteinBreakfast
     },
     {
       pillar: "Recovery",
       score: recovery,
-      status: status(recovery),
-      metrics: [`Sleep quality: ${sleepQuality}/10`, `HRV: ${hrv ?? "not logged"}`, `RHR: ${rhr ?? "not logged"}`],
-      keyDrivers: recoveryDrivers.length ? recoveryDrivers : ["Recovery score is driven by sleep, HRV, resting heart rate, and stress load."],
+      status: status(recovery, t),
+      metrics: [`${t.sleepQuality}: ${sleepQuality}/10`, `HRV: ${hrv ?? t.notLogged}`, `${t.restingHeartRate}: ${rhr ?? t.notLogged}`],
+      keyDrivers: recoveryDrivers.length ? recoveryDrivers : [t.recoveryBasis],
       limitingFactors: recoveryLimits,
       riskFlags: recoveryRisks,
-      nextAction: sleepDuration !== null && sleepDuration < 7 ? "Protect an 8-hour sleep opportunity with a fixed wake time and low-light wind-down." : stress >= 7 ? "Add two five-minute downshift breaks and keep training intensity submaximal today." : "Set a fixed wake time and a 60-minute low-light wind-down."
+      nextAction: sleepDuration !== null && sleepDuration < 7 ? t.sleepOpportunity : stress >= 7 ? t.downshiftBreaks : t.fixedWake
     },
     {
       pillar: "Longevity",
       score: longevity,
-      status: status(longevity),
-      metrics: [`CRP: ${crp ?? "not logged"}`, `Alcohol: ${alcohol ?? "not set"}`, `Nicotine: ${nicotine ?? "not set"}`],
-      keyDrivers: longevityDrivers.length ? longevityDrivers : ["Longevity score is based on inflammation, vitamin D, and exercise consistency."],
+      status: status(longevity, t),
+      metrics: [`CRP: ${crp ?? t.notLogged}`, `${t.alcohol}: ${alcohol ?? t.notSet}`, `${t.nicotine}: ${nicotine ?? t.notSet}`],
+      keyDrivers: longevityDrivers.length ? longevityDrivers : [t.longevityBasis],
       limitingFactors: longevityLimits,
       riskFlags: longevityRisks,
-      nextAction: nicotine && !includesAny(nicotine, ["none", "former"]) ? "Discuss a supported nicotine cessation plan with a licensed healthcare provider." : includesAny(alcohol, ["7-14", "15+"]) ? "Choose three alcohol-free recovery nights this week and track sleep quality." : "Schedule two zone-2 sessions and one strength session this week."
+      nextAction: nicotine && !includesAny(nicotine, ["none", "former"]) ? t.nicotinePlan : includesAny(alcohol, ["7-14", "15+"]) ? t.alcoholFree : t.longevityTraining
     },
     {
       pillar: "Cognitive",
       score: cognitive,
-      status: status(cognitive),
-      metrics: [`Focus: ${focus ?? "not set"}/10`, `Brain fog: ${brainFog ?? "not set"}`, `Caffeine: ${caffeine ?? "not set"}`],
-      keyDrivers: cognitiveDrivers.length ? cognitiveDrivers : ["Cognitive score reflects energy, stress, sleep quality, and REM sleep."],
+      status: status(cognitive, t),
+      metrics: [`${t.focus}: ${focus ?? t.notSet}/10`, `${t.brainFog}: ${brainFog ?? t.notSet}`, `${t.caffeine}: ${caffeine ?? t.notSet}`],
+      keyDrivers: cognitiveDrivers.length ? cognitiveDrivers : [t.cognitiveBasis],
       limitingFactors: cognitiveLimits,
       riskFlags: cognitiveRisks,
-      nextAction: includesAny(brainFog, ["often", "daily"]) && includesAny(caffeine, ["3-4", "5+"]) ? "Delay caffeine 60-90 minutes after waking and track focus before adding another serving." : "Do your hardest cognitive block before caffeine dose two."
+      nextAction: includesAny(brainFog, ["often", "daily"]) && includesAny(caffeine, ["3-4", "5+"]) ? t.caffeineDelay : t.cognitiveBlock
     },
     {
       pillar: "Beauty",
       score: beauty,
-      status: status(beauty),
-      metrics: [`Skin quality: ${skinQuality ?? "not set"}/10`, `Hydration: ${hydration ?? "not set"}/10`, `Sleep quality: ${sleepQuality}/10`],
-      keyDrivers: beautyDrivers.length ? beautyDrivers : ["Beauty score is based on sleep quality, deep sleep, vitamin D, and stress."],
+      status: status(beauty, t),
+      metrics: [`${t.skinQuality}: ${skinQuality ?? t.notSet}/10`, `${t.hydration}: ${hydration ?? t.notSet}/10`, `${t.sleepQuality}: ${sleepQuality}/10`],
+      keyDrivers: beautyDrivers.length ? beautyDrivers : [t.beautyBasis],
       limitingFactors: beautyLimits,
       riskFlags: beautyRisks,
-      nextAction: hydration !== null && hydration <= 5 ? "Set three hydration anchors: waking, midday, and with your final meal." : "Prioritize hydration, evening light hygiene, and consistent sleep timing."
+      nextAction: hydration !== null && hydration <= 5 ? t.hydrationAnchors : t.beautyFoundations
     }
   ];
-  if (language === "en") return scores;
-  return scores.map((pillar) => ({
-    ...pillar,
-    status: translateScoreText(pillar.status, language),
-    metrics: pillar.metrics.map((item) => translateScoreText(item, language)),
-    keyDrivers: pillar.keyDrivers.map((item) => translateScoreText(item, language)),
-    limitingFactors: pillar.limitingFactors.map((item) => translateScoreText(item, language)),
-    riskFlags: pillar.riskFlags.map((item) => translateScoreText(item, language)),
-    nextAction: translateScoreText(pillar.nextAction, language)
-  }));
+  return scores;
 }

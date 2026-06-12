@@ -6,6 +6,8 @@ import { formatDate } from "@/lib/format";
 import { getServerI18n } from "@/lib/i18n/server";
 import { calculateProfileCompletion, membershipStatusTone } from "@/lib/membership";
 import { createClient } from "@/lib/supabase-server";
+import { databaseErrorMessage, isMissingSchemaError } from "@/lib/supabase-errors";
+import { getSupabaseProjectRef } from "@/lib/supabase-config";
 import type { MemberConsent, Membership, OnboardingData, Profile } from "@/types/database";
 
 export default async function MembershipPage() {
@@ -17,14 +19,14 @@ export default async function MembershipPage() {
   const [
     { data: profile, error: profileError },
     { data: membership, error: membershipError },
-    { data: consent },
+    { data: consent, error: consentError },
     { data: onboarding },
     { count: labCount },
     { count: protocolCount }
   ] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", auth.user.id).maybeSingle<Profile>(),
-    supabase.from("memberships").select("*").eq("user_id", auth.user.id).maybeSingle<Membership>(),
-    supabase.from("member_consents").select("*").eq("user_id", auth.user.id).maybeSingle<MemberConsent>(),
+    supabase.from("profiles").select("id,email,language_preference,first_name,last_name,phone_number,date_of_birth,country,state_province,city,address_line,gender,height_cm,weight_kg,occupation,member_id,created_at,updated_at").eq("id", auth.user.id).maybeSingle<Profile>(),
+    supabase.from("memberships").select("id,user_id,status,join_date,plan_code,billing_provider,billing_customer_id,billing_subscription_id,current_period_end,created_at,updated_at").eq("user_id", auth.user.id).maybeSingle<Membership>(),
+    supabase.from("member_consents").select("id,user_id,age_certified_at,educational_content_accepted_at,terms_accepted_at,privacy_accepted_at,consent_version,created_at,updated_at").eq("user_id", auth.user.id).maybeSingle<MemberConsent>(),
     supabase.from("onboarding_data").select("*").eq("user_id", auth.user.id).maybeSingle<OnboardingData>(),
     supabase.from("lab_reports").select("id", { count: "exact", head: true }).eq("user_id", auth.user.id).eq("processing_status", "completed"),
     supabase.from("generated_protocols").select("id", { count: "exact", head: true }).eq("user_id", auth.user.id)
@@ -45,7 +47,10 @@ export default async function MembershipPage() {
   const nextIncomplete = completion.sections.find((section) => !section.complete);
   const nextHref = nextIncomplete?.key === "labData" ? "/dashboard/labs" : nextIncomplete?.key === "protocols" ? "/dashboard/protocols" : "/onboarding";
   const nextLabel = nextIncomplete?.key === "labData" ? copy.membership.addLabs : nextIncomplete?.key === "protocols" ? copy.membership.generateProtocol : copy.membership.updateProfile;
-  const migrationMissing = Boolean(profileError || membershipError);
+  const queryErrors = [profileError, membershipError, consentError].filter(Boolean);
+  const schemaError = queryErrors.find(isMissingSchemaError);
+  const dataError = queryErrors.find((error) => !isMissingSchemaError(error));
+  const projectRef = getSupabaseProjectRef();
 
   return (
     <div className="space-y-6">
@@ -55,7 +60,8 @@ export default async function MembershipPage() {
         <p className="mt-2 max-w-2xl text-sm leading-6 text-chrome">{copy.membership.description}</p>
       </header>
 
-      {migrationMissing && <Card className="border-amber-300/30 bg-amber-300/10"><p className="text-sm text-amber-100">{copy.membership.architectureError}</p></Card>}
+      {schemaError && <Card className="border-amber-300/30 bg-amber-300/10"><p className="text-sm text-amber-100">{copy.membership.architectureError} {copy.membership.connectedProject}: <span className="font-mono text-white">{projectRef}</span>. {databaseErrorMessage(schemaError)}</p></Card>}
+      {dataError && <Card className="border-amber-300/30 bg-amber-300/10"><p className="text-sm text-amber-100">{copy.membership.dataError} {databaseErrorMessage(dataError)}</p></Card>}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card className="min-h-36"><div className="flex items-center justify-between"><p className="text-xs uppercase tracking-[0.18em] text-chrome">{copy.membership.memberId}</p><BadgeCheck className="h-5 w-5 text-emeraldx" /></div><p className="mt-5 font-mono text-2xl font-semibold text-white">{profile?.member_id ?? "XYV------"}</p></Card>

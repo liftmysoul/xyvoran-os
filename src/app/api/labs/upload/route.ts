@@ -7,7 +7,8 @@ import { createClient } from "@/lib/supabase-server";
 import { getSupabaseAnonKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
 import type { LabReport } from "@/types/database";
 import type { Profile } from "@/types/database";
-import { normalizeLanguage } from "@/lib/i18n";
+import { getDictionary, normalizeLanguage } from "@/lib/i18n";
+import { isMissingSchemaError } from "@/lib/supabase-errors";
 import { getServerLanguage } from "@/lib/i18n/server";
 
 export const runtime = "nodejs";
@@ -16,13 +17,15 @@ export const maxDuration = 60;
 const allowedTypes = new Set(["application/pdf", "image/jpeg", "image/png"]);
 
 export async function POST(request: Request) {
+  let language = await getServerLanguage();
+  let copy = getDictionary(language);
   if (!isSupabaseConfigured()) return NextResponse.json({ error: supabaseConfigMessage() }, { status: 503 });
   const supabase = await createClient();
   const { data: cookieAuth } = await supabase.auth.getUser();
   const bearerToken = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim();
   const useBearerClient = Boolean(!cookieAuth.user && bearerToken);
   const { data: auth, error: authError } = useBearerClient ? await supabase.auth.getUser(bearerToken) : await supabase.auth.getUser();
-  if (authError || !auth.user) return NextResponse.json({ error: "Sign in before uploading bloodwork." }, { status: 401 });
+  if (authError || !auth.user) return NextResponse.json({ error: copy.labs.signInUpload }, { status: 401 });
   const dataClient = useBearerClient && bearerToken
     ? createSupabaseClient(getSupabaseUrl(), getSupabaseAnonKey(), {
         global: { headers: { Authorization: `Bearer ${bearerToken}` } },
@@ -30,21 +33,22 @@ export async function POST(request: Request) {
       })
     : supabase;
   const { data: profile } = await dataClient.from("profiles").select("id,language_preference").eq("id", auth.user.id).maybeSingle<Profile>();
-  const language = normalizeLanguage(profile?.language_preference ?? await getServerLanguage());
+  language = normalizeLanguage(profile?.language_preference ?? language);
+  copy = getDictionary(language);
 
   const form = await request.formData();
   const file = form.get("file");
-  if (!(file instanceof File)) return NextResponse.json({ error: "Choose a PDF, JPG, JPEG, or PNG lab report." }, { status: 400 });
-  if (!allowedTypes.has(file.type)) return NextResponse.json({ error: "Unsupported file type. Upload PDF, JPG, JPEG, or PNG." }, { status: 400 });
-  if (file.size > 4 * 1024 * 1024) return NextResponse.json({ error: "Lab reports must be 4 MB or smaller for production uploads." }, { status: 400 });
+  if (!(file instanceof File)) return NextResponse.json({ error: copy.labs.chooseFile }, { status: 400 });
+  if (!allowedTypes.has(file.type)) return NextResponse.json({ error: copy.labs.unsupportedFile }, { status: 400 });
+  if (file.size > 4 * 1024 * 1024) return NextResponse.json({ error: copy.labs.maxFileSize }, { status: 400 });
 
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
   const path = `${auth.user.id}/${randomUUID()}-${safeName}`;
   const buffer = Buffer.from(await file.arrayBuffer());
   const { error: uploadError } = await dataClient.storage.from("lab-reports").upload(path, buffer, { contentType: file.type, upsert: false });
   if (uploadError) {
-    const hint = uploadError.message.toLowerCase().includes("bucket") ? " Run supabase/phase5_labs_migration.sql in the Supabase SQL Editor." : "";
-    return NextResponse.json({ error: `Unable to store lab report: ${uploadError.message}.${hint}` }, { status: 500 });
+    const hint = uploadError.message.toLowerCase().includes("bucket") ? ` ${copy.labs.missingBucket}` : "";
+    return NextResponse.json({ error: `${copy.labs.storeError}: ${uploadError.message}.${hint}` }, { status: 500 });
   }
 
   const { data: report, error: insertError } = await dataClient
@@ -54,7 +58,8 @@ export async function POST(request: Request) {
     .single<LabReport>();
   if (insertError || !report) {
     await dataClient.storage.from("lab-reports").remove([path]);
-    return NextResponse.json({ error: `Unable to create lab report record: ${insertError?.message ?? "Unknown database error"}. Run supabase/phase5_labs_migration.sql if needed.` }, { status: 500 });
+    const migrationHint = isMissingSchemaError(insertError) ? ` ${copy.labs.storageError}.` : "";
+    return NextResponse.json({ error: `${copy.labs.recordError}: ${insertError?.message ?? copy.common.error}.${migrationHint}` }, { status: 500 });
   }
 
   try {
@@ -67,10 +72,10 @@ export async function POST(request: Request) {
       .eq("user_id", auth.user.id)
       .select("*")
       .single<LabReport>();
-    if (updateError) throw new Error(`Analysis completed but could not be saved: ${updateError.message}`);
+    if (updateError) throw new Error(`${copy.labs.analysisSaveError}: ${updateError.message}`);
     return NextResponse.json({ report: completed });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Lab extraction failed.";
+    const message = error instanceof Error ? error.message : copy.labs.extractionFailed;
     await dataClient.from("lab_reports").update({ processing_status: "failed", analysis_json: { error: message } }).eq("id", report.id).eq("user_id", auth.user.id);
     return NextResponse.json({ error: message }, { status: 422 });
   }

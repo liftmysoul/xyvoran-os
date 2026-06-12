@@ -239,7 +239,7 @@ OPENAI_API_KEY
 ```
 
 7. Optionally add `OPENAI_MODEL`; the application currently defaults to `gpt-4o-mini` when it is absent.
-8. Deploy and open `/api/health`. A ready deployment returns HTTP `200` with configuration booleans only. It never returns secret values.
+8. Deploy and open `/api/health`. A ready deployment returns HTTP `200` with configuration and Phase 7/8 schema booleans plus the connected Supabase project reference. It never returns secret values.
 9. Test signup, confirmation callback, onboarding, dashboard, lab upload, protocol generation, and AI Coach persistence on the Vercel URL.
 
 Local development remains:

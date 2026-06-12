@@ -58,3 +58,32 @@ select event_type, count(*)
 from public.compliance_audit_logs
 group by event_type
 order by event_type;
+
+select sequence_schema, sequence_name
+from information_schema.sequences
+where sequence_schema = 'public'
+  and sequence_name = 'xyv_member_number_seq';
+
+select trigger_name, event_object_table, action_timing, event_manipulation
+from information_schema.triggers
+where trigger_schema = 'public'
+  and trigger_name in (
+    'assign_xyv_member_id', 'validate_profile_member_age', 'ensure_membership_record',
+    'log_profile_compliance_event', 'log_consent_compliance_event'
+  )
+order by trigger_name, event_manipulation;
+
+select conname as constraint_name, conrelid::regclass as table_name, pg_get_constraintdef(oid) as definition
+from pg_constraint
+where connamespace = 'public'::regnamespace
+  and conrelid in (
+    'public.memberships'::regclass,
+    'public.member_consents'::regclass,
+    'public.member_admin_metadata'::regclass,
+    'public.biometrics'::regclass,
+    'public.wearable_connections'::regclass,
+    'public.bloodwork_records'::regclass,
+    'public.protocol_history'::regclass,
+    'public.health_goals'::regclass
+  )
+order by table_name::text, constraint_name;

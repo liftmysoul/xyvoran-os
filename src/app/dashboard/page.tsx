@@ -10,17 +10,19 @@ import { createClient } from "@/lib/supabase-server";
 import { formatDate } from "@/lib/format";
 import type { BiomarkerEntry, LabReport, OnboardingData, Protocol } from "@/types/database";
 import { getServerI18n } from "@/lib/i18n/server";
-import { localizeIntensity, localizePillar } from "@/lib/i18n";
+import { getDictionary, localizeIntensity, localizeLabCategory, localizeLabPriorityAction, localizePillar } from "@/lib/i18n";
+import { localizeGoal } from "@/lib/protocol";
 
 function biomarkerSummary(biomarkers: BiomarkerEntry | null, language: "en" | "es") {
-  if (!biomarkers) return [language === "es" ? "Aún no hay biomarcadores registrados." : "No biomarker entry yet."];
-  const missing = language === "es" ? "sin registrar" : "not logged";
+  const dictionary = getDictionary(language);
+  if (!biomarkers) return [dictionary.dashboard.noBiomarkers];
+  const missing = dictionary.common.notSet;
   return [
-    `${language === "es" ? "Glucosa" : "Glucose"}: ${biomarkers.fasting_glucose ?? missing}`,
+    `${dictionary.dashboard.glucose}: ${biomarkers.fasting_glucose ?? missing}`,
     `HbA1c: ${biomarkers.hba1c ?? missing}`,
     `HRV: ${biomarkers.hrv ?? missing}`,
-    `${language === "es" ? "FC reposo" : "RHR"}: ${biomarkers.resting_heart_rate ?? missing}`,
-    `${language === "es" ? "Sueño" : "Sleep"}: ${biomarkers.sleep_duration ?? missing}h`
+    `${dictionary.dashboard.restingHeartRate}: ${biomarkers.resting_heart_rate ?? missing}`,
+    `${dictionary.dashboard.sleep}: ${biomarkers.sleep_duration ?? missing}h`
   ];
 }
 
@@ -40,7 +42,7 @@ export default async function DashboardPage() {
   if (!onboarding?.disclaimer_confirmed) redirect("/onboarding");
 
   const scoreBiomarkers = mergeLabsIntoBiomarkers(biomarkers, latestLab?.analysis_json);
-  const pillars = applyLabScoreImpacts(calculatePillars(onboarding, scoreBiomarkers, language), latestLab?.analysis_json);
+  const pillars = applyLabScoreImpacts(calculatePillars(onboarding, scoreBiomarkers, language), latestLab?.analysis_json, language);
   const { error: pillarError } = await supabase.from("pillar_scores").upsert(
     pillars.map((pillar) => ({
       user_id: auth.user.id,
@@ -56,17 +58,19 @@ export default async function DashboardPage() {
   const weakest = findWeakestPillar(pillars);
   const priorityActions = [
     weakest.nextAction,
-    ...weakest.limitingFactors.slice(0, 2).map((factor) => `${language === "es" ? "Abordar" : "Address"}: ${factor}`)
+    ...weakest.limitingFactors.slice(0, 2).map((factor) => `${copy.dashboard.address}: ${factor}`)
   ].slice(0, 3);
   while (priorityActions.length < 3) {
-    priorityActions.push(pillars.find((pillar) => pillar.pillar !== weakest.pillar)?.nextAction ?? (language === "es" ? "Registra un nuevo biomarcador o métrica de sueño." : "Log one new biomarker or sleep metric."));
+    priorityActions.push(pillars.find((pillar) => pillar.pillar !== weakest.pillar)?.nextAction ?? copy.dashboard.logMetric);
   }
 
-  const coachPrompts = language === "es" ? [
-    `Ayúdame a mejorar mi puntuación de ${localizePillar(weakest.pillar, language)} esta semana.`,
-    `Crea un plan de 24 horas para ${onboarding.main_goal} usando mis biomarcadores recientes.`,
-    `Explica qué limita mi pilar de ${localizePillar(weakest.pillar, language)} y qué debo hacer primero.`
-  ] : [`Help me improve my ${weakest.pillar} score this week.`, `Build a 24-hour plan for ${onboarding.main_goal} using my latest biomarkers.`, `Explain what is limiting my ${weakest.pillar} pillar and what to do first.`];
+  const localizedWeakest = localizePillar(weakest.pillar, language);
+  const localizedGoal = localizeGoal(onboarding.main_goal, language);
+  const coachPrompts = [
+    copy.dashboard.improvePrompt.replace("{pillar}", localizedWeakest),
+    copy.dashboard.planPrompt.replace("{goal}", localizedGoal),
+    copy.dashboard.explainPrompt.replace("{pillar}", localizedWeakest)
+  ];
 
   return (
     <div className="space-y-6">
@@ -75,27 +79,27 @@ export default async function DashboardPage() {
           <p className="text-sm uppercase tracking-[0.25em] text-emeraldx">{copy.dashboard.overall}</p>
           <h2 className="mt-3 text-4xl font-semibold text-white">{average}/100</h2>
           <p className="mt-3 max-w-2xl text-chrome">
-            {language === "es" ? "Tu plan actual está orientado a" : "Your current plan is tuned for"} <span className="text-white">{onboarding.main_goal}</span>. {language === "es" ? "El pilar prioritario es" : "The weakest pillar is"}{" "}
-            <span className="text-white">{localizePillar(weakest.pillar, language)}</span>, {language === "es" ? "actualmente en" : "currently at"} <span className="text-white">{weakest.score}/100</span>.
+            {copy.dashboard.planPrefix} <span className="text-white">{localizedGoal}</span>. {copy.dashboard.weakestPrefix}{" "}
+            <span className="text-white">{localizedWeakest}</span>, {copy.dashboard.currentlyAt} <span className="text-white">{weakest.score}/100</span>.
           </p>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             {priorityActions.map((action, index) => (
               <div key={`${action}-${index}`} className="rounded-md border border-white/10 bg-white/5 p-4 text-sm text-white">
-                <p className="mb-2 text-xs uppercase tracking-[0.18em] text-emeraldx">{language === "es" ? "Prioridad" : "Priority"} {index + 1}</p>
+                <p className="mb-2 text-xs uppercase tracking-[0.18em] text-emeraldx">{copy.dashboard.priority} {index + 1}</p>
                 {action}
               </div>
             ))}
           </div>
         </Card>
         <Card>
-          <h3 className="font-semibold text-white">{language === "es" ? "Siguientes acciones" : "Next Moves"}</h3>
+          <h3 className="font-semibold text-white">{copy.dashboard.nextMoves}</h3>
           <div className="mt-4 space-y-3">
             {[
-              ["/dashboard/biomarkers", language === "es" ? "Registrar biomarcadores" : "Log biomarkers", FlaskConical],
-              ["/dashboard/labs", language === "es" ? "Analizar laboratorio" : "Analyze bloodwork", Microscope],
-              ["/dashboard/coach", language === "es" ? "Consultar al Coach de IA" : "Ask the AI Coach", MessageSquare],
-              ["/dashboard/protocols", language === "es" ? "Generar protocolo" : "Generate protocol", WandSparkles],
-              ["/dashboard/membership", language === "es" ? "Abrir centro de membresía" : "Open Membership Center", BadgeCheck]
+              ["/dashboard/biomarkers", copy.dashboard.logBiomarkers, FlaskConical],
+              ["/dashboard/labs", copy.dashboard.analyzeBloodwork, Microscope],
+              ["/dashboard/coach", copy.dashboard.askCoach, MessageSquare],
+              ["/dashboard/protocols", copy.dashboard.generateProtocol, WandSparkles],
+              ["/dashboard/membership", copy.dashboard.openMembership, BadgeCheck]
             ].map(([href, label, Icon]) => (
               <Link key={String(href)} href={String(href)} className="flex items-center justify-between rounded-md bg-white/5 p-3 text-sm text-white hover:bg-white/10">
                 <span className="flex items-center gap-2"><Icon className="h-4 w-4 text-emeraldx" />{String(label)}</span>
@@ -121,10 +125,10 @@ export default async function DashboardPage() {
               <p className="text-white">{latestProtocol.title ?? latestProtocol.goal}</p>
               <p>{copy.common.status}: <span className="text-emeraldx">{latestProtocol.status ?? copy.common.active}</span></p>
               <p>{copy.protocols.intensity}: {localizeIntensity(latestProtocol.intensity ?? "Beginner", language)}</p>
-              <Link href="/dashboard/protocols" className="inline-flex items-center gap-2 text-emeraldx">{language === "es" ? "Ver protocolo" : "View protocol"} <ArrowRight className="h-4 w-4" /></Link>
+              <Link href="/dashboard/protocols" className="inline-flex items-center gap-2 text-emeraldx">{copy.dashboard.viewProtocol} <ArrowRight className="h-4 w-4" /></Link>
             </div>
           ) : (
-            <Link href="/dashboard/protocols" className="mt-4 inline-flex items-center gap-2 text-sm text-emeraldx">{language === "es" ? "Genera tu primer protocolo" : "Generate your first protocol"} <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/dashboard/protocols" className="mt-4 inline-flex items-center gap-2 text-sm text-emeraldx">{copy.dashboard.firstProtocol} <ArrowRight className="h-4 w-4" /></Link>
           )}
         </Card>
         <Card>
@@ -138,20 +142,20 @@ export default async function DashboardPage() {
       <Card>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div><h3 className="flex items-center gap-2 font-semibold text-white"><Microscope className="h-4 w-4 text-emeraldx" /> {copy.labs.latest}</h3><p className="mt-1 text-xs text-chrome">{latestLab ? formatDate(latestLab.created_at) : copy.labs.noAnalysis}</p></div>
-          <Link href="/dashboard/labs" className="inline-flex items-center gap-2 text-sm text-emeraldx">{language === "es" ? "Abrir laboratorios" : "Open labs"} <ArrowRight className="h-4 w-4" /></Link>
+          <Link href="/dashboard/labs" className="inline-flex items-center gap-2 text-sm text-emeraldx">{copy.dashboard.openLabs} <ArrowRight className="h-4 w-4" /></Link>
         </div>
         {latestLab?.analysis_json ? (
           <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <div className="rounded-md bg-white/5 p-4 text-sm"><p className="text-chrome">{copy.labs.weakest}</p><p className="mt-2 text-white">{latestLab.analysis_json.weakestCategory ?? copy.common.none}</p></div>
-            <div className="rounded-md bg-white/5 p-4 text-sm"><p className="text-chrome">{copy.labs.opportunities}</p><p className="mt-2 text-white">{latestLab.analysis_json.biggestOpportunities.slice(0, 3).map((marker) => marker.name).join(", ") || (language === "es" ? "Sin biomarcadores prioritarios" : "No priority markers")}</p></div>
-            <div className="rounded-md bg-white/5 p-4 text-sm"><p className="text-chrome">{copy.labs.priority}</p><p className="mt-2 text-white">{latestLab.analysis_json.priorityActions[0]}</p></div>
+            <div className="rounded-md bg-white/5 p-4 text-sm"><p className="text-chrome">{copy.labs.weakest}</p><p className="mt-2 text-white">{localizeLabCategory(latestLab.analysis_json.weakestCategory, language) ?? copy.common.none}</p></div>
+            <div className="rounded-md bg-white/5 p-4 text-sm"><p className="text-chrome">{copy.labs.opportunities}</p><p className="mt-2 text-white">{latestLab.analysis_json.biggestOpportunities.slice(0, 3).map((marker) => marker.name).join(", ") || copy.dashboard.noPriorityMarkers}</p></div>
+            <div className="rounded-md bg-white/5 p-4 text-sm"><p className="text-chrome">{copy.labs.priority}</p><p className="mt-2 text-white">{latestLab.analysis_json.biggestOpportunities[0] ? localizeLabPriorityAction(latestLab.analysis_json.biggestOpportunities[0].name, language) : copy.optimization.labs.maintain}</p></div>
           </div>
-        ) : <p className="mt-4 text-sm text-chrome">{language === "es" ? "Carga análisis de sangre para conectar las señales de laboratorio con las puntuaciones por pilar y el contexto del Coach de IA." : "Upload bloodwork to connect lab signals to pillar scores and AI Coach context."}</p>}
+        ) : <p className="mt-4 text-sm text-chrome">{copy.dashboard.labConnection}</p>}
       </Card>
 
       {pillarError && (
         <Card className="border-amber-300/30 bg-amber-300/10">
-          <p className="text-sm text-amber-100">{language === "es" ? "No se pudieron guardar las puntuaciones por pilar en Supabase" : "Pillar scores could not be saved to Supabase"}: {pillarError.message}</p>
+          <p className="text-sm text-amber-100">{copy.dashboard.pillarSaveError}: {pillarError.message}</p>
         </Card>
       )}
       <PillarGrid pillars={pillars} />

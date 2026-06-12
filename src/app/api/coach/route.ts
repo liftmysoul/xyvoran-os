@@ -3,7 +3,6 @@ import OpenAI from "openai";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import {
   buildCoachContext,
-  coachNotConfiguredMessage,
   coachSystemPrompt,
   type PersistedPillarScore,
   type UserProfile
@@ -77,7 +76,7 @@ export async function POST(request: Request) {
     if (userMessageError) return NextResponse.json({ error: `Unable to save your message: ${userMessageError.message}` }, { status: 500 });
 
     if (!process.env.OPENAI_API_KEY?.trim()) {
-      const fallback = language === "es" ? copy.coach.notConfigured : coachNotConfiguredMessage;
+      const fallback = copy.coach.notConfigured;
       const { error: fallbackError } = await dataClient.from("ai_chat_messages").insert({ user_id: auth.user.id, role: "assistant", content: fallback });
       if (fallbackError) return NextResponse.json({ error: `Unable to save coach reply: ${fallbackError.message}` }, { status: 500 });
       return NextResponse.json({ reply: fallback, configured: false }, { status: 503 });
@@ -97,10 +96,10 @@ export async function POST(request: Request) {
         ],
         max_tokens: 900
       });
-      reply = completion.choices[0]?.message.content ?? (language === "es" ? "No pude generar una respuesta. Inténtalo de nuevo con una pregunta más específica." : "I could not generate a response. Try again with a more specific question.");
+      reply = completion.choices[0]?.message.content ?? copy.coach.generatedEmpty;
     } catch (error) {
       const openaiMessage = error instanceof Error ? error.message : "Unknown OpenAI API error.";
-      reply = language === "es" ? `El Coach de IA no pudo completar la solicitud. Revisa la facturación, cuota y configuración de la clave de OpenAI. Error de OpenAI: ${openaiMessage}` : `AI Coach could not complete the OpenAI request. Check your OpenAI billing, quota, and API key settings. OpenAI error: ${openaiMessage}`;
+      reply = `${copy.coach.apiFailure} OpenAI: ${openaiMessage}`;
       const { error: assistantError } = await dataClient.from("ai_chat_messages").insert({ user_id: auth.user.id, role: "assistant", content: reply });
       if (assistantError) return NextResponse.json({ error: `OpenAI failed and the error reply could not be saved: ${assistantError.message}` }, { status: 500 });
       return NextResponse.json({ error: reply, reply, configured: true }, { status: 502 });

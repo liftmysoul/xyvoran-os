@@ -7,34 +7,31 @@ import type {
   ProtocolIntensity,
   StructuredProtocol
 } from "@/types/database";
-import type { Language } from "@/lib/i18n";
-import { localizePillar } from "@/lib/i18n";
+import { getDictionary, localizePillar, type Language } from "@/lib/i18n";
 
-const goalEs: Record<string, string> = { "Fat loss": "Pérdida de grasa", "Better sleep": "Mejor sueño", "More energy": "Más energía", "Cognitive performance": "Rendimiento cognitivo", Recovery: "Recuperación", Longevity: "Longevidad", "Metabolic health": "Salud metabólica", "Stress resilience": "Resiliencia al estrés", "Beauty / skin optimization": "Optimización de belleza y piel" };
-const protocolEs: Record<string, string> = {
-  "Lock a consistent wake time and get 10-15 minutes of outdoor light within 30 minutes of waking.": "Mantén una hora constante para despertar y recibe 10-15 minutos de luz exterior durante los primeros 30 minutos del día.",
-  "Begin a 60-minute wind-down: dim lights, reduce screens, cool the room, and keep the sleep window consistent.": "Inicia 60 minutos de relajación: reduce la luz y las pantallas, refresca la habitación y mantén constante tu horario de sueño.",
-  "Protect your current sleep window and avoid caffeine within 8 hours of bedtime.": "Protege tu horario de sueño actual y evita cafeína durante las 8 horas previas a dormir.",
-  "Use a 12-hour overnight fasting window, then break the fast with protein, fiber, and hydration.": "Usa una ventana de ayuno nocturno de 12 horas y rompe el ayuno con proteína, fibra e hidratación.",
-  "Build each meal around protein, colorful plants, and slow carbohydrates only around training or walks.": "Estructura cada comida con proteína, vegetales variados y carbohidratos de absorción lenta alrededor del entrenamiento o caminatas.",
-  "Prioritize protein, omega-3 rich foods, mineral hydration, and colorful plants for skin-supportive nutrition.": "Prioriza proteína, alimentos ricos en omega-3, hidratación con minerales y vegetales variados para apoyar la piel.",
-  "Eat protein within 90 minutes of waking and delay caffeine until after hydration and morning light.": "Consume proteína dentro de los primeros 90 minutos del día y retrasa la cafeína hasta después de hidratarte y recibir luz matutina.",
-  "Keep meals protein-forward and avoid large late meals that could suppress recovery.": "Prioriza proteína en tus comidas y evita cenas abundantes que puedan limitar la recuperación.",
-  "Complete 20 minutes of easy mobility plus a relaxed walk.": "Completa 20 minutos de movilidad suave y una caminata relajada.",
-  "Walk 20-30 minutes in zone 2, preferably after a meal.": "Camina 20-30 minutos en zona 2, preferentemente después de una comida.",
-  "Do 25 minutes of zone 2 movement before the deepest work block.": "Realiza 25 minutos de movimiento en zona 2 antes de tu bloque de trabajo más profundo.",
-  "Complete a moderate full-body strength session.": "Completa una sesión moderada de fuerza de cuerpo completo.",
-  "Walk 10 minutes after two meals.": "Camina 10 minutos después de dos comidas.",
-  "Do 5 minutes of slow nasal breathing, then a short mobility flow.": "Realiza 5 minutos de respiración nasal lenta y luego una breve secuencia de movilidad.",
-  "Add a 10-minute decompression block after work: walk, breathe, or stretch without screens.": "Agrega 10 minutos de descarga después del trabajo: camina, respira o estira sin pantallas.",
-  "Schedule one deliberate downshift block: breathwork, mobility, or quiet outdoor walking.": "Programa un bloque deliberado para bajar revoluciones: respiración, movilidad o caminata tranquila al aire libre."
+type ProtocolCopy = ReturnType<typeof getDictionary>["optimization"]["protocol"];
+type ProtocolCopyKey = keyof ProtocolCopy;
+
+const goalCopyKeys: Record<string, ProtocolCopyKey> = {
+  "Fat loss": "goalFatLoss", "Better sleep": "goalBetterSleep", "More energy": "goalMoreEnergy",
+  "Cognitive performance": "goalCognitive", Recovery: "goalRecovery", Longevity: "goalLongevity",
+  "Metabolic health": "goalMetabolic", "Stress resilience": "goalStress", "Beauty / skin optimization": "goalBeauty"
 };
 
-function translateProtocolText(text: string, language: Language) {
-  if (language !== "es") return text;
-  if (protocolEs[text]) return protocolEs[text];
-  if (text.startsWith("Log ")) return text.replace(/^Log /, "Registra ").replace("Note one action that improved the day.", "Anota una acción que mejoró el día.");
-  return text;
+export function localizeGoal(goal: string, language: Language) {
+  const key = goalCopyKeys[goal] ?? (Object.keys(goalCopyKeys) as string[]).map((canonical) => goalCopyKeys[canonical]).find((candidate) =>
+    getDictionary("en").optimization.protocol[candidate] === goal || getDictionary("es").optimization.protocol[candidate] === goal
+  );
+  return key ? getDictionary(language).optimization.protocol[key] : goal;
+}
+
+export function localizeProtocolText(text: string, language: Language) {
+  if (language === "en") return text;
+  const source = getDictionary("en").optimization.protocol;
+  const target = getDictionary(language).optimization.protocol;
+  const spanish = getDictionary("es").optimization.protocol;
+  const key = (Object.keys(source) as ProtocolCopyKey[]).find((candidate) => source[candidate] === text || spanish[candidate] === text);
+  return key ? target[key] : text;
 }
 
 const supportedGoals = [
@@ -63,15 +60,16 @@ function normalizeGoal(goal?: string | null) {
 }
 
 export function findWeakestPillar(pillars: PillarScore[]): PillarScore {
+  const fallback = getDictionary("en").optimization.protocol;
   return [...pillars].sort((a, b) => a.score - b.score)[0] ?? {
     pillar: "Recovery",
     score: 50,
     status: "Needs attention",
     metrics: [],
     keyDrivers: [],
-    limitingFactors: ["Not enough scoring data is available."],
+    limitingFactors: [fallback.noScoringData],
     riskFlags: [],
-    nextAction: "Complete onboarding and add biomarkers."
+    nextAction: fallback.completeData
   };
 }
 
@@ -93,55 +91,54 @@ export function chooseProtocolIntensity(
   return requested ?? "Beginner";
 }
 
-function sleepAction(day: number, goal: string, onboarding: OnboardingData | null, biomarkers: BiomarkerEntry | null) {
+function sleepAction(day: number, goal: string, onboarding: OnboardingData | null, biomarkers: BiomarkerEntry | null, copy: ProtocolCopy) {
   const lowSleep = (onboarding?.sleep_quality ?? 6) < 7 || (biomarkers?.sleep_duration ?? onboarding?.sleep_duration ?? 7) < 7;
   if (goal === "Better sleep" || lowSleep) {
     return day <= 2
-      ? "Lock a consistent wake time and get 10-15 minutes of outdoor light within 30 minutes of waking."
-      : "Begin a 60-minute wind-down: dim lights, reduce screens, cool the room, and keep the sleep window consistent.";
+      ? copy.wakeLight
+      : copy.windDown;
   }
-  return "Protect your current sleep window and avoid caffeine within 8 hours of bedtime.";
+  return copy.protectSleep;
 }
 
-function nutritionAction(day: number, goal: string, onboarding: OnboardingData | null, biomarkers: BiomarkerEntry | null) {
+function nutritionAction(day: number, goal: string, onboarding: OnboardingData | null, biomarkers: BiomarkerEntry | null, copy: ProtocolCopy) {
   const glucose = biomarkers?.fasting_glucose ?? null;
   if (goal === "Fat loss" || goal === "Metabolic health" || (glucose && glucose > 100)) {
     return day % 2 === 0
-      ? "Use a 12-hour overnight fasting window, then break the fast with protein, fiber, and hydration."
-      : "Build each meal around protein, colorful plants, and slow carbohydrates only around training or walks.";
+      ? copy.fastingWindow
+      : copy.balancedMeals;
   }
   if (goal === "Beauty / skin optimization") {
-    return "Prioritize protein, omega-3 rich foods, mineral hydration, and colorful plants for skin-supportive nutrition.";
+    return copy.skinNutrition;
   }
   if ((onboarding?.energy_level ?? 5) <= 5) {
-    return "Eat protein within 90 minutes of waking and delay caffeine until after hydration and morning light.";
+    return copy.morningProtein;
   }
-  return "Keep meals protein-forward and avoid large late meals that could suppress recovery.";
+  return copy.recoveryMeals;
 }
 
-function movementAction(day: number, goal: string, intensity: ProtocolIntensity, weakestPillar: PillarName) {
+function movementAction(day: number, goal: string, intensity: ProtocolIntensity, weakestPillar: PillarName, copy: ProtocolCopy) {
   if (weakestPillar === "Recovery" || intensity === "Beginner") {
     return day % 3 === 0
-      ? "Complete 20 minutes of easy mobility plus a relaxed walk."
-      : "Walk 20-30 minutes in zone 2, preferably after a meal.";
+      ? copy.mobilityWalk
+      : copy.zone2Walk;
   }
-  if (goal === "Cognitive performance") return "Do 25 minutes of zone 2 movement before the deepest work block.";
-  if (goal === "Fat loss" || goal === "Metabolic health") return day % 3 === 0 ? "Complete a moderate full-body strength session." : "Walk 10 minutes after two meals.";
-  return day % 3 === 0 ? "Complete a strength session with clean technique and long rests." : "Accumulate 7,000-9,000 steps with nasal breathing.";
+  if (goal === "Cognitive performance") return copy.cognitiveZone2;
+  if (goal === "Fat loss" || goal === "Metabolic health") return day % 3 === 0 ? copy.strength : copy.twoMealWalks;
+  return day % 3 === 0 ? copy.advancedStrength : copy.steps;
 }
 
-function recoveryAction(day: number, goal: string, onboarding: OnboardingData | null, weakestPillar: PillarName) {
+function recoveryAction(day: number, goal: string, onboarding: OnboardingData | null, weakestPillar: PillarName, copy: ProtocolCopy) {
   const highStress = (onboarding?.stress_level ?? 5) >= 7 || goal === "Stress resilience";
   if (weakestPillar === "Recovery" || highStress) {
-    return day <= 3 ? "Do 5 minutes of slow nasal breathing, then a short mobility flow." : "Add a 10-minute decompression block after work: walk, breathe, or stretch without screens.";
+    return day <= 3 ? copy.breathing : copy.decompression;
   }
-  if (goal === "Longevity") return "Use a small hormetic dose only if recovered: sauna, brisk walk, or cold finish as tolerated.";
-  return "Schedule one deliberate downshift block: breathwork, mobility, or quiet outdoor walking.";
+  if (goal === "Longevity") return copy.hormesis;
+  return copy.downshift;
 }
 
-function trackingAction(day: number, weakestPillar: PillarName) {
-  const focus = weakestPillar === "Recovery" ? "sleep duration, HRV or resting heart rate, stress, and energy" : "energy, hunger, sleep, training readiness, and one biomarker trend";
-  return `Log ${focus}. Note one action that improved the day.`;
+function trackingAction(_day: number, weakestPillar: PillarName, copy: ProtocolCopy) {
+  return weakestPillar === "Recovery" ? copy.trackingRecovery : copy.trackingGeneral;
 }
 
 export function generateStructuredProtocol(args: {
@@ -153,6 +150,7 @@ export function generateStructuredProtocol(args: {
   language?: Language;
 }): StructuredProtocol {
   const language = args.language ?? "en";
+  const copy = getDictionary(language).optimization.protocol;
   const goal = normalizeGoal(args.onboarding?.main_goal);
   const weakest = findWeakestPillar(args.pillars);
   const intensity = chooseProtocolIntensity(args.onboarding, args.biomarkers, weakest, args.requestedIntensity);
@@ -162,32 +160,32 @@ export function generateStructuredProtocol(args: {
     const day = index + 1;
     return {
       day,
-      sleep: sleepAction(day, goal, args.onboarding, args.biomarkers),
-      nutrition: nutritionAction(day, goal, args.onboarding, args.biomarkers),
-      movement: movementAction(day, goal, intensity, weakest.pillar),
-      recovery: recoveryAction(day, goal, args.onboarding, weakest.pillar),
-      tracking: trackingAction(day, weakest.pillar)
+      sleep: sleepAction(day, goal, args.onboarding, args.biomarkers, copy),
+      nutrition: nutritionAction(day, goal, args.onboarding, args.biomarkers, copy),
+      movement: movementAction(day, goal, intensity, weakest.pillar, copy),
+      recovery: recoveryAction(day, goal, args.onboarding, weakest.pillar, copy),
+      tracking: trackingAction(day, weakest.pillar, copy)
     };
   });
 
   const metricsToMonitor = [
-    "Sleep duration and sleep quality",
-    "Morning energy and afternoon energy dip",
-    "Stress level and HRV or resting heart rate",
-    "Adherence to sleep, nutrition, movement, and recovery actions",
-    ...(goal === "Metabolic health" || goal === "Fat loss" ? ["Fasting glucose trend and post-meal walk completion"] : []),
-    ...(goal === "Beauty / skin optimization" ? ["Deep sleep, hydration, and skin recovery notes"] : [])
+    copy.sleepMetric,
+    copy.energyMetric,
+    copy.stressMetric,
+    copy.adherenceMetric,
+    ...(goal === "Metabolic health" || goal === "Fat loss" ? [copy.glucoseMetric] : []),
+    ...(goal === "Beauty / skin optimization" ? [copy.beautyMetric] : [])
   ];
 
   const protocol: StructuredProtocol = {
-    title: language === "es" ? `Protocolo inicial de ${goalEs[goal] ?? goal}: reinicio de ${localizePillar(weakest.pillar, language)}` : `${goal} Starter Protocol: ${weakest.pillar} Reset`,
-    primaryGoal: language === "es" ? goalEs[goal] ?? goal : goal,
+    title: language === "es" ? `Protocolo inicial de ${localizeGoal(goal, language)}: reinicio de ${localizePillar(weakest.pillar, language)}` : `${goal} Starter Protocol: ${weakest.pillar} Reset`,
+    primaryGoal: localizeGoal(goal, language),
     weakestPillar: weakest.pillar,
     intensity,
     sevenDayActionPlan,
-    safetyDisclaimer: language === "es" ? "Este protocolo ofrece orientación educativa de bienestar únicamente. No diagnostica enfermedades, prescribe medicamentos, proporciona dosificación de péptidos, recomienda suspender medicamentos prescritos ni sustituye la atención profesional. Consulta a un profesional médico autorizado ante biomarcadores anormales, síntomas, inquietudes hormonales, enfermedades crónicas o decisiones de prescripción." : "This protocol is educational wellness guidance only. It does not diagnose disease, prescribe medication, provide peptide dosing, recommend stopping prescribed medications, or replace professional care. Consult a licensed healthcare provider for abnormal biomarkers, symptoms, hormonal concerns, chronic disease, or prescription decisions.",
-    metricsToMonitor: language === "es" ? ["Duración y calidad del sueño", "Energía matutina y bajón de energía por la tarde", "Nivel de estrés y HRV o frecuencia cardiaca en reposo", "Adherencia a las acciones de sueño, nutrición, movimiento y recuperación", ...(goal === "Metabolic health" || goal === "Fat loss" ? ["Tendencia de glucosa en ayunas y caminatas después de comer"] : []), ...(goal === "Beauty / skin optimization" ? ["Sueño profundo, hidratación y notas de recuperación de la piel"] : [])] : metricsToMonitor,
-    whenToReassess: language === "es" ? "Reevalúa después de 7 días, o antes si empeora el sueño, el HRV cae notablemente, aparecen síntomas o hay biomarcadores anormales." : "Reassess after 7 days, or sooner if sleep worsens, HRV drops sharply, symptoms appear, or biomarkers are abnormal.",
+    safetyDisclaimer: copy.safety,
+    metricsToMonitor,
+    whenToReassess: copy.reassess,
     topPriorityActions: [
       weakest.nextAction,
       sevenDayActionPlan[0].sleep,
@@ -206,10 +204,10 @@ export function generateStructuredProtocol(args: {
     ]
   };
   if (language === "es") {
-    protocol.sevenDayActionPlan = protocol.sevenDayActionPlan.map((day) => ({ ...day, sleep: translateProtocolText(day.sleep, language), nutrition: translateProtocolText(day.nutrition, language), movement: translateProtocolText(day.movement, language), recovery: translateProtocolText(day.recovery, language), tracking: translateProtocolText(day.tracking, language) }));
-    protocol.topPriorityActions = protocol.topPriorityActions.map((item) => translateProtocolText(item, language));
+    protocol.sevenDayActionPlan = protocol.sevenDayActionPlan.map((day) => ({ ...day, sleep: localizeProtocolText(day.sleep, language), nutrition: localizeProtocolText(day.nutrition, language), movement: localizeProtocolText(day.movement, language), recovery: localizeProtocolText(day.recovery, language), tracking: localizeProtocolText(day.tracking, language) }));
+    protocol.topPriorityActions = protocol.topPriorityActions.map((item) => localizeProtocolText(item, language));
     protocol.contextSummary = [
-      `Objetivo principal: ${goalEs[goal] ?? goal}`, `Pilar prioritario: ${localizePillar(weakest.pillar, language)} (${weakest.score}/100)`,
+      `Objetivo principal: ${localizeGoal(goal, language)}`, `Pilar prioritario: ${localizePillar(weakest.pillar, language)} (${weakest.score}/100)`,
       `Calidad del sueño: ${args.onboarding?.sleep_quality ?? "sin registrar"}/10`, `Nivel de estrés: ${args.onboarding?.stress_level ?? "sin registrar"}/10`, `Nivel de energía: ${args.onboarding?.energy_level ?? "sin registrar"}/10`,
       `Frecuencia de ejercicio: ${args.onboarding?.exercise_frequency ?? "sin registrar"}`, `Estilo de alimentación: ${args.onboarding?.diet_style ?? "sin registrar"}`, `HRV más reciente: ${args.biomarkers?.hrv ?? "sin registrar"}`,
       ...(recentCoachHint ? [`Contexto reciente del coach: ${recentCoachHint}`] : [])

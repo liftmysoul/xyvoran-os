@@ -6,8 +6,9 @@ import { createClient } from "@/lib/supabase-server";
 import { getSupabaseAnonKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
 import type { BiomarkerEntry, ChatMessage, OnboardingData, PillarScore, ProtocolIntensity } from "@/types/database";
 import type { Profile } from "@/types/database";
-import { normalizeLanguage } from "@/lib/i18n";
+import { getDictionary, normalizeLanguage } from "@/lib/i18n";
 import { getServerLanguage } from "@/lib/i18n/server";
+import { isMissingSchemaError } from "@/lib/supabase-errors";
 
 type StoredPillar = {
   pillar: PillarScore["pillar"];
@@ -58,19 +59,16 @@ export async function POST(request: Request) {
   const readError = onboardingError ?? biomarkerError ?? pillarsError ?? messagesError;
   if (readError) return NextResponse.json({ error: `Unable to load protocol context: ${readError.message}` }, { status: 500 });
 
-  if (!onboarding) return NextResponse.json({ error: "Complete onboarding before generating a protocol." }, { status: 400 });
-
   const language = normalizeLanguage(profile?.language_preference ?? await getServerLanguage());
+  const copy = getDictionary(language);
+  if (!onboarding) return NextResponse.json({ error: copy.protocols.completeOnboarding }, { status: 400 });
   const calculatedPillars = calculatePillars(onboarding, latestBiomarkers, language);
   const pillarByName = new Map(calculatedPillars.map((pillar) => [pillar.pillar, pillar]));
   const pillars = storedPillars?.length
     ? storedPillars.map((pillar) => ({
         ...(pillarByName.get(pillar.pillar) ?? calculatedPillars[0]),
         pillar: pillar.pillar,
-        score: pillar.score,
-        status: pillar.status,
-        metrics: Array.isArray(pillar.metrics) ? pillar.metrics : [],
-        nextAction: pillar.suggested_next_action
+        score: pillar.score
       }))
     : calculatedPillars;
 
@@ -94,7 +92,7 @@ export async function POST(request: Request) {
     status: "active"
   };
   const { error } = await dataClient.from("generated_protocols").insert(insertPayload);
-  if (error && error.message.includes("column")) {
+  if (error && isMissingSchemaError(error)) {
     const { error: legacyError } = await dataClient.from("generated_protocols").insert({
       user_id: auth.user.id,
       goal: protocol.primaryGoal,
@@ -103,7 +101,7 @@ export async function POST(request: Request) {
     if (legacyError) return NextResponse.json({ error: `Unable to save generated protocol: ${legacyError.message}` }, { status: 500 });
     return NextResponse.json({
       protocol,
-      warning: "Protocol saved in legacy JSON mode. Run the Phase 4 schema migration to enable title, weakest pillar, intensity, status, and protocol_json columns."
+      warning: copy.protocols.legacyWarning
     });
   }
 

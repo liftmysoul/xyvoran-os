@@ -12,6 +12,7 @@ import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import type { Language } from "@/lib/i18n";
 import { calculateAge, isAtLeast21, maximumMemberBirthDate } from "@/lib/membership";
+import { isMissingSchemaError } from "@/lib/supabase-errors";
 
 const goals = ["Fat loss", "Better sleep", "More energy", "Cognitive performance", "Recovery", "Longevity", "Metabolic health", "Stress resilience", "Beauty / skin optimization"];
 const frequencies = ["Never", "Rarely", "Sometimes", "Often", "Daily"];
@@ -217,7 +218,7 @@ export default function OnboardingPage() {
     const { error: profileError } = await supabase.from("profiles").upsert(profilePayload, { onConflict: "id" });
     if (profileError) {
       setLoading(false);
-      return setError(profileError.message.includes("column") || profileError.message.includes("member_consents") ? `${copy.onboarding.memberMigration} ${profileError.message}` : `${copy.onboarding.saveError}: ${profileError.message}`);
+      return setError(isMissingSchemaError(profileError) ? `${copy.onboarding.memberMigration} ${profileError.message}` : `${copy.onboarding.saveError}: ${profileError.message}`);
     }
     const now = new Date().toISOString();
     const { error: consentError } = await supabase.from("member_consents").upsert({
@@ -230,7 +231,7 @@ export default function OnboardingPage() {
     }, { onConflict: "user_id" });
     if (consentError) {
       setLoading(false);
-      return setError(`${copy.onboarding.memberMigration} ${consentError.message}`);
+      return setError(isMissingSchemaError(consentError) ? `${copy.onboarding.memberMigration} ${consentError.message}` : `${copy.onboarding.saveError}: ${consentError.message}`);
     }
     const payload = {
       user_id: auth.user.id,
@@ -243,7 +244,7 @@ export default function OnboardingPage() {
     };
     const { error: dbError } = await supabase.from("onboarding_data").upsert(payload, { onConflict: "user_id" });
     setLoading(false);
-    if (dbError) return setError(dbError.message.includes("column") ? `${copy.onboarding.migration}: ${dbError.message}` : `${copy.onboarding.saveError}: ${dbError.message}`);
+    if (dbError) return setError(isMissingSchemaError(dbError) ? `${copy.onboarding.migration}: ${dbError.message}` : `${copy.onboarding.saveError}: ${dbError.message}`);
     router.replace("/dashboard");
     router.refresh();
   }
