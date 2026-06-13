@@ -256,22 +256,24 @@ export default function OnboardingPage() {
   if (hydrating) return <main className="grid min-h-screen place-items-center"><LoaderCircle className="h-7 w-7 animate-spin text-emeraldx" /></main>;
 
   return (
-    <main className="min-h-screen px-4 py-8 md:px-8">
-      <div className="mx-auto max-w-6xl">
-        <header className="mb-7 flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-6">
-          <div><p className="text-xs uppercase tracking-[0.28em] text-emeraldx">{copy.onboarding.eyebrow}</p><h1 className="mt-2 text-3xl font-semibold text-white">{copy.onboarding.title}</h1><p className="mt-2 max-w-2xl text-sm text-chrome">{copy.onboarding.intro}</p></div>
+    <main className="relative min-h-screen overflow-hidden bg-obsidian px-4 py-8 md:px-8">
+      <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[38%] bg-[url('/images/xyvoran-digital-twin-hero.png')] bg-cover bg-center opacity-20 xl:block" />
+      <div className="pointer-events-none absolute inset-0 bg-bio-grid bg-[length:64px_64px] opacity-25" />
+      <div className="relative mx-auto max-w-6xl">
+        <header className="mb-7 flex flex-wrap items-end justify-between gap-4 border-b border-signal/10 pb-6">
+          <div><p className="system-label flex items-center gap-2"><span className="status-dot" />{copy.onboarding.eyebrow}</p><h1 className="mt-3 text-3xl font-semibold text-white">{copy.onboarding.title}</h1><p className="mt-2 max-w-2xl text-sm text-chrome">{copy.onboarding.intro}</p></div>
           <div className="flex items-center gap-4"><p className="text-sm text-chrome">{copy.onboarding.step} <span className="text-white">{step + 1}</span> {copy.onboarding.of} {steps.length}</p><LanguageSwitcher compact /></div>
         </header>
 
         <div className="mb-6 grid grid-cols-6 gap-2" aria-label={copy.onboarding.progress}>
-          {steps.map((item, index) => <button key={item.title} type="button" onClick={() => index <= step && setStep(index)} className={`h-2 rounded-sm ${index <= step ? "bg-emeraldx" : "bg-white/10"}`} aria-label={`Go to ${item.title}`} />)}
+          {steps.map((item, index) => <button key={item.title} type="button" onClick={() => index <= step && setStep(index)} className={`h-1.5 rounded-sm transition ${index <= step ? "bg-emeraldx shadow-[0_0_12px_rgba(0,245,212,0.3)]" : "bg-white/10"}`} aria-label={`Go to ${item.title}`} />)}
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[250px_1fr]">
-          <aside className="hidden lg:block"><div className="space-y-2">{steps.map((item, index) => { const Icon = item.icon; return <div key={item.title} className={`flex items-center gap-3 rounded-md px-3 py-3 ${index === step ? "bg-emeraldx/10 text-white" : "text-chrome"}`}><span className={`grid h-8 w-8 place-items-center rounded-md ${index < step ? "bg-emeraldx text-obsidian" : "border border-white/10"}`}>{index < step ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}</span><span><span className="block text-sm">{item.title}</span><span className="block text-xs opacity-70">{item.subtitle}</span></span></div>; })}</div></aside>
+          <aside className="hidden lg:block"><div className="space-y-1 border-l border-signal/10 pl-3">{steps.map((item, index) => { const Icon = item.icon; return <div key={item.title} className={`relative flex items-center gap-3 rounded-md border px-3 py-3 ${index === step ? "border-emeraldx/20 bg-emeraldx/[0.06] text-white" : "border-transparent text-chrome"}`}>{index === step && <span className="absolute inset-y-2 left-0 w-px bg-emeraldx" />}<span className={`grid h-8 w-8 place-items-center rounded-md ${index < step ? "bg-emeraldx text-obsidian" : "border border-signal/15 bg-panel/60"}`}>{index < step ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}</span><span><span className="block text-sm">{item.title}</span><span className="block text-xs opacity-70">{item.subtitle}</span></span></div>; })}</div></aside>
 
-          <Card className="min-h-[570px]">
-            <div className="mb-7 flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-md border border-emeraldx/30 bg-emeraldx/10"><CurrentIcon className="h-5 w-5 text-emeraldx" /></span><div><h2 className="text-xl font-semibold text-white">{steps[step].title}</h2><p className="text-sm text-chrome">{steps[step].subtitle}</p></div></div>
+          <Card className="min-h-[570px] border-signal/15 p-6 md:p-7">
+            <div className="mb-7 flex items-center gap-3 border-b border-signal/10 pb-5"><span className="grid h-11 w-11 place-items-center rounded-md border border-emeraldx/30 bg-emeraldx/[0.07]"><CurrentIcon className="h-5 w-5 text-emeraldx" /></span><div><p className="system-label">{copy.onboarding.step} {step + 1}</p><h2 className="mt-1 text-xl font-semibold text-white">{steps[step].title}</h2><p className="text-sm text-chrome">{steps[step].subtitle}</p></div></div>
 
             {step === 0 && <div className="grid gap-5 md:grid-cols-2">
               <Field label={copy.onboarding.firstName} helper={copy.onboarding.identityHelp}><input className={commonInput} autoComplete="given-name" placeholder={language === "es" ? "p. ej. Jordan" : "e.g. Jordan"} value={text("first_name")} onChange={(e) => update("first_name", e.target.value)} /></Field>

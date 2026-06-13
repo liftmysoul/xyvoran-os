@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase-server";
 import { databaseErrorMessage, isMissingSchemaError } from "@/lib/supabase-errors";
 import { getSupabaseProjectRef } from "@/lib/supabase-config";
 import type { MemberConsent, Membership, OnboardingData, Profile } from "@/types/database";
+import { SystemHeader } from "@/components/dashboard/SystemHeader";
 
 export default async function MembershipPage() {
   const { copy, language } = await getServerI18n();
@@ -54,17 +55,13 @@ export default async function MembershipPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-xs uppercase tracking-[0.28em] text-emeraldx">{copy.membership.eyebrow}</p>
-        <h2 className="mt-2 text-3xl font-semibold text-white">{copy.membership.title}</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-chrome">{copy.membership.description}</p>
-      </header>
+      <SystemHeader eyebrow={copy.membership.eyebrow} title={copy.membership.title} description={copy.membership.description} icon={BadgeCheck} />
 
       {schemaError && <Card className="border-amber-300/30 bg-amber-300/10"><p className="text-sm text-amber-100">{copy.membership.architectureError} {copy.membership.connectedProject}: <span className="font-mono text-white">{projectRef}</span>. {databaseErrorMessage(schemaError)}</p></Card>}
       {dataError && <Card className="border-amber-300/30 bg-amber-300/10"><p className="text-sm text-amber-100">{copy.membership.dataError} {databaseErrorMessage(dataError)}</p></Card>}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Card className="min-h-36"><div className="flex items-center justify-between"><p className="text-xs uppercase tracking-[0.18em] text-chrome">{copy.membership.memberId}</p><BadgeCheck className="h-5 w-5 text-emeraldx" /></div><p className="mt-5 font-mono text-2xl font-semibold text-white">{profile?.member_id ?? "XYV------"}</p></Card>
+        <Card className="min-h-36"><div className="flex items-center justify-between"><p className="system-label">{copy.membership.memberId}</p><BadgeCheck className="h-5 w-5 text-emeraldx" /></div><p className="metric-glow mt-5 font-mono text-2xl font-semibold text-white">{profile?.member_id ?? "XYV------"}</p></Card>
         <Card className="min-h-36"><div className="flex items-center justify-between"><p className="text-xs uppercase tracking-[0.18em] text-chrome">{copy.membership.status}</p><ShieldCheck className="h-5 w-5 text-emeraldx" /></div><span className={`mt-5 inline-flex rounded-md border px-3 py-2 text-sm font-semibold ${membershipStatusTone(status)}`}>{statusLabel}</span></Card>
         <Card className="min-h-36"><div className="flex items-center justify-between"><p className="text-xs uppercase tracking-[0.18em] text-chrome">{copy.membership.joinDate}</p><CalendarDays className="h-5 w-5 text-emeraldx" /></div><p className="mt-5 text-lg font-semibold text-white">{formatDate(membership?.join_date ?? profile?.created_at)}</p></Card>
         <Card className="min-h-36"><div className="flex items-center justify-between"><p className="text-xs uppercase tracking-[0.18em] text-chrome">{copy.membership.language}</p><Globe2 className="h-5 w-5 text-emeraldx" /></div><p className="mt-5 text-lg font-semibold text-white">{language === "es" ? copy.language.spanish : copy.language.english}</p></Card>

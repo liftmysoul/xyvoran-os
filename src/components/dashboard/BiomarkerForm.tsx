@@ -58,22 +58,14 @@ export function BiomarkerForm() {
   }
 
   return (
-    <Card>
-      <h2 className="text-xl font-semibold text-white">{copy.biomarkers.input}</h2>
-      <form onSubmit={submit} className="mt-5 grid gap-3 md:grid-cols-3">
+    <Card className="border-signal/15">
+      <p className="system-label flex items-center gap-2"><span className="status-dot" />{copy.nav.biomarkers}</p>
+      <h2 className="mt-3 text-xl font-semibold text-white">{copy.biomarkers.input}</h2>
+      <form onSubmit={submit} className="mt-5 grid gap-4 md:grid-cols-3">
         {fields.map(([key, label]) => (
-          <input
-            key={key}
-            className="field"
-            type="number"
-            step="any"
-            placeholder={labels[label] ?? label}
-            aria-label={labels[label] ?? label}
-            value={values[key] ?? ""}
-            onChange={(event) => setValues((current) => ({ ...current, [key]: event.target.value }))}
-          />
+          <label key={key} className="block text-xs text-chrome"><span className="mb-2 block">{labels[label] ?? label}</span><input className="field" type="number" step="any" placeholder="--" value={values[key] ?? ""} onChange={(event) => setValues((current) => ({ ...current, [key]: event.target.value }))} /></label>
         ))}
-        <textarea className="field md:col-span-3" placeholder={copy.biomarkers.notes} value={values.notes ?? ""} onChange={(event) => setValues((current) => ({ ...current, notes: event.target.value }))} />
+        <label className="block text-xs text-chrome md:col-span-3"><span className="mb-2 block">{copy.biomarkers.notes}</span><textarea className="field" placeholder={copy.biomarkers.notes} value={values.notes ?? ""} onChange={(event) => setValues((current) => ({ ...current, notes: event.target.value }))} /></label>
         {!isSupabaseConfigured() && <p className="md:col-span-3 text-sm text-amber-200">{supabaseConfigMessage()}</p>}
         {error && <p className="md:col-span-3 text-sm text-red-300">{error}</p>}
         <Button className="md:col-span-3" disabled={loading}>{loading ? copy.common.saving : copy.biomarkers.save}</Button>

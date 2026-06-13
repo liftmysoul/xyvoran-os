@@ -7,6 +7,7 @@ import { localizeLabCategory, localizeLabPriorityAction, localizeLabStatus } fro
 import { getServerI18n } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase-server";
 import type { LabReport } from "@/types/database";
+import { SystemHeader } from "@/components/dashboard/SystemHeader";
 
 const statusIcon = { completed: CheckCircle2, processing: Clock3, uploaded: Clock3, failed: AlertTriangle };
 
@@ -22,7 +23,7 @@ export default async function LabsPage() {
 
   return (
     <div className="space-y-6">
-      <div><p className="text-sm uppercase tracking-[0.24em] text-emeraldx">{copy.labs.eyebrow}</p><h2 className="mt-2 text-3xl font-semibold text-white">{copy.labs.title}</h2><p className="mt-2 max-w-3xl text-sm text-chrome">{copy.labs.intro}</p></div>
+      <SystemHeader eyebrow={copy.labs.eyebrow} title={copy.labs.title} description={copy.labs.intro} icon={ScanSearch} />
       {error && <Card className="border-amber-300/30 bg-amber-300/10"><p className="text-sm text-amber-100">{copy.labs.loadError}: {error.message}</p></Card>}
       <section className="grid gap-4 lg:grid-cols-[420px_1fr]">
         <Card><h3 className="mb-4 flex items-center gap-2 font-semibold text-white"><FlaskConical className="h-4 w-4 text-emeraldx" /> {copy.labs.upload}</h3><LabUploadForm /></Card>

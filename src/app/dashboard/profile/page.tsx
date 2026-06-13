@@ -2,6 +2,8 @@ import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase-server";
 import type { OnboardingData, Profile } from "@/types/database";
 import { getServerI18n } from "@/lib/i18n/server";
+import { SystemHeader } from "@/components/dashboard/SystemHeader";
+import { UserRound } from "lucide-react";
 
 export default async function ProfilePage() {
   const { copy, language } = await getServerI18n();
@@ -47,16 +49,18 @@ export default async function ProfilePage() {
     : [];
 
   return (
+    <div className="space-y-6">
+      <SystemHeader eyebrow={copy.nav.layer} title={copy.profile.title} icon={UserRound} />
     <Card>
-      <h2 className="text-xl font-semibold text-white">{copy.profile.title}</h2>
       <div className="mt-5 grid gap-3 md:grid-cols-2">
         {rows.map(([label, value]) => (
-          <div key={String(label)} className="rounded-md border border-white/10 bg-white/5 p-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-emeraldx">{label}</p>
+          <div key={String(label)} className="command-surface rounded-md p-4">
+            <p className="system-label">{label}</p>
             <p className="mt-2 text-white">{value}</p>
           </div>
         ))}
       </div>
     </Card>
+    </div>
   );
 }

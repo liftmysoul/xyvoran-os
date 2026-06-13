@@ -13,6 +13,7 @@ export const es = {
   },
   ageGate: {
     verification: "Verificación de edad", restricted: "Acceso restringido", beta: "Acceso beta privado",
+    secureTitle: "Acceso Seguro a la Beta Privada", secureDescription: "Antes de inicializar tu perfil de inteligencia biológica, confirma que cumples con la edad mínima requerida para la membresía.", encrypted: "Punto de acceso cifrado",
     title: "Confirma tu edad", confirmation: "Confirmo que tengo 21 años de edad o más.",
     adult: "Tengo 21 años o más", underage: "Soy menor de 21 años",
     blocked: "XYVORAN OS está disponible únicamente para personas de 21 años de edad o más.",
@@ -21,17 +22,30 @@ export const es = {
   },
   landing: {
     login: "Iniciar sesión", start: "Iniciar optimización", enter: "Ir al panel",
-    eyebrow: "Tu sistema operativo de optimización humana.",
-    title: "Convierte tu biología en un protocolo de optimización medible.",
-    description: "XYVORAN OS integra hábitos, biomarcadores, puntuaciones por pilar y un Coach de Biohacking con IA en un centro de control premium de bienestar educativo.",
+    eyebrow: "Tu sistema operativo de optimización humana.", platform: "El sistema operativo para la optimización humana", heroAlt: "Gemelo humano digital visualizado mediante señales neuronales y biométricas",
+    title: "La capa de inteligencia entre tu biología y tu potencial.",
+    description: "XYVORAN OS convierte biomarcadores, señales de estilo de vida y datos de rendimiento humano en prioridades precisas, decisiones guiadas por IA y protocolos ejecutables.",
     matrix: "Matriz de pilares en vivo", pillarsTitle: "Cinco pilares de optimización", coach: "Coach de Biohacking con IA",
+    intelligenceLayer: "Arquitectura de inteligencia biológica", pillarsDescription: "Un solo modelo operativo conecta las señales que definen tu rendimiento actual y tu capacidad de evolucionar con resiliencia.",
+    metabolicDescription: "Estabilidad de glucosa, flexibilidad metabólica, ritmo nutricional y señales de composición corporal.",
+    recoveryDescription: "Arquitectura del sueño, HRV, preparación del sistema nervioso y carga acumulada de estrés.",
+    longevityDescription: "Inflamación, suficiencia de nutrientes, capacidad de movimiento y trayectoria de salud a largo plazo.",
+    cognitiveDescription: "Estabilidad del enfoque, energía utilizable, calidad REM, uso de estimulantes y resiliencia mental.",
+    beautyDescription: "Hidratación, profundidad del sueño, recuperación de tejidos, inflamación y ritmos que favorecen la piel.",
+    signalBiomarkers: "Impulsado por biometría", signalAi: "Potenciado por IA", signalProtocols: "Listo para protocolos", signalPrivate: "Privado por diseño",
+    operatingSequence: "Secuencia operativa", howTitle: "De la señal humana a la acción biológica.", howDescription: "XYVORAN crea un ciclo cerrado de inteligencia alrededor de tus objetivos, conducta, biomarcadores y respuesta.",
+    stepProfile: "Mapea tu línea base", stepProfileDescription: "Define objetivos, capacidad de recuperación, patrones metabólicos y el contexto de tu estado actual.",
+    stepSignals: "Conecta tus señales", stepSignalsDescription: "Agrega biomarcadores, laboratorios, sueño, HRV y hábitos para construir un gemelo digital más completo.",
+    stepAction: "Ejecuta la prioridad", stepActionDescription: "Convierte tu pilar más débil y tu oportunidad de mayor impacto en un protocolo estructurado y medible.",
+    coachSystem: "Inteligencia contextual de optimización",
     coachDescription: "Consulta sobre sueño, HRV, ayuno, recuperación, resiliencia al estrés, rendimiento cognitivo y longevidad. El coach utiliza tus datos dentro de límites claros de orientación educativa de bienestar.",
-    membership: "Próximamente en la membresía", membershipTitle: "Laboratorios privados, protocolos avanzados y revisiones expertas.",
+    membership: "Membresía privada de optimización", membershipTitle: "Construye el sistema de inteligencia personal que tu biología merece.",
     question: "¿En qué debería enfocarme esta semana para tener más energía?",
     answer: "Según tu puntuación de sueño y carga de estrés, comienza con una hora fija para despertar, luz matutina, un desayuno rico en proteína y dos bloques de movimiento de baja intensidad."
   },
   auth: {
     email: "Correo electrónico", password: "Contraseña", loginTitle: "Ingresa a XYVORAN OS", login: "Iniciar sesión", authenticating: "Verificando...",
+    secureAccess: "Acceso seguro para miembros", privateEnrollment: "Registro privado de membresía", loginDescription: "Autentícate para acceder a tu entorno privado de inteligencia biológica, prioridades de optimización e historial de protocolos.", signupDescription: "Inicializa tu identidad privada de miembro y comienza a construir un modelo operativo longitudinal de tu biología.", encryptedSession: "Sesión de miembro cifrada", signalIdentity: "Identidad de miembro verificada", signalBiometrics: "Inteligencia biométrica privada", signalIntelligence: "Optimización contextual con IA",
     newHere: "¿Primera vez aquí?", createProfile: "Crea tu perfil", signupTitle: "Crea tu perfil de optimización",
     creating: "Creando...", already: "¿Ya tienes acceso?", loginFailed: "No se pudo iniciar sesión", signupFailed: "No se pudo crear la cuenta",
     confirmEmail: "Tu cuenta fue creada. Revisa tu correo para confirmarla y luego vuelve al proceso de incorporación."
@@ -67,6 +81,11 @@ export const es = {
     consentMissing: "Los consentimientos de membresía están incompletos", architectureError: "Faltan objetos del esquema de la Fase 8 en el proyecto de Supabase conectado.", dataError: "No se pudieron cargar los datos de membresía.", connectedProject: "Proyecto conectado"
   },
   dashboard: {
+    missionEyebrow: "Centro de control biológico", missionTitle: "Centro de Control para tu Biología", missionDescription: "Tu vista operativa de preparación, resiliencia, señales biométricas y oportunidades de mayor impacto dentro de tu sistema de optimización.",
+    healthScore: "Puntuación de Optimización Humana", biologicalAge: "Edad Biológica", years: "años", experimentalEstimate: "Estimación orientativa de bienestar basada en tus datos actuales; no es una medición clínica.",
+    longevityProjection: "Proyección de Longevidad", recoveryStatus: "Estado de Recuperación", trajectoryStrong: "Trayectoria ascendente", trajectoryStable: "Trayectoria estable", trajectoryBuilding: "Construyendo fundamentos",
+    systemReady: "Sistema de optimización activo", dataCoverage: "Cobertura de señales", signalConnected: "Biomarcadores conectados", signalPartial: "Solo datos de línea base", optimizationOpportunities: "Oportunidades de optimización",
+    biomarkerTrends: "Flujo de señales biométricas", intelligenceFeed: "Flujo de inteligencia de IA", pillarArray: "Matriz de pilares de optimización",
     overall: "Puntuación general de optimización", weakest: "Pilar prioritario", priorities: "3 acciones prioritarias",
     latestBiomarkers: "Resumen reciente de biomarcadores", latestProtocol: "Protocolo más reciente", coachPrompts: "Consulta a tu Coach de IA",
     why: "¿Por qué esta puntuación?", positive: "Factores favorables", limiting: "Factores limitantes", risks: "Señales de atención",
@@ -91,7 +110,7 @@ export const es = {
     notConfigured: "El Coach de IA aún no está configurado. Agrega OPENAI_API_KEY para habilitar respuestas reales.", generatedEmpty: "No pude generar una respuesta. Inténtalo de nuevo con una pregunta más específica.", apiFailure: "El Coach de IA no pudo completar la solicitud. Revisa la facturación, la cuota y la configuración de la clave de OpenAI."
   },
   protocols: {
-    title: "Motor de protocolos", description: "Protocolos estructurados de 7 días generados con tu objetivo, biomarcadores, hábitos y pilar prioritario.",
+    missionEyebrow: "Ejecución de mejora biológica", missionPlan: "Plan de misión de optimización", title: "Motor de protocolos", description: "Planes de misión estructurados de 7 días generados con tu objetivo, biomarcadores, hábitos y pilar prioritario.",
     generate: "Generar protocolo", unable: "No se pudo generar el protocolo.", generated: "generado.", loadError: "No se pudieron cargar los protocolos",
     primaryGoal: "Objetivo principal", target: "Pilar prioritario", intensity: "Nivel de intensidad", reassess: "Cuándo reevaluar",
     plan: "Plan de 7 días", day: "Día", sleep: "Acción de sueño", nutrition: "Acción de nutrición", movement: "Acción de movimiento",

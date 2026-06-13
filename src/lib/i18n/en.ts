@@ -11,6 +11,7 @@ export const en = {
   },
   ageGate: {
     verification: "Age Verification", restricted: "Access Restricted", beta: "Private Beta Access",
+    secureTitle: "Secure Private Beta Access", secureDescription: "Before your biological intelligence profile can be initialized, confirm that you meet the minimum membership age requirement.", encrypted: "Encrypted access checkpoint",
     title: "Confirm your age", confirmation: "I confirm that I am 21 years of age or older.",
     adult: "I am 21 or older", underage: "I am under 21",
     blocked: "XYVORAN OS is only available to users 21 years of age or older.",
@@ -19,17 +20,30 @@ export const en = {
   },
   landing: {
     login: "Login", start: "Start Optimization", enter: "Enter Dashboard",
-    eyebrow: "Your Human Optimization Operating System.",
-    title: "Turn your biology into a measurable optimization protocol.",
-    description: "XYVORAN OS unifies lifestyle data, biomarkers, pillar scores, and an AI Biohacking Coach into one premium command center for non-medical wellness guidance.",
+    eyebrow: "Your Human Optimization Operating System.", platform: "The operating system for human optimization", heroAlt: "Digital human twin visualized through neural and biometric intelligence signals",
+    title: "The intelligence layer between your biology and your potential.",
+    description: "XYVORAN OS converts biomarkers, lifestyle signals, and human performance data into precise optimization priorities, AI-guided decisions, and executable protocols.",
     matrix: "Live Pillar Matrix", pillarsTitle: "Five Optimization Pillars", coach: "AI Biohacking Coach",
+    intelligenceLayer: "Biological intelligence architecture", pillarsDescription: "One operating model connects the signals that define how you perform today and how resiliently you evolve over time.",
+    metabolicDescription: "Glucose stability, metabolic flexibility, nutrition rhythm, and body composition signals.",
+    recoveryDescription: "Sleep architecture, HRV, nervous system readiness, and accumulated stress load.",
+    longevityDescription: "Inflammation, nutrient sufficiency, movement capacity, and healthspan trajectory.",
+    cognitiveDescription: "Focus stability, usable energy, REM quality, stimulant timing, and mental resilience.",
+    beautyDescription: "Hydration, sleep depth, tissue recovery, inflammation, and skin-supportive rhythms.",
+    signalBiomarkers: "Biometric-driven", signalAi: "AI-powered", signalProtocols: "Protocol-ready", signalPrivate: "Private by design",
+    operatingSequence: "Operating sequence", howTitle: "From human signal to biological action.", howDescription: "XYVORAN creates a closed intelligence loop around your goals, behavior, biomarkers, and response.",
+    stepProfile: "Map your baseline", stepProfileDescription: "Establish goals, recovery capacity, metabolic patterns, and the context behind your current state.",
+    stepSignals: "Connect your signals", stepSignalsDescription: "Add biomarkers, bloodwork, sleep, HRV, and lifestyle inputs to build a richer digital twin.",
+    stepAction: "Execute the priority", stepActionDescription: "Turn your weakest pillar and highest-leverage opportunity into a structured protocol you can track.",
+    coachSystem: "Contextual optimization intelligence",
     coachDescription: "Ask questions about sleep, HRV, fasting, recovery, stress resilience, cognitive performance, and longevity. The coach uses your data while staying inside clear educational wellness boundaries.",
-    membership: "Membership Teaser", membershipTitle: "Private labs, advanced protocols, expert reviews.",
+    membership: "Private optimization membership", membershipTitle: "Build the personal intelligence system your biology deserves.",
     question: "What should I focus on this week for more energy?",
     answer: "Based on your sleep score and stress load, start with a fixed wake time, morning light, a protein-forward breakfast, and two low-intensity movement blocks."
   },
   auth: {
     email: "Email", password: "Password", loginTitle: "Enter XYVORAN OS", login: "Login", authenticating: "Authenticating...",
+    secureAccess: "Secure member access", privateEnrollment: "Private member enrollment", loginDescription: "Authenticate to access your private biological intelligence environment, optimization priorities, and protocol history.", signupDescription: "Initialize your private member identity and begin building a longitudinal operating model of your biology.", encryptedSession: "Encrypted member session", signalIdentity: "Verified member identity", signalBiometrics: "Private biometric intelligence", signalIntelligence: "Contextual AI optimization",
     newHere: "New here?", createProfile: "Create your profile", signupTitle: "Create your optimization profile",
     creating: "Creating...", already: "Already have access?", loginFailed: "Login failed", signupFailed: "Signup failed",
     confirmEmail: "Signup succeeded. Check your email to confirm your account, then return to onboarding."
@@ -65,6 +79,11 @@ export const en = {
     consentMissing: "Membership consents are incomplete", architectureError: "Phase 8 schema objects are missing from the connected Supabase project.", dataError: "Membership data could not be loaded.", connectedProject: "Connected project"
   },
   dashboard: {
+    missionEyebrow: "Biological mission control", missionTitle: "Mission Control for Your Biology", missionDescription: "Your live operating view of readiness, resilience, biomarker signals, and the highest-leverage opportunities in your optimization system.",
+    healthScore: "Human Optimization Score", biologicalAge: "Biological Age", years: "years", experimentalEstimate: "Directional wellness estimate based on current optimization inputs; not a clinical measurement.",
+    longevityProjection: "Longevity Projection", recoveryStatus: "Recovery Status", trajectoryStrong: "Advancing trajectory", trajectoryStable: "Stable trajectory", trajectoryBuilding: "Foundation building",
+    systemReady: "Optimization system active", dataCoverage: "Signal coverage", signalConnected: "Biomarkers connected", signalPartial: "Baseline data only", optimizationOpportunities: "Optimization opportunities",
+    biomarkerTrends: "Biometric signal stream", intelligenceFeed: "AI intelligence feed", pillarArray: "Optimization pillar array",
     overall: "Overall Optimization Score", weakest: "Weakest Pillar", priorities: "Top 3 Priority Actions",
     latestBiomarkers: "Latest Biomarker Summary", latestProtocol: "Latest Protocol", coachPrompts: "Ask Your AI Coach",
     why: "Why this score?", positive: "Positive drivers", limiting: "Limiting factors", risks: "Risk flags",
@@ -89,7 +108,7 @@ export const en = {
     notConfigured: "AI Coach is not configured yet. Add OPENAI_API_KEY to enable real responses.", generatedEmpty: "I could not generate a response. Try again with a more specific question.", apiFailure: "AI Coach could not complete the OpenAI request. Check your OpenAI billing, quota, and API key settings."
   },
   protocols: {
-    title: "Protocol Engine", description: "Structured 7-day protocols generated from your goal, biomarkers, lifestyle inputs, and weakest pillar.",
+    missionEyebrow: "Biological upgrade execution", missionPlan: "Optimization mission plan", title: "Protocol Engine", description: "Structured 7-day mission plans generated from your goal, biomarkers, lifestyle inputs, and weakest pillar.",
     generate: "Generate Protocol", unable: "Unable to generate protocol.", generated: "generated.", loadError: "Generated protocols could not be loaded",
     primaryGoal: "Primary Goal", target: "Priority Pillar", intensity: "Intensity Level", reassess: "When to Reassess",
     plan: "7-Day Action Plan", day: "Day", sleep: "Sleep Action", nutrition: "Nutrition Action", movement: "Movement Action",

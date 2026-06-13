@@ -23,7 +23,7 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
         value={language}
         disabled={saving}
         onChange={(event) => change(event.target.value as Language)}
-        className="rounded-md border border-white/15 bg-obsidian px-2 py-2 text-sm text-white outline-none focus:border-emeraldx"
+        className="min-h-10 rounded-md border border-signal/15 bg-graphite px-2 py-2 text-sm text-white outline-none transition focus:border-emeraldx"
       >
         <option value="en">{copy.language.english}</option>
         <option value="es">{copy.language.spanish}</option>
@@ -31,4 +31,3 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
     </label>
   );
 }
-

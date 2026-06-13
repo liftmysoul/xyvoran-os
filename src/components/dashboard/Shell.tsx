@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, BadgeCheck, Brain, ChevronRight, Dna, FlaskConical, LayoutDashboard, LogOut, Microscope, Settings, UserRound, WandSparkles } from "lucide-react";
+import { Activity, BadgeCheck, Brain, ChevronRight, FlaskConical, LayoutDashboard, LogOut, Microscope, Settings, UserRound, WandSparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { cn } from "@/lib/format";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { useI18n } from "@/components/i18n/LanguageProvider";
+import { BrandMark } from "@/components/brand/BrandMark";
 
 export function DashboardShell({ children, email }: { children: React.ReactNode; email?: string | null }) {
   const pathname = usePathname();
@@ -32,17 +33,10 @@ export function DashboardShell({ children, email }: { children: React.ReactNode;
 
   return (
     <div className="min-h-screen bg-obsidian text-chrome">
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-72 border-r border-white/10 bg-black/50 p-5 backdrop-blur xl:block">
-        <Link href="/" className="flex items-center gap-3 text-white">
-          <span className="grid h-10 w-10 place-items-center rounded-md border border-emeraldx/40 bg-emeraldx/10">
-            <Dna className="h-5 w-5 text-emeraldx" />
-          </span>
-          <span>
-            <span className="block text-lg font-bold tracking-wide">XYVORAN OS</span>
-            <span className="text-xs uppercase text-emeraldx/80">{copy.nav.layer}</span>
-          </span>
-        </Link>
-        <nav className="mt-10 space-y-2">
+      <aside className="fixed inset-y-0 left-0 z-20 hidden w-72 border-r border-signal/10 bg-graphite/90 p-5 backdrop-blur-xl xl:block">
+        <Link href="/" className="text-white"><BrandMark /></Link>
+        <div className="mt-8 flex items-center justify-between border-y border-signal/10 py-3 text-[10px] uppercase text-muted"><span>{copy.nav.layer}</span><span className="flex items-center gap-2 text-successx"><span className="status-dot" />ONLINE</span></div>
+        <nav className="mt-6 space-y-1">
           {nav.map((item) => {
             const active = pathname === item.href;
             const Icon = item.icon;
@@ -51,36 +45,36 @@ export function DashboardShell({ children, email }: { children: React.ReactNode;
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center justify-between rounded-md px-3 py-3 text-sm transition",
-                  active ? "bg-emeraldx text-obsidian" : "text-chrome hover:bg-white/7 hover:text-white"
+                  "relative flex items-center justify-between overflow-hidden rounded-md border px-3 py-3 text-sm transition",
+                  active ? "border-emeraldx/30 bg-emeraldx/[0.08] text-white" : "border-transparent text-chrome hover:border-signal/10 hover:bg-white/[0.035] hover:text-white"
                 )}
               >
                 <span className="flex items-center gap-3">
-                  <Icon className="h-4 w-4" />
+                  <Icon className={cn("h-4 w-4", active && "text-emeraldx")} />
                   {item.label}
                 </span>
-                {active && <ChevronRight className="h-4 w-4" />}
+                {active && <><span className="absolute inset-y-2 left-0 w-px bg-emeraldx" /><ChevronRight className="h-4 w-4 text-emeraldx" /></>}
               </Link>
             );
           })}
         </nav>
       </aside>
       <main className="xl:pl-72">
-        <header className="sticky top-0 z-10 border-b border-white/10 bg-obsidian/86 px-4 py-4 backdrop-blur md:px-8">
+        <header className="sticky top-0 z-10 border-b border-signal/10 bg-obsidian/90 px-4 py-4 backdrop-blur-xl md:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-emeraldx/80">{copy.nav.system}</p>
-              <h1 className="text-xl font-semibold text-white md:text-2xl">{copy.nav.center}</h1>
+              <p className="system-label flex items-center gap-2"><span className="status-dot" />{copy.nav.system}</p>
+              <h1 className="mt-1 text-xl font-semibold text-white md:text-2xl">{copy.nav.center}</h1>
             </div>
             <div className="flex items-center gap-3">
-              <div className="hidden items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white md:flex">
+              <div className="hidden items-center gap-2 rounded-md border border-signal/10 bg-panel/70 px-3 py-2 text-sm text-white md:flex">
                 <Activity className="h-4 w-4 text-emeraldx" />
                 {email ?? copy.nav.athlete}
               </div>
               <LanguageSwitcher compact />
               <button
                 onClick={logout}
-                className="grid h-10 w-10 place-items-center rounded-md border border-white/10 bg-white/5 text-chrome hover:text-white"
+                className="grid h-10 w-10 place-items-center rounded-md border border-signal/10 bg-panel/70 text-chrome transition hover:border-dangerx/30 hover:text-dangerx"
                 aria-label={copy.nav.logout}
                 title={copy.nav.logout}
               >
@@ -95,7 +89,7 @@ export function DashboardShell({ children, email }: { children: React.ReactNode;
                 href={item.href}
                 className={cn(
                   "shrink-0 rounded-md px-3 py-2 text-sm",
-                  pathname === item.href ? "bg-emeraldx text-obsidian" : "bg-white/5 text-chrome"
+                  pathname === item.href ? "border border-emeraldx/30 bg-emeraldx/10 text-white" : "border border-signal/10 bg-panel/60 text-chrome"
                 )}
               >
                 {item.label}
@@ -103,7 +97,7 @@ export function DashboardShell({ children, email }: { children: React.ReactNode;
             ))}
           </nav>
         </header>
-        <div className="p-4 md:p-8">{children}</div>
+        <div className="mx-auto max-w-[1600px] p-4 md:p-8">{children}</div>
       </main>
     </div>
   );

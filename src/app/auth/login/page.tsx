@@ -4,11 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase-browser";
 import { isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
-import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { useI18n } from "@/components/i18n/LanguageProvider";
+import { SecureAccessFrame } from "@/components/brand/SecureAccessFrame";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,18 +36,15 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center px-4">
-      <Card className="w-full max-w-md">
-        <div className="flex items-start justify-between gap-4"><h1 className="text-2xl font-semibold text-white">{copy.auth.loginTitle}</h1><LanguageSwitcher compact /></div>
-        <form onSubmit={submit} className="mt-6 space-y-4">
-          <input className="field" type="email" placeholder={copy.auth.email} aria-label={copy.auth.email} value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <input className="field" type="password" placeholder={copy.auth.password} aria-label={copy.auth.password} value={password} onChange={(e) => setPassword(e.target.value)} required />
+    <SecureAccessFrame eyebrow={copy.auth.secureAccess} title={copy.auth.loginTitle} description={copy.auth.loginDescription} statusLabel={copy.auth.encryptedSession} signalLabels={[copy.auth.signalIdentity, copy.auth.signalBiometrics, copy.auth.signalIntelligence]}>
+        <form onSubmit={submit} className="space-y-4">
+          <label className="block text-sm text-chrome"><span className="mb-2 block">{copy.auth.email}</span><input className="field" type="email" placeholder={copy.auth.email} value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
+          <label className="block text-sm text-chrome"><span className="mb-2 block">{copy.auth.password}</span><input className="field" type="password" placeholder={copy.auth.password} value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
           {!isSupabaseConfigured() && <p className="text-sm text-amber-200">{supabaseConfigMessage()}</p>}
           {error && <p className="text-sm text-red-300">{error}</p>}
           <Button className="w-full" disabled={loading}>{loading ? copy.auth.authenticating : copy.auth.login}</Button>
         </form>
-        <p className="mt-5 text-sm text-chrome">{copy.auth.newHere} <Link className="text-emeraldx" href="/auth/signup">{copy.auth.createProfile}</Link></p>
-      </Card>
-    </main>
+        <p className="mt-5 text-sm text-chrome">{copy.auth.newHere} <Link className="font-semibold text-emeraldx" href="/auth/signup">{copy.auth.createProfile}</Link></p>
+    </SecureAccessFrame>
   );
 }

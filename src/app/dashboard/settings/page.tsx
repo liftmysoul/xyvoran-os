@@ -2,15 +2,14 @@ import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { getServerI18n } from "@/lib/i18n/server";
+import { SystemHeader } from "@/components/dashboard/SystemHeader";
+import { Settings } from "lucide-react";
 
 export default async function SettingsPage() {
   const { copy } = await getServerI18n();
   return (
     <div className="space-y-6">
-      <Card>
-        <h2 className="text-xl font-semibold text-white">{copy.settings.title}</h2>
-        <p className="mt-3 text-chrome">{copy.settings.description}</p>
-      </Card>
+      <SystemHeader eyebrow={copy.nav.system} title={copy.settings.title} description={copy.settings.description} icon={Settings} />
       <Card>
         <h3 className="font-semibold text-white">{copy.settings.language}</h3>
         <p className="mb-4 mt-2 text-sm text-chrome">{copy.settings.languageHelp}</p>
