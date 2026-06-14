@@ -82,19 +82,26 @@ export function DashboardShell({ children, email }: { children: React.ReactNode;
               </button>
             </div>
           </div>
-          <nav className="mt-4 flex gap-2 overflow-x-auto xl:hidden">
-            {nav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "shrink-0 rounded-md px-3 py-2 text-sm",
-                  pathname === item.href ? "border border-emeraldx/30 bg-emeraldx/10 text-white" : "border border-signal/10 bg-panel/60 text-chrome"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+          <nav className="mobile-command-dock -mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1 xl:hidden">
+            {nav.map((item) => {
+              const active = pathname === item.href;
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-label={item.label}
+                  className={cn(
+                    "mobile-command-item relative flex h-[62px] w-[78px] shrink-0 flex-col items-center justify-center gap-1.5 overflow-hidden rounded-md border px-1.5 text-center text-[9px] font-semibold leading-3 transition",
+                    active ? "border-emeraldx/35 bg-emeraldx/[0.09] text-white shadow-[inset_0_0_22px_rgba(0,245,212,0.06)]" : "border-signal/10 bg-panel/60 text-chrome"
+                  )}
+                >
+                  {active && <span className="absolute inset-x-3 top-0 h-px bg-emeraldx shadow-[0_0_10px_rgba(0,245,212,0.8)]" />}
+                  <Icon className={cn("h-4 w-4 shrink-0", active ? "text-emeraldx" : "text-signal")} />
+                  <span className="line-clamp-2">{item.label}</span>
+                </Link>
+              );
+            })}
           </nav>
         </header>
         <div className="mx-auto max-w-[1600px] p-4 md:p-8">{children}</div>

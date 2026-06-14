@@ -51,7 +51,7 @@ export const es = {
     confirmEmail: "Tu cuenta fue creada. Revisa tu correo para confirmarla y luego vuelve al proceso de incorporación."
   },
   nav: {
-    dashboard: "Panel", biomarkers: "Biomarcadores", labs: "Laboratorios", coach: "Coach de IA", protocols: "Protocolos",
+    dashboard: "Centro de Control", biomarkers: "Señales Biométricas", labs: "Inteligencia de Laboratorio", coach: "Núcleo de Inteligencia", protocols: "Motor de Protocolos",
     membership: "Membresía", profile: "Perfil", settings: "Configuración", layer: "Capa de optimización", system: "SO de optimización humana",
     center: "Centro de control", athlete: "Perfil del usuario", logout: "Cerrar sesión"
   },
@@ -94,19 +94,25 @@ export const es = {
     improvePrompt: "Ayúdame a mejorar mi puntuación de {pillar} esta semana.", planPrompt: "Crea un plan de 24 horas para {goal} usando mis biomarcadores recientes.", explainPrompt: "Explica qué limita mi pilar de {pillar} y qué debo hacer primero.",
     planPrefix: "Tu plan actual está orientado a", weakestPrefix: "El pilar prioritario es", currentlyAt: "actualmente en", priority: "Prioridad", nextMoves: "Siguientes acciones",
     logBiomarkers: "Registrar biomarcadores", analyzeBloodwork: "Analizar laboratorio", askCoach: "Consultar al Coach de IA", generateProtocol: "Generar protocolo", openMembership: "Abrir centro de membresía",
-    viewProtocol: "Ver protocolo", firstProtocol: "Genera tu primer protocolo", openLabs: "Abrir laboratorios", noPriorityMarkers: "Sin biomarcadores prioritarios", labConnection: "Carga análisis de sangre para conectar las señales de laboratorio con las puntuaciones por pilar y el contexto del Coach de IA.", pillarSaveError: "No se pudieron guardar las puntuaciones por pilar en Supabase"
+    viewProtocol: "Ver protocolo", firstProtocol: "Genera tu primer protocolo", openLabs: "Abrir Inteligencia de Laboratorio", noPriorityMarkers: "Sin biomarcadores prioritarios", labConnection: "El flujo de inteligencia de laboratorio aún no está conectado. Carga análisis de sangre para activar un análisis más profundo.", pillarSaveError: "No se pudieron guardar las puntuaciones por pilar en Supabase",
+    twinEyebrow: "Gemelo de Salud con IA / Modelo biológico en vivo", twinTitle: "Tu Biología Digital, Sincronizada", twinDescription: "Una capa unificada de inteligencia que integra tu línea base, señales biométricas, contexto de laboratorio, recuperación y misión activa de optimización.",
+    biometricSync: "Sincronización Biométrica", intelligenceCore: "Núcleo de Inteligencia XYVORAN", labIntelligence: "Inteligencia de Laboratorio", activeProtocolStatus: "Protocolo Activo",
+    primaryConstraint: "Principal límite de optimización", nextBiologicalUpgrade: "Siguiente mejora biológica", biometricMatrix: "Matriz biométrica", pillarRadar: "Topología de señales de cinco pilares", priorityQueue: "Cola prioritaria de ejecución",
+    online: "En línea", syncing: "Sincronizando", optimizing: "Optimizando", stable: "Estable", needsAttention: "Requiere atención", dataMissing: "Datos pendientes"
   },
   biomarkers: {
-    input: "Registro manual de biomarcadores", history: "Historial de biomarcadores", notes: "Notas", save: "Guardar biomarcadores",
-    noEntries: "Aún no hay biomarcadores registrados.", historyError: "No se pudo cargar el historial de biomarcadores",
+    input: "Registro manual de señales biométricas", history: "Historial de señales biométricas", notes: "Notas", save: "Sincronizar señales",
+    noEntries: "Flujo de señales biométricas pendiente. Registra biomarcadores o carga análisis de sangre para activar inteligencia avanzada.", historyError: "No se pudo cargar el historial de señales biométricas",
     sessionError: "No se pudo verificar tu sesión", loginAgain: "Vuelve a iniciar sesión antes de guardar biomarcadores.", saveError: "No se pudo guardar el registro de biomarcadores"
   },
   coach: {
-    title: "Coach de Biohacking con IA", description: "Guía educativa de bienestar personalizada con tu perfil, biomarcadores, laboratorios y puntuaciones por pilar.",
+    title: "Núcleo de Inteligencia XYVORAN", description: "Consola educativa de optimización basada en tu perfil, señales biométricas, laboratorios, protocolos y estado de pilares.",
     test: "Probar contexto del Coach", testPrompt: "Prueba el contexto de mi coach. Menciona mi objetivo principal, sueño, estrés, energía, biomarcadores recientes, puntuaciones por pilar, laboratorios recientes y una idea de una conversación previa si está disponible.",
     empty: "Consulta sobre sueño, ayuno, HRV, resiliencia al estrés, rendimiento cognitivo o un plan de 7 días.",
     analyzing: "El Coach está analizando tu contexto de optimización...", placeholder: "Consulta a tu coach...", send: "Enviar",
-    unavailable: "El Coach no está disponible.", historyError: "No se pudo cargar el historial del chat",
+    unavailable: "El Núcleo de Inteligencia no está disponible.", historyError: "No se pudo cargar el historial de inteligencia",
+    coreStatus: "Estado del núcleo de IA", contextSources: "Fuentes de contexto", profileContext: "Contexto de perfil", biomarkerContext: "Contexto biométrico", labContext: "Contexto de laboratorio", protocolContext: "Contexto de protocolos", missionPrompts: "Prompts de misión sugeridos", connected: "Conectado", waitingForData: "Esperando datos",
+    sleepMission: "Identifica la mejora de sueño con mayor impacto para esta noche.", recoveryMission: "Construye una decisión de recuperación para hoy usando mis señales actuales.", metabolicMission: "Explica mi principal límite metabólico y la siguiente acción segura.",
     notConfigured: "El Coach de IA aún no está configurado. Agrega OPENAI_API_KEY para habilitar respuestas reales.", generatedEmpty: "No pude generar una respuesta. Inténtalo de nuevo con una pregunta más específica.", apiFailure: "El Coach de IA no pudo completar la solicitud. Revisa la facturación, la cuota y la configuración de la clave de OpenAI."
   },
   protocols: {
@@ -116,18 +122,21 @@ export const es = {
     plan: "Plan de 7 días", day: "Día", sleep: "Acción de sueño", nutrition: "Acción de nutrición", movement: "Acción de movimiento",
     recovery: "Acción de recuperación", tracking: "Acción de seguimiento", metrics: "Métricas a monitorear", safety: "Aviso de seguridad",
     goal: "Objetivo", weakest: "Pilar prioritario", markCompleted: "Marcar como completado", legacy: "Este protocolo utiliza el formato anterior del MVP. Genera uno nuevo para ver los detalles estructurados.",
-    empty: "Aún no hay protocolos generados.", updateError: "No se pudo actualizar el estado del protocolo.", completeOnboarding: "Completa la incorporación antes de generar un protocolo.", legacyWarning: "El protocolo se guardó en el formato anterior porque faltan columnas de protocolos de la Fase 4 en la base de datos conectada."
+    empty: "No hay una misión biológica activa. Genera un protocolo para iniciar un ciclo estructurado de optimización de siete días.", updateError: "No se pudo actualizar el estado del protocolo.", completeOnboarding: "Completa la incorporación antes de generar un protocolo.", legacyWarning: "El protocolo se guardó en el formato anterior porque faltan columnas de protocolos de la Fase 4 en la base de datos conectada.",
+    estimatedImpact: "Impacto estimado", executionTimeline: "Cronograma de ejecución de 7 días", rationale: "Razonamiento generado por IA", missionActive: "Misión activa", highImpact: "Alto potencial", moderateImpact: "Impacto focalizado"
   },
   labs: {
-    eyebrow: "Inteligencia de laboratorio", title: "Análisis de laboratorio",
+    eyebrow: "Inteligencia de Laboratorio / Extracción de señales", title: "Inteligencia de Laboratorio",
     intro: "Carga un reporte para extraer biomarcadores compatibles y convertirlos en señales educativas de optimización. Los resultados no diagnostican enfermedades ni sustituyen la atención médica.",
     upload: "Cargar análisis de sangre", latest: "Resumen del laboratorio más reciente", markers: "Biomarcadores principales", opportunities: "Mayores oportunidades",
     weakest: "Categoría prioritaria", priority: "Acciones prioritarias", noAnalysis: "Aún no hay un análisis completado.", extracted: "Biomarcadores extraídos",
     biomarker: "Biomarcador", category: "Categoría", current: "Valor actual", range: "Rango de referencia", status: "Estado",
-    history: "Historial de cargas", noUploads: "Aún no has cargado análisis de sangre.", storageError: "El almacenamiento de laboratorios no está listo", loadError: "No se pudieron cargar los reportes de laboratorio",
+    history: "Historial de procesamiento de señales", noUploads: "El flujo de inteligencia de laboratorio aún no está conectado. Carga análisis de sangre para activar la extracción de biomarcadores y el análisis de impacto en pilares.", storageError: "El almacenamiento de laboratorios no está listo", loadError: "No se pudieron cargar los reportes de laboratorio",
     optimal: "Óptimo", attention: "Requiere atención", priorityArea: "Área prioritaria", completed: "completado", processing: "procesando", uploaded: "cargado", failed: "fallido",
     safety: "Interpretación educativa de bienestar únicamente. Consulta a un profesional médico autorizado sobre resultados anormales, síntomas, inquietudes hormonales, enfermedades crónicas o decisiones de medicación.",
-    signInUpload: "Inicia sesión antes de cargar análisis de sangre.", chooseFile: "Selecciona un reporte de laboratorio en PDF, JPG, JPEG o PNG.", unsupportedFile: "Formato no compatible. Carga un archivo PDF, JPG, JPEG o PNG.", maxFileSize: "Los reportes de laboratorio deben pesar 4 MB o menos.", storeError: "No se pudo almacenar el reporte de laboratorio", missingBucket: "Falta el bucket privado lab-reports en el proyecto de Supabase conectado.", recordError: "No se pudo crear el registro del reporte de laboratorio", analysisSaveError: "El análisis terminó, pero no se pudo guardar", extractionFailed: "No se pudo extraer la información del laboratorio."
+    signInUpload: "Inicia sesión antes de cargar análisis de sangre.", chooseFile: "Selecciona un reporte de laboratorio en PDF, JPG, JPEG o PNG.", unsupportedFile: "Formato no compatible. Carga un archivo PDF, JPG, JPEG o PNG.", maxFileSize: "Los reportes de laboratorio deben pesar 4 MB o menos.", storeError: "No se pudo almacenar el reporte de laboratorio", missingBucket: "Falta el bucket privado lab-reports en el proyecto de Supabase conectado.", recordError: "No se pudo crear el registro del reporte de laboratorio", analysisSaveError: "El análisis terminó, pero no se pudo guardar", extractionFailed: "No se pudo extraer la información del laboratorio.",
+    processingPipeline: "Flujo de inteligencia", ingest: "Ingreso seguro", extract: "Extracción de biomarcadores", interpret: "Interpretación por pilares", missingSignals: "Señales prioritarias pendientes", pillarImpact: "Impacto en pilares", noMissingSignals: "Cobertura de señales esenciales detectada", signalValue: "Valor de señal",
+    choosePrompt: "Selecciona un PDF o una imagen del reporte", formatHelp: "PDF, JPG, JPEG o PNG. Máximo 4 MB.", extracting: "Extrayendo señales biométricas...", uploadAnalyze: "Cargar y analizar", chooseFirst: "Selecciona primero un reporte de laboratorio.", uploadFailed: "No se pudo cargar el reporte.", uploadSuccess: "Reporte analizado y sincronizado."
   },
   profile: { title: "Perfil", noneSelected: "Ninguno seleccionado", noneListed: "Ninguno registrado", hours: "horas" },
   settings: {

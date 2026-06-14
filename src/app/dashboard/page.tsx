@@ -1,9 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import { redirect } from "next/navigation";
-import { ArrowRight, BadgeCheck, BrainCircuit, ChartNoAxesCombined, FlaskConical, MessageSquare, Microscope, ShieldCheck, Sparkles, Target, WandSparkles } from "lucide-react";
+import { ArrowRight, BadgeCheck, BrainCircuit, FlaskConical, MessageSquare, Microscope, ShieldCheck, Target, WandSparkles } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { MetricRing } from "@/components/dashboard/MetricRing";
+import { AIHealthTwin } from "@/components/dashboard/AIHealthTwin";
+import { PillarRadar } from "@/components/dashboard/PillarRadar";
 import { PillarGrid } from "@/components/dashboard/PillarGrid";
 import { SystemHeader } from "@/components/dashboard/SystemHeader";
 import { findWeakestPillar } from "@/lib/protocol";
@@ -89,41 +89,54 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <SystemHeader eyebrow={copy.dashboard.missionEyebrow} title={copy.dashboard.missionTitle} description={copy.dashboard.missionDescription} icon={BrainCircuit} />
 
-      <section className="grid gap-4 xl:grid-cols-[1.35fr_0.65fr]">
-        <Card className="scanline relative border-emeraldx/20 p-6 md:p-7">
-          <div className="absolute inset-y-0 right-0 hidden w-[44%] lg:block"><Image src="/images/xyvoran-digital-twin-hero.png" alt="" fill sizes="35vw" className="object-cover object-[72%_center] opacity-42" /><div className="absolute inset-0 bg-[linear-gradient(90deg,#10182B_0%,rgba(16,24,43,0.5)_55%,rgba(16,24,43,0.12))]" /></div>
-          <div className="relative z-10 flex flex-col gap-7 md:flex-row md:items-center lg:max-w-[72%]">
-            <MetricRing value={average} label={copy.dashboard.healthScore} />
-            <div className="min-w-0 flex-1">
-              <p className="system-label">{copy.dashboard.healthScore}</p>
-              <h3 className="mt-3 text-3xl font-semibold text-white">{copy.dashboard.systemReady}</h3>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-chrome">
-                {copy.dashboard.planPrefix} <span className="text-white">{localizedGoal}</span>. {copy.dashboard.weakestPrefix} <span className="text-emeraldx">{localizedWeakest}</span>, {copy.dashboard.currentlyAt} <span className="text-white">{weakest.score}/100</span>.
-              </p>
-              <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 border-t border-signal/10 pt-4 text-xs text-chrome">
-                <span><span className="text-muted">{copy.dashboard.dataCoverage}:</span> {biomarkers ? copy.dashboard.signalConnected : copy.dashboard.signalPartial}</span>
-                <span><span className="text-muted">{copy.dashboard.weakest}:</span> <span className="text-white">{localizedWeakest}</span></span>
-              </div>
-            </div>
-          </div>
-        </Card>
+      <AIHealthTwin
+        score={average}
+        biologicalAge={estimatedBiologicalAge}
+        recoveryStatus={recovery.status}
+        recoveryScore={recovery.score}
+        longevityProjection={longevityProjection}
+        longevityScore={longevity.score}
+        weakestPillar={localizedWeakest}
+        primaryGoal={localizedGoal}
+        nextUpgrade={weakest.nextAction}
+        connected={{ biomarkers: Boolean(biomarkers), labs: Boolean(latestLab?.analysis_json), protocol: Boolean(latestProtocol), coach: Boolean(process.env.OPENAI_API_KEY) }}
+        labels={{
+          eyebrow: copy.dashboard.twinEyebrow,
+          title: copy.dashboard.twinTitle,
+          description: copy.dashboard.twinDescription,
+          optimizationScore: copy.dashboard.healthScore,
+          biologicalAge: copy.dashboard.biologicalAge,
+          years: copy.dashboard.years,
+          recovery: copy.dashboard.recoveryStatus,
+          longevity: copy.dashboard.longevityProjection,
+          biometricSync: copy.dashboard.biometricSync,
+          intelligenceCore: copy.dashboard.intelligenceCore,
+          labIntelligence: copy.dashboard.labIntelligence,
+          activeProtocol: copy.dashboard.activeProtocolStatus,
+          primaryConstraint: copy.dashboard.primaryConstraint,
+          nextUpgrade: copy.dashboard.nextBiologicalUpgrade,
+          online: copy.dashboard.online,
+          syncing: copy.dashboard.syncing,
+          optimizing: copy.dashboard.optimizing,
+          stable: copy.dashboard.stable,
+          needsAttention: copy.dashboard.needsAttention,
+          dataMissing: copy.dashboard.dataMissing,
+          directionalEstimate: copy.dashboard.experimentalEstimate
+        }}
+      />
 
+      <section className="grid gap-4 xl:grid-cols-[1.4fr_0.6fr]">
+        <PillarRadar pillars={pillars} weakest={weakest} />
         <Card className="p-0">
-          <div className="border-b border-signal/10 px-5 py-4"><p className="system-label">{copy.dashboard.optimizationOpportunities}</p></div>
+          <div className="border-b border-signal/10 px-5 py-4"><p className="system-label">{copy.dashboard.optimizationOpportunities}</p><h3 className="mt-2 font-semibold text-white">{copy.dashboard.priorityQueue}</h3></div>
           <div className="divide-y divide-signal/10">
             {priorityActions.map((action, index) => (
-              <div key={`${action}-${index}`} className="grid grid-cols-[34px_1fr] gap-3 px-5 py-4 text-sm text-white">
-                <span className="font-mono text-xs text-emeraldx">0{index + 1}</span><span>{action}</span>
+              <div key={`${action}-${index}`} className="grid grid-cols-[38px_1fr] gap-3 px-5 py-5 text-sm text-white">
+                <span className="font-mono text-xs text-warningx">P{index + 1}</span><span>{action}</span>
               </div>
             ))}
           </div>
         </Card>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-3">
-        <Card className="min-h-36"><p className="system-label">{copy.dashboard.biologicalAge}</p><div className="mt-5 flex items-end justify-between gap-4"><p className="metric-glow text-4xl font-semibold text-white">{estimatedBiologicalAge ?? "--"}<span className="ml-2 text-sm font-normal text-chrome">{copy.dashboard.years}</span></p><Sparkles className="h-5 w-5 text-violetx" /></div><p className="mt-3 text-xs text-muted">{copy.dashboard.experimentalEstimate}</p></Card>
-        <Card className="min-h-36"><p className="system-label">{copy.dashboard.longevityProjection}</p><div className="mt-5 flex items-end justify-between gap-4"><p className="text-2xl font-semibold text-white">{longevityProjection}</p><ChartNoAxesCombined className="h-5 w-5 text-signal" /></div><div className="mt-4 data-track"><div className="data-fill" style={{ width: `${longevity.score}%` }} /></div></Card>
-        <Card className="min-h-36"><p className="system-label">{copy.dashboard.recoveryStatus}</p><div className="mt-5 flex items-end justify-between gap-4"><p className="text-2xl font-semibold text-white">{recovery.status}</p><span className="text-2xl font-semibold text-emeraldx">{recovery.score}</span></div><div className="mt-4 data-track"><div className="data-fill" style={{ width: `${recovery.score}%` }} /></div></Card>
       </section>
 
       <PillarGrid pillars={pillars} />
@@ -164,7 +177,7 @@ export default async function DashboardPage() {
       </section>
 
       {pillarError && <Card className="border-warningx/30 bg-warningx/10"><p className="text-sm text-amber-100">{copy.dashboard.pillarSaveError}: {pillarError.message}</p></Card>}
-      <p className="text-xs text-muted">{biomarkerSummary(biomarkers, language).join(" · ")}</p>
+      <p className="text-xs text-muted">{biomarkerSummary(biomarkers, language).join(" | ")}</p>
     </div>
   );
 }

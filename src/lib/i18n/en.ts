@@ -49,7 +49,7 @@ export const en = {
     confirmEmail: "Signup succeeded. Check your email to confirm your account, then return to onboarding."
   },
   nav: {
-    dashboard: "Dashboard", biomarkers: "Biomarkers", labs: "Labs", coach: "AI Coach", protocols: "Protocols",
+    dashboard: "Mission Control", biomarkers: "Biometric Signals", labs: "Lab Intelligence", coach: "Intelligence Core", protocols: "Protocol Engine",
     membership: "Membership", profile: "Profile", settings: "Settings", layer: "Optimization Layer", system: "Human Optimization OS",
     center: "Command Center", athlete: "Athlete profile", logout: "Log out"
   },
@@ -92,19 +92,25 @@ export const en = {
     improvePrompt: "Help me improve my {pillar} score this week.", planPrompt: "Build a 24-hour plan for {goal} using my latest biomarkers.", explainPrompt: "Explain what is limiting my {pillar} pillar and what to do first.",
     planPrefix: "Your current plan is tuned for", weakestPrefix: "The weakest pillar is", currentlyAt: "currently at", priority: "Priority", nextMoves: "Next Moves",
     logBiomarkers: "Log biomarkers", analyzeBloodwork: "Analyze bloodwork", askCoach: "Ask the AI Coach", generateProtocol: "Generate protocol", openMembership: "Open Membership Center",
-    viewProtocol: "View protocol", firstProtocol: "Generate your first protocol", openLabs: "Open labs", noPriorityMarkers: "No priority markers", labConnection: "Upload bloodwork to connect lab signals to pillar scores and AI Coach context.", pillarSaveError: "Pillar scores could not be saved to Supabase"
+    viewProtocol: "View protocol", firstProtocol: "Generate your first protocol", openLabs: "Open Lab Intelligence", noPriorityMarkers: "No priority markers", labConnection: "Lab intelligence stream not yet connected. Upload bloodwork to activate deeper analysis.", pillarSaveError: "Pillar scores could not be saved to Supabase",
+    twinEyebrow: "AI Health Twin / Live biological model", twinTitle: "Your Digital Biology, Synchronized", twinDescription: "A unified intelligence layer combining your baseline, biometric signals, lab context, recovery state, and active optimization mission.",
+    biometricSync: "Biomarker Sync", intelligenceCore: "XYVORAN Intelligence Core", labIntelligence: "Lab Intelligence", activeProtocolStatus: "Active Protocol",
+    primaryConstraint: "Primary optimization constraint", nextBiologicalUpgrade: "Next biological upgrade", biometricMatrix: "Biometric matrix", pillarRadar: "Five-pillar signal topology", priorityQueue: "Priority execution queue",
+    online: "Online", syncing: "Syncing", optimizing: "Optimizing", stable: "Stable", needsAttention: "Needs attention", dataMissing: "Data missing"
   },
   biomarkers: {
-    input: "Manual Biomarker Input", history: "Biomarker History", notes: "Notes", save: "Save Biomarkers",
-    noEntries: "No biomarker entries yet.", historyError: "Biomarker history could not be loaded",
+    input: "Manual Biometric Signal Input", history: "Biometric Signal History", notes: "Notes", save: "Synchronize Signals",
+    noEntries: "Biometric signal stream not yet connected. Add biomarkers or upload bloodwork to activate deeper intelligence.", historyError: "Biometric signal history could not be loaded",
     sessionError: "Unable to verify your session", loginAgain: "Please log in again before saving biomarkers.", saveError: "Unable to save biomarker entry"
   },
   coach: {
-    title: "AI Biohacking Coach", description: "Educational wellness guidance personalized to your profile, biomarkers, labs, and pillar scores.",
+    title: "XYVORAN Intelligence Core", description: "An educational optimization console grounded in your profile, biometric signals, labs, protocols, and pillar state.",
     test: "Test Coach Context", testPrompt: "Test my coach context. Reference my main goal, sleep, stress, energy, latest biomarkers, pillar scores, latest labs, and one previous chat insight if available.",
     empty: "Ask about sleep, fasting, HRV, stress resilience, cognitive performance, or a 7-day plan.",
     analyzing: "Coach is analyzing your optimization context...", placeholder: "Ask your coach...", send: "Send",
-    unavailable: "Coach unavailable.", historyError: "Chat history could not be loaded",
+    unavailable: "Intelligence Core unavailable.", historyError: "Intelligence history could not be loaded",
+    coreStatus: "AI Core Status", contextSources: "Context sources", profileContext: "Profile context", biomarkerContext: "Biometric context", labContext: "Lab context", protocolContext: "Protocol context", missionPrompts: "Suggested mission prompts", connected: "Connected", waitingForData: "Waiting for data",
+    sleepMission: "Identify my highest-leverage sleep upgrade for tonight.", recoveryMission: "Build a recovery decision for today using my current signals.", metabolicMission: "Explain my primary metabolic constraint and the next safe action.",
     notConfigured: "AI Coach is not configured yet. Add OPENAI_API_KEY to enable real responses.", generatedEmpty: "I could not generate a response. Try again with a more specific question.", apiFailure: "AI Coach could not complete the OpenAI request. Check your OpenAI billing, quota, and API key settings."
   },
   protocols: {
@@ -114,18 +120,21 @@ export const en = {
     plan: "7-Day Action Plan", day: "Day", sleep: "Sleep Action", nutrition: "Nutrition Action", movement: "Movement Action",
     recovery: "Recovery Action", tracking: "Tracking Action", metrics: "Metrics to Monitor", safety: "Safety Notice",
     goal: "Goal", weakest: "Weakest pillar", markCompleted: "Mark Completed", legacy: "This protocol uses the legacy MVP format. Generate a new protocol for structured details.",
-    empty: "No protocols generated yet.", updateError: "Unable to update protocol status.", completeOnboarding: "Complete onboarding before generating a protocol.", legacyWarning: "Protocol saved in legacy JSON mode because the connected database is missing Phase 4 protocol columns."
+    empty: "No active biological mission plan. Generate a protocol to begin a structured seven-day optimization cycle.", updateError: "Unable to update protocol status.", completeOnboarding: "Complete onboarding before generating a protocol.", legacyWarning: "Protocol saved in legacy JSON mode because the connected database is missing Phase 4 protocol columns.",
+    estimatedImpact: "Estimated impact", executionTimeline: "7-day execution timeline", rationale: "AI-generated rationale", missionActive: "Mission active", highImpact: "High leverage", moderateImpact: "Targeted leverage"
   },
   labs: {
-    eyebrow: "Bloodwork Intelligence", title: "Lab Analysis",
+    eyebrow: "Lab Intelligence / Signal extraction", title: "Lab Intelligence",
     intro: "Upload a report to extract supported biomarkers and translate them into educational optimization signals. Results do not diagnose disease or replace medical care.",
     upload: "Upload Bloodwork", latest: "Latest Lab Summary", markers: "Top Biomarkers", opportunities: "Biggest Opportunities",
     weakest: "Weakest Lab Category", priority: "Priority Actions", noAnalysis: "No completed analysis yet.", extracted: "Extracted Biomarkers",
     biomarker: "Biomarker", category: "Category", current: "Current Value", range: "Reference Range", status: "Status",
-    history: "Upload History", noUploads: "No bloodwork uploaded yet.", storageError: "Lab storage is not ready", loadError: "Lab reports could not be loaded",
+    history: "Signal Processing History", noUploads: "Lab intelligence stream not yet connected. Upload bloodwork to activate biomarker extraction and pillar impact analysis.", storageError: "Lab storage is not ready", loadError: "Lab reports could not be loaded",
     optimal: "Optimal", attention: "Needs Attention", priorityArea: "Priority Area", completed: "completed", processing: "processing", uploaded: "uploaded", failed: "failed",
     safety: "Educational wellness interpretation only. Consult a licensed healthcare provider about abnormal labs, symptoms, hormonal concerns, chronic disease, or medication decisions.",
-    signInUpload: "Sign in before uploading bloodwork.", chooseFile: "Choose a PDF, JPG, JPEG, or PNG lab report.", unsupportedFile: "Unsupported file type. Upload PDF, JPG, JPEG, or PNG.", maxFileSize: "Lab reports must be 4 MB or smaller for production uploads.", storeError: "Unable to store lab report", missingBucket: "The private lab-reports storage bucket is missing from the connected Supabase project.", recordError: "Unable to create the lab report record", analysisSaveError: "Analysis completed but could not be saved", extractionFailed: "Lab extraction failed."
+    signInUpload: "Sign in before uploading bloodwork.", chooseFile: "Choose a PDF, JPG, JPEG, or PNG lab report.", unsupportedFile: "Unsupported file type. Upload PDF, JPG, JPEG, or PNG.", maxFileSize: "Lab reports must be 4 MB or smaller for production uploads.", storeError: "Unable to store lab report", missingBucket: "The private lab-reports storage bucket is missing from the connected Supabase project.", recordError: "Unable to create the lab report record", analysisSaveError: "Analysis completed but could not be saved", extractionFailed: "Lab extraction failed.",
+    processingPipeline: "Intelligence pipeline", ingest: "Secure ingest", extract: "Biomarker extraction", interpret: "Pillar interpretation", missingSignals: "Missing priority signals", pillarImpact: "Pillar impact", noMissingSignals: "Core signal coverage detected", signalValue: "Signal value",
+    choosePrompt: "Select a PDF or lab report image", formatHelp: "PDF, JPG, JPEG, or PNG. Maximum 4 MB.", extracting: "Extracting biometric signals...", uploadAnalyze: "Upload and analyze", chooseFirst: "Choose a lab report first.", uploadFailed: "Lab upload failed.", uploadSuccess: "Lab report analyzed and synchronized."
   },
   profile: { title: "Profile", noneSelected: "None selected", noneListed: "None listed", hours: "hours" },
   settings: {
