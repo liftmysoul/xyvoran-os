@@ -1,5 +1,6 @@
-import type { BiomarkerEntry, ChatMessage, Json, LabReport, LanguagePreference, OnboardingData, PillarName } from "@/types/database";
+import type { BiomarkerEntry, BiologicalInsightRecord, ChatMessage, Json, LabReport, LanguagePreference, OnboardingData, PillarName, Protocol } from "@/types/database";
 import type { Language } from "@/lib/i18n";
+import type { BiologicalIntelligenceSummary } from "@/lib/biological-intelligence";
 
 export type PersistedPillarScore = {
   pillar: PillarName;
@@ -29,6 +30,7 @@ Your role:
 - Reference the user's main goal, sleep quality, stress level, energy level, relevant biomarkers, pillar scores, and previous chat context when available.
 - Use pillar-specific intake signals when available, including sleep duration, HRV, resting heart rate, sugar cravings, afternoon energy crashes, fasting pattern, focus, brain fog, caffeine, alcohol, nicotine, hydration, skin quality, current stack, and secondary goals.
 - When a completed lab report is provided, reference actual measured values and their configured optimization status. Distinguish wellness optimization targets from clinical reference ranges.
+- When biological intelligence is provided, use the primary constraint, top opportunity, active insights, missing signals, and latest protocol to answer what to prioritize first and why the score may be limited.
 - Use clear reasoning, prioritize low-risk foundations, and recommend measurable tracking over time.
 - Be direct, elite, calm, ethical, and actionable. Make advice realistic for the next 24 hours and the next 7 days.
 
@@ -55,6 +57,9 @@ export function buildCoachContext(args: {
   onboarding: OnboardingData | null;
   latestBiomarkers: BiomarkerEntry | null;
   latestLabReport?: LabReport | null;
+  latestProtocol?: Protocol | null;
+  biologicalIntelligence?: BiologicalIntelligenceSummary | null;
+  activeInsights?: BiologicalInsightRecord[];
   pillarScores: PersistedPillarScore[];
   history: ChatMessage[];
   language?: Language;
@@ -78,6 +83,8 @@ export function buildCoachContext(args: {
       hasOnboarding: Boolean(onboarding),
       hasLatestBiomarkers: Boolean(latestBiomarkers),
       hasLatestLabReport: Boolean(args.latestLabReport?.analysis_json),
+      hasBiologicalIntelligence: Boolean(args.biologicalIntelligence),
+      activeInsightCount: args.activeInsights?.length ?? 0,
       pillarScoreCount: args.pillarScores.length,
       recentMessageCount: args.history.length
     },
@@ -148,6 +155,31 @@ export function buildCoachContext(args: {
       biggestOpportunities: args.latestLabReport.analysis_json?.biggestOpportunities,
       scoreImpacts: args.latestLabReport.analysis_json?.scoreImpacts,
       safetyFlags: args.latestLabReport.analysis_json?.safetyFlags
+    } : null,
+    biologicalIntelligence: args.biologicalIntelligence ? {
+      primaryConstraint: args.biologicalIntelligence.primaryConstraint,
+      secondaryConstraints: args.biologicalIntelligence.secondaryConstraints,
+      topOpportunity: args.biologicalIntelligence.topOpportunity,
+      confidenceScore: args.biologicalIntelligence.confidenceScore,
+      missingSignals: args.biologicalIntelligence.missingData,
+      pillarImpacts: args.biologicalIntelligence.pillarImpacts
+    } : null,
+    activeBiologicalInsights: (args.activeInsights ?? []).slice(0, 8).map((insight) => ({
+      type: insight.insight_type,
+      pillar: insight.pillar,
+      severity: insight.severity,
+      confidence: insight.confidence_score,
+      title: insight.title,
+      summary: insight.summary,
+      recommendedActions: insight.recommended_actions
+    })),
+    latestProtocol: args.latestProtocol ? {
+      title: args.latestProtocol.title,
+      goal: args.latestProtocol.goal,
+      weakestPillar: args.latestProtocol.weakest_pillar,
+      intensity: args.latestProtocol.intensity,
+      status: args.latestProtocol.status,
+      protocol: args.latestProtocol.protocol_json ?? args.latestProtocol.protocol
     } : null,
     pillarScores: pillarSummary,
     recentConversation: args.history.slice(-8)

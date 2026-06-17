@@ -3,9 +3,13 @@ import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { analyzeLabMarkers } from "@/lib/labs/analyze";
 import { extractLabMarkers } from "@/lib/labs/extract";
+import { applyLabScoreImpacts, mergeLabsIntoBiomarkers } from "@/lib/labs/integrate";
+import { calculatePillars } from "@/lib/scoring";
+import { generateBiologicalIntelligence } from "@/lib/biological-intelligence";
+import { upsertInsights } from "@/app/api/biological-intelligence/_utils";
 import { createClient } from "@/lib/supabase-server";
 import { getSupabaseAnonKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
-import type { LabReport } from "@/types/database";
+import type { BiomarkerEntry, LabReport, OnboardingData } from "@/types/database";
 import type { Profile } from "@/types/database";
 import { getDictionary, normalizeLanguage } from "@/lib/i18n";
 import { isMissingSchemaError } from "@/lib/supabase-errors";
@@ -73,7 +77,39 @@ export async function POST(request: Request) {
       .select("*")
       .single<LabReport>();
     if (updateError) throw new Error(`${copy.labs.analysisSaveError}: ${updateError.message}`);
-    return NextResponse.json({ report: completed });
+    let intelligenceWarning: string | null = null;
+    let generatedInsightCount = 0;
+    try {
+      const [{ data: onboarding }, { data: latestBiomarkers }] = await Promise.all([
+        dataClient.from("onboarding_data").select("*").eq("user_id", auth.user.id).maybeSingle<OnboardingData>(),
+        dataClient.from("biomarker_entries").select("*").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle<BiomarkerEntry>()
+      ]);
+      const scoreBiomarkers = mergeLabsIntoBiomarkers(latestBiomarkers, analysis);
+      const pillars = applyLabScoreImpacts(calculatePillars(onboarding ?? null, scoreBiomarkers, language), analysis, language);
+      await dataClient.from("pillar_scores").upsert(
+        pillars.map((pillar) => ({
+          user_id: auth.user.id,
+          pillar: pillar.pillar,
+          score: pillar.score,
+          status: pillar.status,
+          metrics: pillar.metrics,
+          suggested_next_action: pillar.nextAction
+        })),
+        { onConflict: "user_id,pillar" }
+      );
+      const intelligence = generateBiologicalIntelligence({
+        userId: auth.user.id,
+        onboarding: onboarding ?? null,
+        latestBiomarkers: scoreBiomarkers,
+        latestLabReport: completed,
+        pillarScores: pillars
+      });
+      generatedInsightCount = intelligence.insights.length;
+      await upsertInsights(dataClient, intelligence.insights);
+    } catch (syncError) {
+      intelligenceWarning = syncError instanceof Error ? syncError.message : "Lab intelligence synchronization failed.";
+    }
+    return NextResponse.json({ report: completed, intelligence: { generatedInsightCount }, warning: intelligenceWarning });
   } catch (error) {
     const message = error instanceof Error ? error.message : copy.labs.extractionFailed;
     await dataClient.from("lab_reports").update({ processing_status: "failed", analysis_json: { error: message } }).eq("id", report.id).eq("user_id", auth.user.id);

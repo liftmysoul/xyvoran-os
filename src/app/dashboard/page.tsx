@@ -6,12 +6,14 @@ import { AIHealthTwin } from "@/components/dashboard/AIHealthTwin";
 import { PillarRadar } from "@/components/dashboard/PillarRadar";
 import { PillarGrid } from "@/components/dashboard/PillarGrid";
 import { SystemHeader } from "@/components/dashboard/SystemHeader";
+import { SystemStatus } from "@/components/dashboard/SystemStatus";
 import { findWeakestPillar } from "@/lib/protocol";
 import { calculatePillars } from "@/lib/scoring";
 import { applyLabScoreImpacts, mergeLabsIntoBiomarkers } from "@/lib/labs/integrate";
+import { generateBiologicalIntelligence } from "@/lib/biological-intelligence";
 import { createClient } from "@/lib/supabase-server";
 import { formatDate } from "@/lib/format";
-import type { BiomarkerEntry, LabReport, OnboardingData, Protocol } from "@/types/database";
+import type { BiomarkerEntry, BiologicalInsightRecord, LabReport, OnboardingData, Protocol } from "@/types/database";
 import { getServerI18n } from "@/lib/i18n/server";
 import { getDictionary, localizeIntensity, localizeLabCategory, localizeLabPriorityAction, localizePillar } from "@/lib/i18n";
 import { localizeGoal } from "@/lib/protocol";
@@ -39,17 +41,32 @@ export default async function DashboardPage() {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect("/auth/login");
 
-  const [{ data: onboarding }, { data: biomarkers }, { data: latestProtocol }, { data: latestLab }] = await Promise.all([
+  const [{ data: onboarding }, { data: biomarkers }, { data: latestProtocol }, { data: latestLab }, { data: storedInsights }] = await Promise.all([
     supabase.from("onboarding_data").select("*").eq("user_id", auth.user.id).maybeSingle<OnboardingData>(),
     supabase.from("biomarker_entries").select("*").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle<BiomarkerEntry>(),
     supabase.from("generated_protocols").select("*").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle<Protocol>(),
-    supabase.from("lab_reports").select("*").eq("user_id", auth.user.id).eq("processing_status", "completed").order("created_at", { ascending: false }).limit(1).maybeSingle<LabReport>()
+    supabase.from("lab_reports").select("*").eq("user_id", auth.user.id).eq("processing_status", "completed").order("created_at", { ascending: false }).limit(1).maybeSingle<LabReport>(),
+    supabase.from("biological_insights").select("*").eq("user_id", auth.user.id).eq("status", "active").order("created_at", { ascending: false }).limit(6).returns<BiologicalInsightRecord[]>()
   ]);
 
   if (!onboarding?.disclaimer_confirmed) redirect("/onboarding");
 
   const scoreBiomarkers = mergeLabsIntoBiomarkers(biomarkers, latestLab?.analysis_json);
   const pillars = applyLabScoreImpacts(calculatePillars(onboarding, scoreBiomarkers, language), latestLab?.analysis_json, language);
+  const intelligence = generateBiologicalIntelligence({
+    userId: auth.user.id,
+    onboarding,
+    latestBiomarkers: scoreBiomarkers,
+    latestLabReport: latestLab ?? null,
+    pillarScores: pillars
+  });
+  const intelligenceSummary = intelligence.summary;
+  const activeInsights = storedInsights?.length ? storedInsights : intelligence.insights.slice(0, 6).map((insight, index) => ({
+    ...insight,
+    id: `generated-${index}`,
+    created_at: "",
+    updated_at: ""
+  }));
   const { error: pillarError } = await supabase.from("pillar_scores").upsert(
     pillars.map((pillar) => ({
       user_id: auth.user.id,
@@ -129,9 +146,44 @@ export default async function DashboardPage() {
           nodeMetabolicTitle: copy.dashboard.nodeMetabolicTitle,
           nodeMetabolicDescription: copy.dashboard.nodeMetabolicDescription,
           nodeLabsTitle: copy.dashboard.nodeLabsTitle,
-          nodeLabsDescription: copy.dashboard.nodeLabsDescription
+          nodeLabsDescription: copy.dashboard.nodeLabsDescription,
+          confidence: copy.dashboard.confidence,
+          activeInsights: copy.dashboard.activeInsights,
+          missingSignals: copy.dashboard.missingSignals
+        }}
+        intelligence={{
+          primaryConstraint: intelligenceSummary.primaryConstraint ? localizePillar(intelligenceSummary.primaryConstraint.pillar, language) : null,
+          confidenceScore: intelligenceSummary.confidenceScore,
+          topOpportunity: intelligenceSummary.topOpportunity ?? copy.dashboard.limitedIntelligence,
+          activeInsightsCount: activeInsights.length,
+          missingSignalsCount: intelligenceSummary.missingData.length
         }}
       />
+
+      <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <Card>
+          <div className="flex items-center justify-between gap-3">
+            <div><p className="system-label">{copy.dashboard.intelligenceLayer}</p><h3 className="mt-2 font-semibold text-white">{copy.dashboard.primaryBiologicalConstraint}</h3></div>
+            <SystemStatus label={`${intelligenceSummary.confidenceScore}% ${copy.dashboard.confidence}`} tone={intelligenceSummary.confidenceScore >= 70 ? "active" : "warning"} />
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <div className="command-surface rounded-md p-4"><p className="system-label">{copy.dashboard.primaryBiologicalConstraint}</p><p className="mt-2 text-white">{intelligenceSummary.primaryConstraint ? localizePillar(intelligenceSummary.primaryConstraint.pillar, language) : copy.common.notSet}</p></div>
+            <div className="command-surface rounded-md p-4"><p className="system-label">{copy.dashboard.topOpportunity}</p><p className="mt-2 text-sm leading-5 text-chrome">{intelligenceSummary.topOpportunity ?? copy.dashboard.limitedIntelligence}</p></div>
+            <div className="command-surface rounded-md p-4"><p className="system-label">{copy.dashboard.missingSignals}</p><p className="mt-2 text-white">{intelligenceSummary.missingData.length}</p></div>
+          </div>
+        </Card>
+        <Card>
+          <div className="flex items-center justify-between gap-3"><div><p className="system-label">{copy.dashboard.activeBiologicalInsights}</p><h3 className="mt-2 font-semibold text-white">{activeInsights.length} {copy.dashboard.activeInsights}</h3></div><ShieldCheck className="h-5 w-5 text-signal" /></div>
+          <div className="mt-5 space-y-3">
+            {activeInsights.length ? activeInsights.slice(0, 3).map((insight) => (
+              <div key={insight.id} className="rounded-md border border-signal/10 bg-signal/[0.03] p-3 text-sm">
+                <p className="font-semibold text-white">{localizePillar(String(insight.pillar), language)}</p>
+                <p className="mt-1 leading-5 text-chrome">{String(insight.summary)}</p>
+              </div>
+            )) : <p className="text-sm leading-6 text-chrome">{copy.dashboard.limitedIntelligence}</p>}
+          </div>
+        </Card>
+      </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.4fr_0.6fr]">
         <PillarRadar pillars={pillars} weakest={weakest} />

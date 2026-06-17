@@ -50,12 +50,22 @@ type AIHealthTwinProps = {
     nodeMetabolicDescription: string;
     nodeLabsTitle: string;
     nodeLabsDescription: string;
+    confidence: string;
+    activeInsights: string;
+    missingSignals: string;
   };
   connected: {
     biomarkers: boolean;
     labs: boolean;
     protocol: boolean;
     coach: boolean;
+  };
+  intelligence?: {
+    primaryConstraint?: string | null;
+    confidenceScore?: number | null;
+    topOpportunity?: string | null;
+    activeInsightsCount?: number;
+    missingSignalsCount?: number;
   };
 };
 
@@ -100,10 +110,15 @@ function BioNode({ className, icon: Icon, title, description }: { className: str
   );
 }
 
-export function AIHealthTwin({ score, biologicalAge, recoveryStatus, recoveryScore, longevityProjection, longevityScore, weakestPillar, primaryGoal, nextUpgrade, labels, connected }: AIHealthTwinProps) {
+export function AIHealthTwin({ score, biologicalAge, recoveryStatus, recoveryScore, longevityProjection, longevityScore, weakestPillar, primaryGoal, nextUpgrade, labels, connected, intelligence }: AIHealthTwinProps) {
+  const intelligenceConfidence = typeof intelligence?.confidenceScore === "number" ? `${intelligence.confidenceScore}% ${labels.confidence}` : primaryGoal;
+  const missingSignalsValue = typeof intelligence?.missingSignalsCount === "number" ? `${intelligence.missingSignalsCount} ${labels.missingSignals}` : labels.dataMissing;
+  const activeInsightsText = `${intelligence?.activeInsightsCount ?? 0} ${labels.activeInsights}`;
+  const primaryConstraint = intelligence?.primaryConstraint ?? weakestPillar;
+  const topOpportunity = intelligence?.topOpportunity ?? nextUpgrade;
   const signals: TwinSignal[] = [
-    { label: labels.biometricSync, value: connected.biomarkers ? `${score}% ${labels.stable}` : labels.dataMissing, status: connected.biomarkers ? labels.online : labels.syncing, tone: connected.biomarkers ? "active" : "warning", icon: RadioTower },
-    { label: labels.intelligenceCore, value: primaryGoal, status: connected.coach ? labels.online : labels.dataMissing, tone: connected.coach ? "intelligence" : "muted", icon: BrainCircuit },
+    { label: labels.biometricSync, value: connected.biomarkers ? `${score}% ${labels.stable}` : missingSignalsValue, status: connected.biomarkers ? labels.online : labels.syncing, tone: connected.biomarkers ? "active" : "warning", icon: RadioTower },
+    { label: labels.intelligenceCore, value: intelligenceConfidence, status: connected.coach ? labels.online : labels.dataMissing, tone: connected.coach ? "intelligence" : "muted", icon: BrainCircuit },
     { label: labels.labIntelligence, value: connected.labs ? labels.stable : labels.dataMissing, status: connected.labs ? labels.online : labels.syncing, tone: connected.labs ? "active" : "warning", icon: ScanSearch },
     { label: labels.activeProtocol, value: connected.protocol ? labels.optimizing : labels.dataMissing, status: connected.protocol ? labels.optimizing : labels.syncing, tone: connected.protocol ? "intelligence" : "warning", icon: WandSparkles }
   ];
@@ -180,12 +195,13 @@ export function AIHealthTwin({ score, biologicalAge, recoveryStatus, recoverySco
 
           <div className="bio-upgrade-console">
             <div className="flex items-center gap-2 text-warningx"><ShieldCheck className="h-4 w-4" /><span className="text-[9px] font-semibold uppercase">{labels.nextUpgrade}</span></div>
-            <p className="mt-2 text-xs leading-5 text-chrome">{nextUpgrade}</p>
+            <p className="mt-2 text-xs leading-5 text-chrome">{topOpportunity}</p>
           </div>
 
           <div className="bio-hud-module bio-module--constraint">
             <div className="flex items-center justify-center gap-2 text-warningx"><ShieldCheck className="h-4 w-4" /><span className="text-[9px] font-semibold uppercase">{labels.primaryConstraint}</span></div>
-            <p className="mt-2 text-center text-lg font-semibold text-white">{weakestPillar}</p>
+            <p className="mt-2 text-center text-lg font-semibold text-white">{primaryConstraint}</p>
+            <p className="mt-1 text-center text-[10px] text-emeraldx">{activeInsightsText}</p>
             <p className="mt-1 text-center text-[10px] text-muted">{labels.longevity}: {longevityProjection} | {longevityScore}/100</p>
           </div>
         </div>

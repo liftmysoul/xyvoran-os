@@ -214,6 +214,9 @@ export type StructuredProtocol = {
   primaryGoal: string;
   weakestPillar: PillarName;
   intensity: ProtocolIntensity;
+  biologicalRationale?: string;
+  expectedImpact?: string;
+  confidenceLevel?: string;
   sevenDayActionPlan: ProtocolDay[];
   safetyDisclaimer: string;
   metricsToMonitor: string[];

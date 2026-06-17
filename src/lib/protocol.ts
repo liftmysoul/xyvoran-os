@@ -1,5 +1,6 @@
 import type {
   BiomarkerEntry,
+  BiologicalInsightRecord,
   ChatMessage,
   OnboardingData,
   PillarName,
@@ -8,6 +9,7 @@ import type {
   StructuredProtocol
 } from "@/types/database";
 import { getDictionary, localizePillar, type Language } from "@/lib/i18n";
+import type { BiologicalIntelligenceSummary } from "@/lib/biological-intelligence";
 
 type ProtocolCopy = ReturnType<typeof getDictionary>["optimization"]["protocol"];
 type ProtocolCopyKey = keyof ProtocolCopy;
@@ -146,6 +148,8 @@ export function generateStructuredProtocol(args: {
   biomarkers: BiomarkerEntry | null;
   pillars: PillarScore[];
   recentMessages?: ChatMessage[];
+  biologicalInsights?: BiologicalInsightRecord[];
+  intelligenceSummary?: BiologicalIntelligenceSummary | null;
   requestedIntensity?: ProtocolIntensity;
   language?: Language;
 }): StructuredProtocol {
@@ -155,6 +159,18 @@ export function generateStructuredProtocol(args: {
   const weakest = findWeakestPillar(args.pillars);
   const intensity = chooseProtocolIntensity(args.onboarding, args.biomarkers, weakest, args.requestedIntensity);
   const recentCoachHint = args.recentMessages?.findLast((message) => message.role === "assistant")?.content.slice(0, 140);
+  const activeInsights = args.biologicalInsights?.filter((insight) => insight.status === "active") ?? [];
+  const primaryConstraint = args.intelligenceSummary?.primaryConstraint;
+  const targetPillar = primaryConstraint?.pillar ?? weakest.pillar;
+  const topInsight = activeInsights.find((insight) => insight.insight_type === "constraint" || insight.insight_type === "protocol_priority");
+  const topMissingSignal = args.intelligenceSummary?.missingData?.[0];
+  const confidenceScore = args.intelligenceSummary?.confidenceScore ?? Math.round(weakest.score * 0.75);
+  const confidenceLevel = confidenceScore >= 76 ? copy.confidenceHigh : confidenceScore >= 56 ? copy.confidenceModerate : copy.confidenceLimited;
+  const biologicalRationale = topInsight?.summary
+    ?? primaryConstraint?.constraints?.[0]
+    ?? topMissingSignal?.summary
+    ?? copy.intelligenceLimited;
+  const expectedImpact = intensity === "Advanced" ? copy.expectedImpactHigh : intensity === "Intermediate" ? copy.expectedImpactFocused : copy.expectedImpactFoundational;
 
   const sevenDayActionPlan = Array.from({ length: 7 }, (_, index) => {
     const day = index + 1;
@@ -162,9 +178,9 @@ export function generateStructuredProtocol(args: {
       day,
       sleep: sleepAction(day, goal, args.onboarding, args.biomarkers, copy),
       nutrition: nutritionAction(day, goal, args.onboarding, args.biomarkers, copy),
-      movement: movementAction(day, goal, intensity, weakest.pillar, copy),
-      recovery: recoveryAction(day, goal, args.onboarding, weakest.pillar, copy),
-      tracking: trackingAction(day, weakest.pillar, copy)
+      movement: movementAction(day, goal, intensity, targetPillar, copy),
+      recovery: recoveryAction(day, goal, args.onboarding, targetPillar, copy),
+      tracking: trackingAction(day, targetPillar, copy)
     };
   });
 
@@ -178,10 +194,13 @@ export function generateStructuredProtocol(args: {
   ];
 
   const protocol: StructuredProtocol = {
-    title: language === "es" ? `Protocolo inicial de ${localizeGoal(goal, language)}: reinicio de ${localizePillar(weakest.pillar, language)}` : `${goal} Starter Protocol: ${weakest.pillar} Reset`,
+    title: language === "es" ? `Protocolo inicial de ${localizeGoal(goal, language)}: reinicio de ${localizePillar(targetPillar, language)}` : `${goal} Starter Protocol: ${targetPillar} Reset`,
     primaryGoal: localizeGoal(goal, language),
-    weakestPillar: weakest.pillar,
+    weakestPillar: targetPillar,
     intensity,
+    biologicalRationale,
+    expectedImpact,
+    confidenceLevel,
     sevenDayActionPlan,
     safetyDisclaimer: copy.safety,
     metricsToMonitor,
@@ -200,6 +219,10 @@ export function generateStructuredProtocol(args: {
       `Exercise frequency: ${args.onboarding?.exercise_frequency ?? "not set"}`,
       `Diet style: ${args.onboarding?.diet_style ?? "not set"}`,
       `Latest HRV: ${args.biomarkers?.hrv ?? "not logged"}`,
+      `Biological intelligence confidence: ${confidenceScore}/100`,
+      `Primary biological constraint: ${primaryConstraint?.pillar ?? weakest.pillar}`,
+      `Top opportunity: ${args.intelligenceSummary?.topOpportunity ?? copy.intelligenceLimited}`,
+      ...(topMissingSignal ? [`Missing signal priority: ${topMissingSignal.title}`] : []),
       ...(recentCoachHint ? [`Recent coach context: ${recentCoachHint}`] : [])
     ]
   };
@@ -207,7 +230,7 @@ export function generateStructuredProtocol(args: {
     protocol.sevenDayActionPlan = protocol.sevenDayActionPlan.map((day) => ({ ...day, sleep: localizeProtocolText(day.sleep, language), nutrition: localizeProtocolText(day.nutrition, language), movement: localizeProtocolText(day.movement, language), recovery: localizeProtocolText(day.recovery, language), tracking: localizeProtocolText(day.tracking, language) }));
     protocol.topPriorityActions = protocol.topPriorityActions.map((item) => localizeProtocolText(item, language));
     protocol.contextSummary = [
-      `Objetivo principal: ${localizeGoal(goal, language)}`, `Pilar prioritario: ${localizePillar(weakest.pillar, language)} (${weakest.score}/100)`,
+      `Objetivo principal: ${localizeGoal(goal, language)}`, `Pilar prioritario: ${localizePillar(targetPillar, language)} (${weakest.score}/100)`,
       `Calidad del sueño: ${args.onboarding?.sleep_quality ?? "sin registrar"}/10`, `Nivel de estrés: ${args.onboarding?.stress_level ?? "sin registrar"}/10`, `Nivel de energía: ${args.onboarding?.energy_level ?? "sin registrar"}/10`,
       `Frecuencia de ejercicio: ${args.onboarding?.exercise_frequency ?? "sin registrar"}`, `Estilo de alimentación: ${args.onboarding?.diet_style ?? "sin registrar"}`, `HRV más reciente: ${args.biomarkers?.hrv ?? "sin registrar"}`,
       ...(recentCoachHint ? [`Contexto reciente del coach: ${recentCoachHint}`] : [])

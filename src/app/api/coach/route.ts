@@ -7,9 +7,12 @@ import {
   type PersistedPillarScore,
   type UserProfile
 } from "@/lib/ai-coach";
+import { generateBiologicalIntelligence } from "@/lib/biological-intelligence";
+import { applyLabScoreImpacts, mergeLabsIntoBiomarkers } from "@/lib/labs/integrate";
+import { calculatePillars } from "@/lib/scoring";
 import { createClient } from "@/lib/supabase-server";
 import { getSupabaseAnonKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
-import type { BiomarkerEntry, ChatMessage, LabReport, OnboardingData } from "@/types/database";
+import type { BiomarkerEntry, BiologicalInsightRecord, ChatMessage, LabReport, OnboardingData, Protocol } from "@/types/database";
 import { getDictionary, normalizeLanguage } from "@/lib/i18n";
 import { getServerLanguage } from "@/lib/i18n/server";
 
@@ -54,23 +57,36 @@ export async function POST(request: Request) {
       { data: latestBiomarkers, error: biomarkerError },
       { data: pillarScoresResult, error: pillarScoresError },
       { data: historyResult, error: historyError },
-      { data: latestLabReport, error: labError }
+      { data: latestLabReport, error: labError },
+      { data: latestProtocol, error: protocolError },
+      { data: activeInsights, error: insightsError }
     ] = await Promise.all([
       dataClient.from("profiles").select("*").eq("id", auth.user.id).maybeSingle<UserProfile>(),
       dataClient.from("onboarding_data").select("*").eq("user_id", auth.user.id).maybeSingle<OnboardingData>(),
       dataClient.from("biomarker_entries").select("*").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle<BiomarkerEntry>(),
       dataClient.from("pillar_scores").select("pillar,score,status,metrics,suggested_next_action,created_at,updated_at").eq("user_id", auth.user.id).order("updated_at", { ascending: false }).returns<PersistedPillarScore[]>(),
       dataClient.from("ai_chat_messages").select("*").eq("user_id", auth.user.id).order("created_at", { ascending: true }).limit(12).returns<ChatMessage[]>(),
-      dataClient.from("lab_reports").select("*").eq("user_id", auth.user.id).eq("processing_status", "completed").order("created_at", { ascending: false }).limit(1).maybeSingle<LabReport>()
+      dataClient.from("lab_reports").select("*").eq("user_id", auth.user.id).eq("processing_status", "completed").order("created_at", { ascending: false }).limit(1).maybeSingle<LabReport>(),
+      dataClient.from("generated_protocols").select("*").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle<Protocol>(),
+      dataClient.from("biological_insights").select("*").eq("user_id", auth.user.id).eq("status", "active").order("created_at", { ascending: false }).limit(10).returns<BiologicalInsightRecord[]>()
     ]);
-    const readError = profileError ?? onboardingError ?? biomarkerError ?? pillarScoresError ?? historyError ?? labError;
+    const readError = profileError ?? onboardingError ?? biomarkerError ?? pillarScoresError ?? historyError ?? labError ?? protocolError ?? insightsError;
     if (readError) return NextResponse.json({ error: `Unable to load coach context: ${readError.message}` }, { status: 500 });
 
     const history = historyResult ?? [];
     const pillarScores = pillarScoresResult ?? [];
     const language = normalizeLanguage(profile?.language_preference ?? await getServerLanguage());
     const copy = getDictionary(language);
-    const context = buildCoachContext({ profile, onboarding, latestBiomarkers, latestLabReport, pillarScores, history, language });
+    const scoreBiomarkers = mergeLabsIntoBiomarkers(latestBiomarkers, latestLabReport?.analysis_json);
+    const calculatedPillars = applyLabScoreImpacts(calculatePillars(onboarding ?? null, scoreBiomarkers, language), latestLabReport?.analysis_json, language);
+    const biologicalIntelligence = generateBiologicalIntelligence({
+      userId: auth.user.id,
+      onboarding: onboarding ?? null,
+      latestBiomarkers: scoreBiomarkers,
+      latestLabReport: latestLabReport ?? null,
+      pillarScores: calculatedPillars
+    }).summary;
+    const context = buildCoachContext({ profile, onboarding, latestBiomarkers: scoreBiomarkers, latestLabReport, latestProtocol, biologicalIntelligence, activeInsights: activeInsights ?? [], pillarScores, history, language });
 
     const { error: userMessageError } = await dataClient.from("ai_chat_messages").insert({ user_id: auth.user.id, role: "user", content: message });
     if (userMessageError) return NextResponse.json({ error: `Unable to save your message: ${userMessageError.message}` }, { status: 500 });
