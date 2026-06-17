@@ -13,8 +13,17 @@ export async function GET(request: Request) {
     } catch {
       storedInsightCount = 0;
     }
+    const summary = {
+      ...generated.summary,
+      missingSignals: generated.summary.missingData
+    };
     return NextResponse.json({
-      summary: generated.summary,
+      summary,
+      primaryConstraint: summary.primaryConstraint,
+      topOpportunity: summary.topOpportunity,
+      confidenceScore: summary.confidenceScore,
+      missingSignals: summary.missingSignals,
+      pillarImpacts: summary.pillarImpacts,
       generatedInsightCount: generated.insights.length,
       storedInsightCount,
       safety: "Educational wellness guidance only. XYVORAN OS does not diagnose disease, prescribe medication, or replace licensed medical care."
