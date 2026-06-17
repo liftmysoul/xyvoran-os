@@ -166,6 +166,290 @@ textarea {
   backdrop-filter: blur(14px);
 }
 
+.health-twin-avatar-shell {
+  border-color: rgba(255, 183, 3, 0.16);
+  background:
+    radial-gradient(circle at 50% 44%, rgba(255, 183, 3, 0.05), transparent 24%),
+    radial-gradient(circle at 44% 55%, rgba(0, 245, 212, 0.08), transparent 34%),
+    radial-gradient(circle at 74% 24%, rgba(124, 58, 237, 0.08), transparent 28%),
+    rgba(5, 8, 22, 0.96);
+}
+
+.bio-avatar-stage {
+  position: relative;
+  z-index: 1;
+  min-height: 700px;
+  overflow: hidden;
+  border: 1px solid rgba(76, 201, 240, 0.15);
+  border-radius: 0.375rem;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255, 183, 3, 0.08), transparent 26%),
+    radial-gradient(circle at 50% 56%, rgba(0, 245, 212, 0.1), transparent 36%),
+    linear-gradient(180deg, rgba(5, 8, 22, 0.56), rgba(5, 8, 22, 0.96));
+  box-shadow: inset 0 0 90px rgba(0, 245, 212, 0.04), inset 0 0 160px rgba(255, 183, 3, 0.035);
+}
+
+.bio-stage-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 183, 3, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(76, 201, 240, 0.05) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at center, black 32%, transparent 82%);
+}
+
+.bio-avatar-glow {
+  position: absolute;
+  inset: 6% 20%;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 183, 3, 0.22), transparent 30%),
+    radial-gradient(circle at 50% 56%, rgba(0, 245, 212, 0.16), transparent 48%),
+    radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.12), transparent 66%);
+  filter: blur(18px);
+}
+
+.bio-avatar-image {
+  z-index: 2;
+  object-fit: contain;
+  object-position: center;
+  padding: 2.3rem 0 2.7rem;
+  filter:
+    drop-shadow(0 0 18px rgba(255, 183, 3, 0.38))
+    drop-shadow(0 0 34px rgba(0, 245, 212, 0.18));
+  mix-blend-mode: screen;
+  animation: bio-float 6s ease-in-out infinite;
+}
+
+.bio-scanline {
+  position: absolute;
+  z-index: 5;
+  left: 19%;
+  right: 19%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(76, 201, 240, 0.9), rgba(0, 245, 212, 0.75), transparent);
+  box-shadow: 0 0 18px rgba(76, 201, 240, 0.7);
+  animation: bio-scan 4.8s linear infinite;
+}
+
+.bio-scanline--two {
+  animation-delay: 2.2s;
+  opacity: 0.55;
+}
+
+.bio-score-core {
+  position: absolute;
+  z-index: 8;
+  left: 50%;
+  top: 49%;
+  display: grid;
+  width: 9.5rem;
+  height: 9.5rem;
+  place-items: center;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(255, 183, 3, 0.32);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(5, 8, 22, 0.82), rgba(5, 8, 22, 0.28) 68%, transparent 70%);
+  text-align: center;
+  box-shadow: 0 0 42px rgba(255, 183, 3, 0.18), 0 0 70px rgba(0, 245, 212, 0.14);
+  backdrop-filter: blur(4px);
+}
+
+.bio-score-ring {
+  position: absolute;
+  inset: -0.6rem;
+  border: 1px dashed rgba(255, 183, 3, 0.42);
+  border-radius: 999px;
+}
+
+.bio-score-ring--inner {
+  inset: 0.9rem;
+  border-color: rgba(76, 201, 240, 0.42);
+}
+
+.bio-node {
+  position: absolute;
+  z-index: 9;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgba(255, 183, 3, 0.5);
+  border-radius: 999px;
+  color: #ffdc7a;
+  background: rgba(5, 8, 22, 0.72);
+  box-shadow: 0 0 20px rgba(255, 183, 3, 0.34);
+}
+
+.bio-node::after {
+  position: absolute;
+  inset: -0.55rem;
+  content: "";
+  border: 1px solid rgba(255, 183, 3, 0.22);
+  border-radius: inherit;
+  animation: ht-ring 2.8s ease-out infinite;
+}
+
+.bio-node--head { left: calc(50% - 1rem); top: 13%; }
+.bio-node--heart { left: calc(50% - 1rem); top: 34%; color: var(--xy-primary); border-color: rgba(0, 245, 212, 0.45); box-shadow: 0 0 20px rgba(0, 245, 212, 0.34); }
+.bio-node--dna { left: calc(50% - 1rem); top: 68%; color: #c4b5fd; border-color: rgba(124, 58, 237, 0.45); box-shadow: 0 0 20px rgba(124, 58, 237, 0.34); }
+.bio-node--labs { left: calc(50% - 1rem); top: 83%; }
+
+.bio-pathway {
+  position: absolute;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bio-pathway__line {
+  height: 1px;
+  width: clamp(3rem, 8vw, 7.5rem);
+  background: linear-gradient(90deg, transparent, rgba(76, 201, 240, 0.85));
+  box-shadow: 0 0 12px rgba(76, 201, 240, 0.42);
+}
+
+.bio-hud-chip {
+  min-width: 8.5rem;
+  border: 1px solid rgba(76, 201, 240, 0.16);
+  border-radius: 0.25rem;
+  background: rgba(5, 8, 22, 0.76);
+  padding: 0.72rem 0.82rem;
+  box-shadow: inset 0 0 26px rgba(76, 201, 240, 0.026);
+  backdrop-filter: blur(12px);
+}
+
+.bio-hud-chip p {
+  color: var(--xy-text-muted);
+  font-size: 0.56rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.bio-hud-chip strong {
+  display: block;
+  margin-top: 0.3rem;
+  color: white;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.bio-hud-chip strong span,
+.bio-hud-chip small {
+  color: var(--xy-text-muted);
+  font-size: 0.62rem;
+  font-weight: 500;
+}
+
+.bio-hud-chip--priority {
+  border-color: rgba(255, 183, 3, 0.25);
+  background: rgba(255, 183, 3, 0.055);
+}
+
+.bio-hud-meter {
+  display: block;
+  height: 0.22rem;
+  margin-top: 0.55rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+}
+
+.bio-hud-meter span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--xy-primary), var(--xy-tertiary));
+  box-shadow: 0 0 12px rgba(0, 245, 212, 0.42);
+}
+
+.bio-pathway--age { left: 8%; top: 18%; }
+.bio-pathway--recovery { right: 7%; top: 30%; flex-direction: row-reverse; }
+.bio-pathway--recovery .bio-pathway__line { background: linear-gradient(90deg, rgba(76, 201, 240, 0.85), transparent); }
+.bio-pathway--longevity { right: 8%; bottom: 21%; flex-direction: row-reverse; }
+.bio-pathway--longevity .bio-pathway__line { background: linear-gradient(90deg, rgba(124, 58, 237, 0.85), transparent); }
+.bio-pathway--constraint { left: 7%; bottom: 23%; }
+
+.bio-orbit-panel {
+  position: absolute;
+  z-index: 11;
+  display: grid;
+  gap: 0.7rem;
+  width: min(15rem, 24vw);
+}
+
+.bio-orbit-panel--left { left: 4%; top: 44%; }
+.bio-orbit-panel--right { right: 4%; top: 48%; }
+
+.bio-orbit-card {
+  min-width: 0;
+  border: 1px solid rgba(76, 201, 240, 0.13);
+  border-radius: 0.25rem;
+  background: rgba(5, 8, 22, 0.7);
+  padding: 0.9rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), inset 0 0 32px rgba(76, 201, 240, 0.025);
+  backdrop-filter: blur(14px);
+}
+
+.bio-orbit-card--left::after,
+.bio-orbit-card--right::after {
+  position: absolute;
+  top: 50%;
+  content: "";
+  width: 3rem;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0, 245, 212, 0.7), transparent);
+}
+
+.bio-upgrade-console {
+  position: absolute;
+  z-index: 12;
+  left: 50%;
+  bottom: 1.1rem;
+  width: min(38rem, calc(100% - 2rem));
+  transform: translateX(-50%);
+  border: 1px solid rgba(255, 183, 3, 0.18);
+  border-radius: 0.25rem;
+  background: rgba(5, 8, 22, 0.72);
+  padding: 0.9rem 1rem;
+  backdrop-filter: blur(14px);
+}
+
+.bio-dna-rail {
+  position: absolute;
+  z-index: 1;
+  top: 8%;
+  bottom: 10%;
+  width: 4.2rem;
+  opacity: 0.42;
+  background:
+    radial-gradient(circle at 50% 8%, rgba(76, 201, 240, 0.7) 0 2px, transparent 3px),
+    radial-gradient(circle at 50% 24%, rgba(124, 58, 237, 0.7) 0 2px, transparent 3px),
+    radial-gradient(circle at 50% 40%, rgba(255, 183, 3, 0.7) 0 2px, transparent 3px),
+    radial-gradient(circle at 50% 56%, rgba(76, 201, 240, 0.7) 0 2px, transparent 3px),
+    radial-gradient(circle at 50% 72%, rgba(124, 58, 237, 0.7) 0 2px, transparent 3px),
+    radial-gradient(circle at 50% 88%, rgba(255, 183, 3, 0.7) 0 2px, transparent 3px),
+    repeating-linear-gradient(180deg, transparent 0 24px, rgba(76, 201, 240, 0.16) 25px 27px, transparent 28px 48px);
+  filter: drop-shadow(0 0 10px rgba(76, 201, 240, 0.32));
+}
+
+.bio-dna-rail--left { left: 1.4rem; }
+.bio-dna-rail--right { right: 1.4rem; transform: scaleX(-1); }
+
+.bio-particle-field {
+  position: absolute;
+  inset: 0;
+  opacity: 0.46;
+  background:
+    radial-gradient(circle at 18% 26%, rgba(0, 245, 212, 0.9) 0 1px, transparent 2px),
+    radial-gradient(circle at 73% 19%, rgba(255, 183, 3, 0.9) 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 61%, rgba(124, 58, 237, 0.9) 0 1px, transparent 2px),
+    radial-gradient(circle at 24% 76%, rgba(76, 201, 240, 0.9) 0 1px, transparent 2px),
+    radial-gradient(circle at 60% 84%, rgba(255, 183, 3, 0.9) 0 1px, transparent 2px);
+  animation: bio-particles 7s ease-in-out infinite;
+}
+
 .twin-orbit {
   position: absolute;
   left: 50%;
@@ -241,9 +525,119 @@ textarea {
 @keyframes twin-rotate { to { transform: rotate(360deg); } }
 @keyframes twin-rotate-reverse { to { transform: rotate(-360deg); } }
 @keyframes twin-scan { 0% { transform: translateX(-100%); } 45%, 100% { transform: translateX(100%); } }
+@keyframes bio-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-0.55rem) scale(1.01); }
+}
+@keyframes bio-scan {
+  0% { top: 9%; opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { top: 91%; opacity: 0; }
+}
+@keyframes bio-particles {
+  0%, 100% { transform: translate3d(0, 0, 0); opacity: 0.38; }
+  50% { transform: translate3d(0.35rem, -0.45rem, 0); opacity: 0.72; }
+}
+@keyframes ht-ring {
+  0% { transform: scale(1); opacity: 0.85; }
+  100% { transform: scale(2.9); opacity: 0; }
+}
 
 .signal-pulse {
   animation: signal-pulse 2.8s ease-in-out infinite;
+}
+
+@media (min-width: 1024px) {
+  .bio-orbit-card--left::after {
+    right: -3rem;
+  }
+
+  .bio-orbit-card--right::after {
+    left: -3rem;
+    transform: scaleX(-1);
+  }
+}
+
+@media (max-width: 1023px) {
+  .bio-avatar-stage {
+    min-height: 760px;
+  }
+
+  .bio-orbit-panel {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    width: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0.75rem;
+  }
+
+  .bio-orbit-panel--left {
+    margin-top: 34rem;
+  }
+
+  .bio-orbit-card--left::after,
+  .bio-orbit-card--right::after {
+    display: none;
+  }
+
+  .bio-pathway {
+    gap: 0.4rem;
+  }
+
+  .bio-pathway__line {
+    width: 2rem;
+  }
+
+  .bio-pathway--age { left: 0.75rem; top: 1rem; }
+  .bio-pathway--recovery { right: 0.75rem; top: 7.2rem; }
+  .bio-pathway--longevity { right: 0.75rem; bottom: 15.5rem; }
+  .bio-pathway--constraint { left: 0.75rem; bottom: 15.5rem; }
+}
+
+@media (max-width: 640px) {
+  .bio-avatar-stage {
+    min-height: 800px;
+  }
+
+  .bio-avatar-image {
+    padding: 8.8rem 0 16.2rem;
+  }
+
+  .bio-score-core {
+    top: 42%;
+    width: 7.5rem;
+    height: 7.5rem;
+  }
+
+  .bio-hud-chip {
+    min-width: 7.2rem;
+    padding: 0.6rem 0.65rem;
+  }
+
+  .bio-hud-chip strong {
+    font-size: 0.78rem;
+  }
+
+  .bio-orbit-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .bio-orbit-panel--left {
+    margin-top: 33rem;
+  }
+
+  .bio-pathway__line,
+  .bio-dna-rail {
+    display: none;
+  }
+
+  .bio-upgrade-console {
+    bottom: 0.7rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
