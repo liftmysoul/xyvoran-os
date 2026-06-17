@@ -262,3 +262,26 @@ export type LabReport = {
   analysis_json: LabAnalysis | null;
   created_at: string;
 };
+
+export type BiologicalInsightSeverity = "low" | "moderate" | "high" | "priority";
+export type BiologicalInsightType = "constraint" | "opportunity" | "trend" | "risk_flag" | "protocol_priority" | "missing_data";
+export type BiologicalInsightStatus = "active" | "resolved" | "dismissed";
+export type BiologicalInsightSourceType = "biomarker" | "lab" | "lifestyle" | "pillar" | "missing_data";
+
+export type BiologicalInsightRecord = {
+  id: string;
+  user_id: string;
+  source_type: BiologicalInsightSourceType | string;
+  source_id?: string | null;
+  insight_type: BiologicalInsightType | string;
+  pillar: PillarName | "System" | string;
+  severity: BiologicalInsightSeverity | string;
+  confidence_score: number;
+  title: string;
+  summary: string;
+  evidence: Json;
+  recommended_actions: Json;
+  status: BiologicalInsightStatus | string;
+  created_at: string;
+  updated_at: string;
+};
