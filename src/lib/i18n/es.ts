@@ -98,7 +98,11 @@ export const es = {
     twinEyebrow: "Gemelo de Salud con IA / Modelo biológico en vivo", twinTitle: "Tu Biología Digital, Sincronizada", twinDescription: "Una capa unificada de inteligencia que integra tu línea base, señales biométricas, contexto de laboratorio, recuperación y misión activa de optimización.",
     biometricSync: "Sincronización Biométrica", intelligenceCore: "Núcleo de Inteligencia XYVORAN", labIntelligence: "Inteligencia de Laboratorio", activeProtocolStatus: "Protocolo Activo",
     primaryConstraint: "Principal límite de optimización", nextBiologicalUpgrade: "Siguiente mejora biológica", biometricMatrix: "Matriz biométrica", pillarRadar: "Topología de señales de cinco pilares", priorityQueue: "Cola prioritaria de ejecución",
-    online: "En línea", syncing: "Sincronizando", optimizing: "Optimizando", stable: "Estable", needsAttention: "Requiere atención", dataMissing: "Datos pendientes"
+    online: "En línea", syncing: "Sincronizando", optimizing: "Optimizando", stable: "Estable", needsAttention: "Requiere atención", dataMissing: "Datos pendientes",
+    nodeHeadTitle: "Nodo de comando neural", nodeHeadDescription: "Representa carga cognitiva, enfoque y el contexto del Núcleo de Inteligencia conectado a tu gemelo.",
+    nodeHeartTitle: "Nodo de recuperación", nodeHeartDescription: "Representa sueño, HRV, estrés, frecuencia cardiaca en reposo y preparación de recuperación.",
+    nodeMetabolicTitle: "Nodo metabólico y protocolo", nodeMetabolicDescription: "Representa señales metabólicas, preparación de movimiento y ejecución del protocolo activo.",
+    nodeLabsTitle: "Nodo de inteligencia de laboratorio", nodeLabsDescription: "Representa análisis de sangre cargados, biomarcadores extraídos e insights de optimización basados en laboratorio."
   },
   biomarkers: {
     input: "Registro manual de señales biométricas", history: "Historial de señales biométricas", notes: "Notas", save: "Sincronizar señales",

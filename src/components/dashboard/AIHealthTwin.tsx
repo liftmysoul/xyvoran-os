@@ -42,6 +42,14 @@ type AIHealthTwinProps = {
     needsAttention: string;
     dataMissing: string;
     directionalEstimate: string;
+    nodeHeadTitle: string;
+    nodeHeadDescription: string;
+    nodeHeartTitle: string;
+    nodeHeartDescription: string;
+    nodeMetabolicTitle: string;
+    nodeMetabolicDescription: string;
+    nodeLabsTitle: string;
+    nodeLabsDescription: string;
   };
   connected: {
     biomarkers: boolean;
@@ -77,6 +85,18 @@ function MetricModule({ className, icon: Icon, label, value, detail, meter }: { 
       {detail ? <p className="mt-1 text-[10px] text-muted">{detail}</p> : null}
       {typeof meter === "number" ? <span className="bio-hud-meter"><span style={{ width: `${meter}%` }} /></span> : null}
     </div>
+  );
+}
+
+function BioNode({ className, icon: Icon, title, description }: { className: string; icon: typeof Activity; title: string; description: string }) {
+  return (
+    <button type="button" className={`bio-node ${className}`} aria-label={`${title}. ${description}`}>
+      <Icon className="h-3 w-3" aria-hidden />
+      <span className="bio-node-tooltip" role="tooltip">
+        <strong>{title}</strong>
+        <span>{description}</span>
+      </span>
+    </button>
   );
 }
 
@@ -146,10 +166,10 @@ export function AIHealthTwin({ score, biologicalAge, recoveryStatus, recoverySco
             <p className="mt-1 font-mono text-[9px] text-muted">/ 100</p>
           </div>
 
-          <span className="bio-node bio-node--head" aria-hidden><Sparkles className="h-3 w-3" /></span>
-          <span className="bio-node bio-node--heart" aria-hidden><Activity className="h-3 w-3" /></span>
-          <span className="bio-node bio-node--dna" aria-hidden><Dna className="h-3 w-3" /></span>
-          <span className="bio-node bio-node--labs" aria-hidden><ScanSearch className="h-3 w-3" /></span>
+          <BioNode className="bio-node--head" icon={Sparkles} title={labels.nodeHeadTitle} description={labels.nodeHeadDescription} />
+          <BioNode className="bio-node--heart" icon={Activity} title={labels.nodeHeartTitle} description={labels.nodeHeartDescription} />
+          <BioNode className="bio-node--dna" icon={Dna} title={labels.nodeMetabolicTitle} description={labels.nodeMetabolicDescription} />
+          <BioNode className="bio-node--labs" icon={ScanSearch} title={labels.nodeLabsTitle} description={labels.nodeLabsDescription} />
 
           <MetricModule className="bio-module--age" icon={Sparkles} label={labels.biologicalAge} value={`${biologicalAge ?? "--"} ${labels.years}`} />
           <MetricModule className="bio-module--recovery" icon={Activity} label={labels.recovery} value={recoveryStatus} meter={recoveryScore} />

@@ -121,7 +121,15 @@ export default async function DashboardPage() {
           stable: copy.dashboard.stable,
           needsAttention: copy.dashboard.needsAttention,
           dataMissing: copy.dashboard.dataMissing,
-          directionalEstimate: copy.dashboard.experimentalEstimate
+          directionalEstimate: copy.dashboard.experimentalEstimate,
+          nodeHeadTitle: copy.dashboard.nodeHeadTitle,
+          nodeHeadDescription: copy.dashboard.nodeHeadDescription,
+          nodeHeartTitle: copy.dashboard.nodeHeartTitle,
+          nodeHeartDescription: copy.dashboard.nodeHeartDescription,
+          nodeMetabolicTitle: copy.dashboard.nodeMetabolicTitle,
+          nodeMetabolicDescription: copy.dashboard.nodeMetabolicDescription,
+          nodeLabsTitle: copy.dashboard.nodeLabsTitle,
+          nodeLabsDescription: copy.dashboard.nodeLabsDescription
         }}
       />
 

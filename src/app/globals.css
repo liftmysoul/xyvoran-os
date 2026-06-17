@@ -370,11 +370,14 @@ textarea {
   width: 2rem;
   height: 2rem;
   place-items: center;
+  cursor: help;
   border: 1px solid rgba(255, 183, 3, 0.34);
   border-radius: 999px;
   color: #ffdc7a;
   background: rgba(5, 8, 22, 0.72);
   box-shadow: 0 0 14px rgba(255, 183, 3, 0.22), 0 0 22px rgba(76, 201, 240, 0.12);
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
 .bio-node::after {
@@ -384,6 +387,69 @@ textarea {
   border: 1px solid rgba(255, 183, 3, 0.16);
   border-radius: inherit;
   animation: ht-ring 2.8s ease-out infinite;
+}
+
+.bio-node:hover,
+.bio-node:focus-visible {
+  z-index: 15;
+  border-color: rgba(0, 245, 212, 0.72);
+  color: var(--xy-primary);
+  box-shadow: 0 0 18px rgba(0, 245, 212, 0.4), 0 0 34px rgba(124, 58, 237, 0.18);
+  transform: translateY(-0.12rem) scale(1.04);
+}
+
+.bio-node-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.8rem);
+  display: grid;
+  width: min(15rem, 42vw);
+  gap: 0.3rem;
+  border: 1px solid rgba(76, 201, 240, 0.24);
+  border-radius: 0.25rem;
+  background: rgba(5, 8, 22, 0.92);
+  padding: 0.7rem 0.78rem;
+  color: var(--xy-text-secondary);
+  text-align: left;
+  box-shadow: 0 18px 38px rgba(0,0,0,0.32), inset 0 0 24px rgba(0, 245, 212, 0.04);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 0.35rem);
+  transition: opacity 160ms ease, transform 160ms ease;
+  backdrop-filter: blur(14px);
+}
+
+.bio-node-tooltip::after {
+  position: absolute;
+  left: 50%;
+  bottom: -0.35rem;
+  width: 0.65rem;
+  height: 0.65rem;
+  content: "";
+  border-right: 1px solid rgba(76, 201, 240, 0.24);
+  border-bottom: 1px solid rgba(76, 201, 240, 0.24);
+  background: rgba(5, 8, 22, 0.92);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.bio-node-tooltip strong {
+  color: white;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.bio-node-tooltip span {
+  color: var(--xy-text-secondary);
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+.bio-node:hover .bio-node-tooltip,
+.bio-node:focus-visible .bio-node-tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .bio-node--head { left: calc(50% - 1rem); top: 13%; }
@@ -746,6 +812,10 @@ textarea {
   .bio-node--dna { top: 24rem; }
   .bio-node--labs { top: 29rem; }
 
+  .bio-node-tooltip {
+    width: min(14rem, 76vw);
+  }
+
   .bio-hud-module {
     position: relative;
     left: auto;
@@ -836,6 +906,10 @@ textarea {
   .bio-node--heart { top: 11.8rem; }
   .bio-node--dna { top: 21.8rem; }
   .bio-node--labs { top: 26.2rem; }
+
+  .bio-node-tooltip {
+    width: min(13.5rem, 82vw);
+  }
 
   .bio-module--age,
   .bio-module--recovery,

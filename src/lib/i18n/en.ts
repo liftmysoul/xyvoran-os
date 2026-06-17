@@ -96,7 +96,11 @@ export const en = {
     twinEyebrow: "AI Health Twin / Live biological model", twinTitle: "Your Digital Biology, Synchronized", twinDescription: "A unified intelligence layer combining your baseline, biometric signals, lab context, recovery state, and active optimization mission.",
     biometricSync: "Biomarker Sync", intelligenceCore: "XYVORAN Intelligence Core", labIntelligence: "Lab Intelligence", activeProtocolStatus: "Active Protocol",
     primaryConstraint: "Primary optimization constraint", nextBiologicalUpgrade: "Next biological upgrade", biometricMatrix: "Biometric matrix", pillarRadar: "Five-pillar signal topology", priorityQueue: "Priority execution queue",
-    online: "Online", syncing: "Syncing", optimizing: "Optimizing", stable: "Stable", needsAttention: "Needs attention", dataMissing: "Data missing"
+    online: "Online", syncing: "Syncing", optimizing: "Optimizing", stable: "Stable", needsAttention: "Needs attention", dataMissing: "Data missing",
+    nodeHeadTitle: "Neural command node", nodeHeadDescription: "Represents cognitive load, focus, and the Intelligence Core context attached to your twin.",
+    nodeHeartTitle: "Recovery signal node", nodeHeartDescription: "Represents sleep, HRV, stress, resting heart rate, and recovery readiness.",
+    nodeMetabolicTitle: "Metabolic protocol node", nodeMetabolicDescription: "Represents metabolic signals, movement readiness, and active protocol execution.",
+    nodeLabsTitle: "Lab intelligence node", nodeLabsDescription: "Represents uploaded bloodwork, extracted biomarkers, and lab-driven optimization insights."
   },
   biomarkers: {
     input: "Manual Biometric Signal Input", history: "Biometric Signal History", notes: "Notes", save: "Synchronize Signals",
