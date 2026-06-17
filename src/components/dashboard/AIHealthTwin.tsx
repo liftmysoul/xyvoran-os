@@ -130,6 +130,7 @@ export function AIHealthTwin({ score, biologicalAge, recoveryStatus, recoverySco
           <div className="bio-scanline bio-scanline--one" aria-hidden />
           <div className="bio-scanline bio-scanline--two" aria-hidden />
           <span className="bio-connector bio-connector--age" aria-hidden />
+          <span className="bio-connector bio-connector--score" aria-hidden />
           <span className="bio-connector bio-connector--recovery" aria-hidden />
           <span className="bio-connector bio-connector--biomarkers" aria-hidden />
           <span className="bio-connector bio-connector--labs" aria-hidden />

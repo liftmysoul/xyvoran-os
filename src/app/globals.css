@@ -332,12 +332,12 @@ textarea {
 
 .bio-score-core {
   position: absolute;
-  z-index: 8;
-  left: 50%;
-  top: 47.5%;
+  z-index: 12;
+  left: 68.5%;
+  top: 22.5%;
   display: grid;
-  width: 10.5rem;
-  height: 10.5rem;
+  width: 9.2rem;
+  height: 9.2rem;
   place-items: center;
   transform: translate(-50%, -50%);
   border: 1px solid rgba(255, 183, 3, 0.32);
@@ -388,8 +388,8 @@ textarea {
 
 .bio-node--head { left: calc(50% - 1rem); top: 13%; }
 .bio-node--heart { left: calc(50% - 1rem); top: 34%; color: var(--xy-primary); border-color: rgba(0, 245, 212, 0.45); box-shadow: 0 0 20px rgba(0, 245, 212, 0.34); }
-.bio-node--dna { left: calc(50% - 1rem); top: 68%; color: #c4b5fd; border-color: rgba(124, 58, 237, 0.45); box-shadow: 0 0 20px rgba(124, 58, 237, 0.34); }
-.bio-node--labs { left: calc(50% - 1rem); top: 83%; }
+.bio-node--dna { left: calc(50% - 1rem); top: 54%; color: #c4b5fd; border-color: rgba(124, 58, 237, 0.45); box-shadow: 0 0 20px rgba(124, 58, 237, 0.34); }
+.bio-node--labs { left: calc(50% - 1rem); top: 72%; }
 
 .bio-pathway {
   position: absolute;
@@ -505,16 +505,16 @@ textarea {
 }
 
 .bio-module--age { left: 5.5%; top: 7.2%; }
-.bio-module--recovery { right: 5.5%; top: 7.2%; }
+.bio-module--recovery { right: 4%; top: 7.2%; }
 .bio-module--biomarkers { left: 4%; top: 35.5%; }
 .bio-module--labs { right: 4%; top: 35.5%; }
 .bio-module--core { left: 6%; top: 61.5%; }
 .bio-module--protocol { right: 6%; top: 61.5%; }
 .bio-module--constraint {
-  left: 50%;
+  left: 4%;
   bottom: 1rem;
-  width: min(24rem, calc(100% - 2rem));
-  transform: translateX(-50%);
+  width: min(22rem, calc(50% - 1.2rem));
+  transform: none;
   border-color: rgba(255, 183, 3, 0.23);
   background: rgba(255, 183, 3, 0.045);
 }
@@ -522,10 +522,10 @@ textarea {
 .bio-upgrade-console {
   position: absolute;
   z-index: 12;
-  left: 50%;
-  bottom: 6.1rem;
-  width: min(30rem, calc(100% - 2rem));
-  transform: translateX(-50%);
+  right: 4%;
+  bottom: 1rem;
+  width: min(27rem, calc(50% - 1.2rem));
+  transform: none;
   border: 1px solid rgba(255, 183, 3, 0.18);
   border-radius: 0.25rem;
   background: rgba(5, 8, 22, 0.86);
@@ -536,12 +536,12 @@ textarea {
 
 .bio-upgrade-console::before {
   position: absolute;
-  left: 50%;
-  top: -2.4rem;
-  width: 1px;
-  height: 2.4rem;
+  left: -3.4rem;
+  top: 50%;
+  width: 3.4rem;
+  height: 1px;
   content: "";
-  background: linear-gradient(180deg, rgba(255, 183, 3, 0), rgba(255, 183, 3, 0.5), rgba(0, 245, 212, 0.6));
+  background: linear-gradient(90deg, rgba(0, 245, 212, 0.6), rgba(255, 183, 3, 0.5), transparent);
   box-shadow: 0 0 12px rgba(0, 245, 212, 0.34);
 }
 
@@ -556,7 +556,7 @@ textarea {
   animation: bio-pathway-flow 3.8s linear infinite;
 }
 
-.bio-connector::after {
+.bio-connector::before {
   position: absolute;
   right: -0.2rem;
   top: -0.18rem;
@@ -568,13 +568,31 @@ textarea {
   box-shadow: 0 0 12px rgba(0, 245, 212, 0.72);
 }
 
-.bio-connector--age { left: 18%; top: 19%; width: 27%; transform: rotate(11deg); transform-origin: left center; }
-.bio-connector--recovery { right: 18%; top: 25%; width: 25%; transform: rotate(168deg); transform-origin: right center; }
-.bio-connector--biomarkers { left: 17%; top: 47%; width: 29%; transform: rotate(-3deg); transform-origin: left center; }
-.bio-connector--labs { right: 17%; top: 50%; width: 28%; transform: rotate(184deg); transform-origin: right center; }
-.bio-connector--core { left: 18%; top: 68%; width: 28%; transform: rotate(-18deg); transform-origin: left center; }
-.bio-connector--protocol { right: 18%; top: 68%; width: 28%; transform: rotate(197deg); transform-origin: right center; }
-.bio-connector--constraint { left: 50%; bottom: 15.6%; width: 1px; height: 8.5%; transform: translateX(-50%); background: linear-gradient(180deg, transparent, rgba(255, 183, 3, 0.38), rgba(0, 245, 212, 0.55), transparent); }
+.bio-connector::after {
+  position: absolute;
+  left: 0;
+  top: -0.11rem;
+  width: 0.22rem;
+  height: 0.22rem;
+  content: "";
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.95);
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.65);
+  animation: bio-connector-pulse 2.9s ease-in-out infinite;
+}
+
+.bio-connector--age { left: 18%; top: 18%; width: 30%; transform: rotate(7deg); transform-origin: left center; }
+.bio-connector--score { right: 23.5%; top: 23%; width: 18%; transform: rotate(186deg); transform-origin: right center; }
+.bio-connector--score::before { left: -0.2rem; right: auto; }
+.bio-connector--recovery { right: 18%; top: 30.5%; width: 31%; transform: rotate(177deg); transform-origin: right center; }
+.bio-connector--recovery::before,
+.bio-connector--labs::before,
+.bio-connector--protocol::before { left: -0.2rem; right: auto; }
+.bio-connector--biomarkers { left: 17%; top: 48%; width: 31%; transform: rotate(-1deg); transform-origin: left center; }
+.bio-connector--labs { right: 17%; top: 51.5%; width: 31%; transform: rotate(181deg); transform-origin: right center; }
+.bio-connector--core { left: 18%; top: 25.5%; width: 29%; transform: rotate(-17deg); transform-origin: left center; }
+.bio-connector--protocol { right: 18%; top: 71%; width: 30%; transform: rotate(192deg); transform-origin: right center; }
+.bio-connector--constraint { left: 27%; bottom: 18%; width: 19%; transform: rotate(-12deg); transform-origin: left center; background: linear-gradient(90deg, transparent, rgba(255, 183, 3, 0.38), rgba(0, 245, 212, 0.55), transparent); }
 
 .bio-dna-rail {
   position: absolute;
@@ -728,6 +746,12 @@ textarea {
   0%, 100% { opacity: 0.34; transform: scale(0.72); }
   50% { opacity: 1; transform: scale(1); }
 }
+@keyframes bio-connector-pulse {
+  0% { transform: translateX(0); opacity: 0; }
+  18% { opacity: 1; }
+  72% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
 @keyframes bio-score-breathe {
   0%, 100% { box-shadow: 0 0 34px rgba(255, 183, 3, 0.14), 0 0 78px rgba(0, 245, 212, 0.22), inset 0 0 24px rgba(76, 201, 240, 0.06); }
   50% { box-shadow: 0 0 42px rgba(255, 183, 3, 0.2), 0 0 98px rgba(0, 245, 212, 0.3), inset 0 0 34px rgba(255, 77, 109, 0.08); }
@@ -779,9 +803,13 @@ textarea {
   }
 
   .bio-score-core {
-    top: 17.2rem;
+    position: relative;
+    left: auto;
+    top: auto;
     width: 8.7rem;
     height: 8.7rem;
+    margin: 0 auto 0.85rem;
+    transform: none;
   }
 
   .bio-node--head { top: 4.8rem; }
@@ -820,7 +848,9 @@ textarea {
   .bio-upgrade-console {
     position: relative;
     left: auto;
+    right: auto;
     top: auto;
+    bottom: auto;
     clear: both;
     width: auto;
     margin: 1rem 0.75rem 0;
@@ -834,6 +864,9 @@ textarea {
   .bio-module--constraint {
     clear: both;
     width: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
     margin-top: 0.75rem;
   }
 }
@@ -862,7 +895,6 @@ textarea {
   }
 
   .bio-score-core {
-    top: 15.6rem;
     width: 7.8rem;
     height: 7.8rem;
   }
