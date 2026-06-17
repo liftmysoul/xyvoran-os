@@ -105,6 +105,8 @@ export function AIHealthTwin({ score, biologicalAge, recoveryStatus, recoverySco
             sizes="(max-width: 768px) 94vw, (max-width: 1280px) 58vw, 760px"
             className="bio-avatar-image"
           />
+          <div className="bio-avatar-spectrum" aria-hidden />
+          <div className="bio-avatar-edge-grid" aria-hidden />
 
           <div className="bio-scanline bio-scanline--one" aria-hidden />
           <div className="bio-scanline bio-scanline--two" aria-hidden />

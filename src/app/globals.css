@@ -167,11 +167,12 @@ textarea {
 }
 
 .health-twin-avatar-shell {
-  border-color: rgba(255, 183, 3, 0.16);
+  border-color: rgba(76, 201, 240, 0.2);
   background:
-    radial-gradient(circle at 50% 44%, rgba(255, 183, 3, 0.05), transparent 24%),
-    radial-gradient(circle at 44% 55%, rgba(0, 245, 212, 0.08), transparent 34%),
-    radial-gradient(circle at 74% 24%, rgba(124, 58, 237, 0.08), transparent 28%),
+    radial-gradient(circle at 50% 44%, rgba(0, 245, 212, 0.08), transparent 26%),
+    radial-gradient(circle at 44% 55%, rgba(76, 201, 240, 0.09), transparent 36%),
+    radial-gradient(circle at 74% 24%, rgba(124, 58, 237, 0.1), transparent 30%),
+    radial-gradient(circle at 51% 18%, rgba(255, 183, 3, 0.022), transparent 18%),
     rgba(5, 8, 22, 0.96);
 }
 
@@ -183,17 +184,18 @@ textarea {
   border: 1px solid rgba(76, 201, 240, 0.15);
   border-radius: 0.375rem;
   background:
-    radial-gradient(circle at 50% 48%, rgba(255, 183, 3, 0.08), transparent 26%),
-    radial-gradient(circle at 50% 56%, rgba(0, 245, 212, 0.1), transparent 36%),
-    linear-gradient(180deg, rgba(5, 8, 22, 0.56), rgba(5, 8, 22, 0.96));
-  box-shadow: inset 0 0 90px rgba(0, 245, 212, 0.04), inset 0 0 160px rgba(255, 183, 3, 0.035);
+    radial-gradient(circle at 50% 48%, rgba(0, 245, 212, 0.13), transparent 30%),
+    radial-gradient(circle at 50% 56%, rgba(76, 201, 240, 0.12), transparent 40%),
+    radial-gradient(circle at 58% 38%, rgba(124, 58, 237, 0.09), transparent 34%),
+    linear-gradient(180deg, rgba(5, 8, 22, 0.72), rgba(5, 8, 22, 0.97));
+  box-shadow: inset 0 0 90px rgba(0, 245, 212, 0.05), inset 0 0 160px rgba(124, 58, 237, 0.035);
 }
 
 .bio-stage-grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 183, 3, 0.045) 1px, transparent 1px),
+    linear-gradient(rgba(0, 245, 212, 0.045) 1px, transparent 1px),
     linear-gradient(90deg, rgba(76, 201, 240, 0.05) 1px, transparent 1px);
   background-size: 42px 42px;
   mask-image: radial-gradient(circle at center, black 32%, transparent 82%);
@@ -204,10 +206,10 @@ textarea {
   inset: 6% 20%;
   border-radius: 999px;
   background:
-    radial-gradient(circle at 50% 42%, rgba(255, 183, 3, 0.22), transparent 30%),
-    radial-gradient(circle at 50% 56%, rgba(0, 245, 212, 0.16), transparent 48%),
-    radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.12), transparent 66%);
-  filter: blur(18px);
+    radial-gradient(circle at 50% 42%, rgba(0, 245, 212, 0.24), transparent 32%),
+    radial-gradient(circle at 50% 56%, rgba(76, 201, 240, 0.18), transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.15), transparent 68%);
+  filter: blur(16px);
 }
 
 .bio-avatar-image {
@@ -216,10 +218,45 @@ textarea {
   object-position: center;
   padding: 2.3rem 0 2.7rem;
   filter:
-    drop-shadow(0 0 18px rgba(255, 183, 3, 0.38))
-    drop-shadow(0 0 34px rgba(0, 245, 212, 0.18));
+    hue-rotate(154deg)
+    saturate(0.92)
+    brightness(0.92)
+    contrast(1.34)
+    drop-shadow(0 0 12px rgba(76, 201, 240, 0.34))
+    drop-shadow(0 0 30px rgba(0, 245, 212, 0.24))
+    drop-shadow(0 0 54px rgba(124, 58, 237, 0.18));
+  opacity: 0.86;
   mix-blend-mode: screen;
   animation: bio-float 6s ease-in-out infinite;
+}
+
+.bio-avatar-spectrum {
+  position: absolute;
+  z-index: 3;
+  inset: 2.3rem 23% 2.7rem;
+  pointer-events: none;
+  background:
+    linear-gradient(105deg, rgba(0, 245, 212, 0.18), transparent 36%, rgba(124, 58, 237, 0.16) 68%, rgba(76, 201, 240, 0.18)),
+    radial-gradient(circle at 50% 14%, rgba(255, 183, 3, 0.1), transparent 12%),
+    radial-gradient(circle at 50% 35%, rgba(0, 245, 212, 0.16), transparent 18%),
+    radial-gradient(circle at 50% 68%, rgba(124, 58, 237, 0.12), transparent 20%);
+  mix-blend-mode: color;
+  opacity: 0.78;
+  mask-image: radial-gradient(ellipse at center, black 0 54%, transparent 73%);
+}
+
+.bio-avatar-edge-grid {
+  position: absolute;
+  z-index: 4;
+  inset: 2.3rem 22% 2.7rem;
+  pointer-events: none;
+  opacity: 0.32;
+  background-image:
+    linear-gradient(rgba(0, 245, 212, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(76, 201, 240, 0.12) 1px, transparent 1px);
+  background-size: 18px 18px;
+  mix-blend-mode: screen;
+  mask-image: radial-gradient(ellipse at center, transparent 0 36%, black 42% 60%, transparent 73%);
 }
 
 .bio-scanline {
@@ -252,14 +289,14 @@ textarea {
   border-radius: 999px;
   background: radial-gradient(circle, rgba(5, 8, 22, 0.82), rgba(5, 8, 22, 0.28) 68%, transparent 70%);
   text-align: center;
-  box-shadow: 0 0 42px rgba(255, 183, 3, 0.18), 0 0 70px rgba(0, 245, 212, 0.14);
+  box-shadow: 0 0 32px rgba(255, 183, 3, 0.12), 0 0 74px rgba(0, 245, 212, 0.18);
   backdrop-filter: blur(4px);
 }
 
 .bio-score-ring {
   position: absolute;
   inset: -0.6rem;
-  border: 1px dashed rgba(255, 183, 3, 0.42);
+  border: 1px dashed rgba(255, 183, 3, 0.3);
   border-radius: 999px;
 }
 
@@ -275,18 +312,18 @@ textarea {
   width: 2rem;
   height: 2rem;
   place-items: center;
-  border: 1px solid rgba(255, 183, 3, 0.5);
+  border: 1px solid rgba(255, 183, 3, 0.34);
   border-radius: 999px;
   color: #ffdc7a;
   background: rgba(5, 8, 22, 0.72);
-  box-shadow: 0 0 20px rgba(255, 183, 3, 0.34);
+  box-shadow: 0 0 14px rgba(255, 183, 3, 0.22), 0 0 22px rgba(76, 201, 240, 0.12);
 }
 
 .bio-node::after {
   position: absolute;
   inset: -0.55rem;
   content: "";
-  border: 1px solid rgba(255, 183, 3, 0.22);
+  border: 1px solid rgba(255, 183, 3, 0.16);
   border-radius: inherit;
   animation: ht-ring 2.8s ease-out infinite;
 }
@@ -313,11 +350,11 @@ textarea {
 
 .bio-hud-chip {
   min-width: 8.5rem;
-  border: 1px solid rgba(76, 201, 240, 0.16);
+  border: 1px solid rgba(76, 201, 240, 0.24);
   border-radius: 0.25rem;
-  background: rgba(5, 8, 22, 0.76);
+  background: rgba(5, 8, 22, 0.86);
   padding: 0.72rem 0.82rem;
-  box-shadow: inset 0 0 26px rgba(76, 201, 240, 0.026);
+  box-shadow: inset 0 0 26px rgba(76, 201, 240, 0.04), 0 0 22px rgba(0, 245, 212, 0.04);
   backdrop-filter: blur(12px);
 }
 
@@ -384,11 +421,11 @@ textarea {
 
 .bio-orbit-card {
   min-width: 0;
-  border: 1px solid rgba(76, 201, 240, 0.13);
+  border: 1px solid rgba(76, 201, 240, 0.22);
   border-radius: 0.25rem;
-  background: rgba(5, 8, 22, 0.7);
+  background: rgba(5, 8, 22, 0.84);
   padding: 0.9rem;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), inset 0 0 32px rgba(76, 201, 240, 0.025);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.045), inset 0 0 32px rgba(76, 201, 240, 0.04), 0 18px 34px rgba(0,0,0,0.24);
   backdrop-filter: blur(14px);
 }
 
@@ -411,8 +448,9 @@ textarea {
   transform: translateX(-50%);
   border: 1px solid rgba(255, 183, 3, 0.18);
   border-radius: 0.25rem;
-  background: rgba(5, 8, 22, 0.72);
+  background: rgba(5, 8, 22, 0.86);
   padding: 0.9rem 1rem;
+  box-shadow: 0 18px 44px rgba(0,0,0,0.28), inset 0 0 28px rgba(255, 183, 3, 0.026);
   backdrop-filter: blur(14px);
 }
 
@@ -426,10 +464,10 @@ textarea {
   background:
     radial-gradient(circle at 50% 8%, rgba(76, 201, 240, 0.7) 0 2px, transparent 3px),
     radial-gradient(circle at 50% 24%, rgba(124, 58, 237, 0.7) 0 2px, transparent 3px),
-    radial-gradient(circle at 50% 40%, rgba(255, 183, 3, 0.7) 0 2px, transparent 3px),
+    radial-gradient(circle at 50% 40%, rgba(255, 183, 3, 0.46) 0 2px, transparent 3px),
     radial-gradient(circle at 50% 56%, rgba(76, 201, 240, 0.7) 0 2px, transparent 3px),
     radial-gradient(circle at 50% 72%, rgba(124, 58, 237, 0.7) 0 2px, transparent 3px),
-    radial-gradient(circle at 50% 88%, rgba(255, 183, 3, 0.7) 0 2px, transparent 3px),
+    radial-gradient(circle at 50% 88%, rgba(255, 183, 3, 0.46) 0 2px, transparent 3px),
     repeating-linear-gradient(180deg, transparent 0 24px, rgba(76, 201, 240, 0.16) 25px 27px, transparent 28px 48px);
   filter: drop-shadow(0 0 10px rgba(76, 201, 240, 0.32));
 }
@@ -443,10 +481,10 @@ textarea {
   opacity: 0.46;
   background:
     radial-gradient(circle at 18% 26%, rgba(0, 245, 212, 0.9) 0 1px, transparent 2px),
-    radial-gradient(circle at 73% 19%, rgba(255, 183, 3, 0.9) 0 1px, transparent 2px),
+    radial-gradient(circle at 73% 19%, rgba(255, 183, 3, 0.52) 0 1px, transparent 2px),
     radial-gradient(circle at 82% 61%, rgba(124, 58, 237, 0.9) 0 1px, transparent 2px),
     radial-gradient(circle at 24% 76%, rgba(76, 201, 240, 0.9) 0 1px, transparent 2px),
-    radial-gradient(circle at 60% 84%, rgba(255, 183, 3, 0.9) 0 1px, transparent 2px);
+    radial-gradient(circle at 60% 84%, rgba(255, 183, 3, 0.52) 0 1px, transparent 2px);
   animation: bio-particles 7s ease-in-out infinite;
 }
 
@@ -605,6 +643,11 @@ textarea {
 
   .bio-avatar-image {
     padding: 8.8rem 0 16.2rem;
+  }
+
+  .bio-avatar-spectrum,
+  .bio-avatar-edge-grid {
+    inset: 8.8rem 14% 16.2rem;
   }
 
   .bio-score-core {
