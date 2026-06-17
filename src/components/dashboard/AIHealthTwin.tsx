@@ -51,16 +51,31 @@ type AIHealthTwinProps = {
   };
 };
 
-function SignalTile({ signal, position }: { signal: TwinSignal; position: "left" | "right" }) {
+function OrbitModule({ signal, className }: { signal: TwinSignal; className: string }) {
   const Icon = signal.icon;
   return (
-    <div className={`bio-orbit-card bio-orbit-card--${position} group`}>
+    <div className={`bio-hud-module ${className} group`}>
       <div className="flex items-center justify-between gap-3">
         <Icon className="h-4 w-4 text-signal transition group-hover:text-emeraldx" />
         <SystemStatus label={signal.status} tone={signal.tone} />
       </div>
       <p className="mt-4 text-[10px] font-semibold uppercase text-muted">{signal.label}</p>
       <p className="mt-1 truncate text-sm font-semibold text-white">{signal.value}</p>
+    </div>
+  );
+}
+
+function MetricModule({ className, icon: Icon, label, value, detail, meter }: { className: string; icon: typeof Activity; label: string; value: string; detail?: string; meter?: number }) {
+  return (
+    <div className={`bio-hud-module ${className}`}>
+      <div className="flex items-center justify-between gap-3">
+        <Icon className="h-4 w-4 text-signal" />
+        {typeof meter === "number" ? <span className="font-mono text-[10px] text-emeraldx">{meter}/100</span> : null}
+      </div>
+      <p className="mt-4 text-[10px] font-semibold uppercase text-muted">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-white">{value}</p>
+      {detail ? <p className="mt-1 text-[10px] text-muted">{detail}</p> : null}
+      {typeof meter === "number" ? <span className="bio-hud-meter"><span style={{ width: `${meter}%` }} /></span> : null}
     </div>
   );
 }
@@ -96,6 +111,10 @@ export function AIHealthTwin({ score, biologicalAge, recoveryStatus, recoverySco
           <div className="bio-dna-rail bio-dna-rail--right" aria-hidden />
           <div className="bio-particle-field" aria-hidden />
           <div className="bio-avatar-glow" aria-hidden />
+          <div className="bio-neural-field" aria-hidden />
+          <svg className="bio-ecg-pulse" viewBox="0 0 260 56" aria-hidden>
+            <polyline points="0,31 42,31 51,17 61,42 72,9 88,31 126,31 138,24 148,35 160,31 260,31" />
+          </svg>
 
           <Image
             src="/images/xyvoran-health-twin-avatar.jpg"
@@ -110,6 +129,13 @@ export function AIHealthTwin({ score, biologicalAge, recoveryStatus, recoverySco
 
           <div className="bio-scanline bio-scanline--one" aria-hidden />
           <div className="bio-scanline bio-scanline--two" aria-hidden />
+          <span className="bio-connector bio-connector--age" aria-hidden />
+          <span className="bio-connector bio-connector--recovery" aria-hidden />
+          <span className="bio-connector bio-connector--biomarkers" aria-hidden />
+          <span className="bio-connector bio-connector--labs" aria-hidden />
+          <span className="bio-connector bio-connector--core" aria-hidden />
+          <span className="bio-connector bio-connector--protocol" aria-hidden />
+          <span className="bio-connector bio-connector--constraint" aria-hidden />
 
           <div className="bio-score-core" aria-label={`${labels.optimizationScore}: ${score}/100`}>
             <div className="bio-score-ring twin-spin" />
@@ -124,53 +150,22 @@ export function AIHealthTwin({ score, biologicalAge, recoveryStatus, recoverySco
           <span className="bio-node bio-node--dna" aria-hidden><Dna className="h-3 w-3" /></span>
           <span className="bio-node bio-node--labs" aria-hidden><ScanSearch className="h-3 w-3" /></span>
 
-          <div className="bio-pathway bio-pathway--age">
-            <span className="bio-pathway__line" />
-            <div className="bio-hud-chip">
-              <p>{labels.biologicalAge}</p>
-              <strong>{biologicalAge ?? "--"} <span>{labels.years}</span></strong>
-            </div>
-          </div>
-
-          <div className="bio-pathway bio-pathway--recovery">
-            <span className="bio-pathway__line" />
-            <div className="bio-hud-chip">
-              <p>{labels.recovery}</p>
-              <strong>{recoveryStatus}</strong>
-              <span className="bio-hud-meter"><span style={{ width: `${recoveryScore}%` }} /></span>
-            </div>
-          </div>
-
-          <div className="bio-pathway bio-pathway--longevity">
-            <span className="bio-pathway__line" />
-            <div className="bio-hud-chip">
-              <p>{labels.longevity}</p>
-              <strong>{longevityProjection}</strong>
-              <small>{longevityScore}/100</small>
-            </div>
-          </div>
-
-          <div className="bio-pathway bio-pathway--constraint">
-            <span className="bio-pathway__line" />
-            <div className="bio-hud-chip bio-hud-chip--priority">
-              <p>{labels.primaryConstraint}</p>
-              <strong>{weakestPillar}</strong>
-            </div>
-          </div>
-
-          <div className="bio-orbit-panel bio-orbit-panel--left">
-            <SignalTile signal={signals[0]} position="left" />
-            <SignalTile signal={signals[1]} position="left" />
-          </div>
-
-          <div className="bio-orbit-panel bio-orbit-panel--right">
-            <SignalTile signal={signals[2]} position="right" />
-            <SignalTile signal={signals[3]} position="right" />
-          </div>
+          <MetricModule className="bio-module--age" icon={Sparkles} label={labels.biologicalAge} value={`${biologicalAge ?? "--"} ${labels.years}`} />
+          <MetricModule className="bio-module--recovery" icon={Activity} label={labels.recovery} value={recoveryStatus} meter={recoveryScore} />
+          <OrbitModule signal={signals[0]} className="bio-module--biomarkers" />
+          <OrbitModule signal={signals[2]} className="bio-module--labs" />
+          <OrbitModule signal={signals[1]} className="bio-module--core" />
+          <OrbitModule signal={signals[3]} className="bio-module--protocol" />
 
           <div className="bio-upgrade-console">
             <div className="flex items-center gap-2 text-warningx"><ShieldCheck className="h-4 w-4" /><span className="text-[9px] font-semibold uppercase">{labels.nextUpgrade}</span></div>
             <p className="mt-2 text-xs leading-5 text-chrome">{nextUpgrade}</p>
+          </div>
+
+          <div className="bio-hud-module bio-module--constraint">
+            <div className="flex items-center justify-center gap-2 text-warningx"><ShieldCheck className="h-4 w-4" /><span className="text-[9px] font-semibold uppercase">{labels.primaryConstraint}</span></div>
+            <p className="mt-2 text-center text-lg font-semibold text-white">{weakestPillar}</p>
+            <p className="mt-1 text-center text-[10px] text-muted">{labels.longevity}: {longevityProjection} | {longevityScore}/100</p>
           </div>
         </div>
 
