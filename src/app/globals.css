@@ -26,11 +26,13 @@
 
 html {
   background: var(--xy-bg);
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  overflow-x: hidden;
   background-color: var(--xy-bg);
   background-image:
     linear-gradient(rgba(76, 201, 240, 0.035) 1px, transparent 1px),
@@ -511,6 +513,10 @@ textarea {
   animation: bio-dot-activity 2.2s ease-in-out infinite;
 }
 
+.bio-mobile-metrics {
+  display: contents;
+}
+
 .bio-module--age { left: 5.5%; top: 7.2%; }
 .bio-module--recovery { right: 4%; top: 7.2%; }
 .bio-module--biomarkers { left: 4%; top: 35.5%; }
@@ -761,9 +767,14 @@ textarea {
 }
 
 @media (max-width: 1023px) {
+  .bio-twin-content {
+    min-height: 0 !important;
+    padding: 0.75rem !important;
+  }
+
   .bio-avatar-stage {
     min-height: 0;
-    padding: 35rem 0 1rem;
+    padding: 31rem 0.25rem 0.75rem;
   }
 
   .bio-avatar-stage::after,
@@ -774,21 +785,21 @@ textarea {
 
   .bio-avatar-image {
     inset: 0 0 auto !important;
-    height: 34rem !important;
-    padding: 2rem 0 1rem;
+    height: 30rem !important;
+    padding: 1.25rem 0 0.75rem;
   }
 
   .bio-avatar-spectrum,
   .bio-avatar-edge-grid {
-    inset: 2rem 18% auto;
-    height: 31rem;
+    inset: 1.25rem 18% auto;
+    height: 28rem;
   }
 
   .bio-avatar-glow,
   .bio-stage-grid,
   .bio-particle-field,
   .bio-neural-field {
-    height: 34rem;
+    height: 30rem;
     bottom: auto;
   }
 
@@ -816,6 +827,14 @@ textarea {
     width: min(14rem, 76vw);
   }
 
+  .bio-mobile-metrics {
+    display: grid;
+    clear: both;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0.75rem;
+  }
+
   .bio-hud-module {
     position: relative;
     left: auto;
@@ -824,7 +843,7 @@ textarea {
     bottom: auto;
     display: block;
     width: auto;
-    margin: 0.75rem;
+    margin: 0;
     transform: none;
   }
 
@@ -834,14 +853,8 @@ textarea {
   .bio-module--labs,
   .bio-module--core,
   .bio-module--protocol {
-    width: calc(50% - 1.125rem);
-    float: left;
-  }
-
-  .bio-module--recovery,
-  .bio-module--labs,
-  .bio-module--protocol {
-    float: right;
+    width: auto;
+    float: none;
   }
 
   .bio-upgrade-console {
@@ -866,63 +879,114 @@ textarea {
     left: auto;
     right: auto;
     bottom: auto;
-    margin-top: 0.75rem;
+    margin: 0.75rem;
   }
 }
 
 @media (max-width: 640px) {
+  .bio-twin-header {
+    padding: 0.9rem 1rem;
+  }
+
+  .bio-twin-header h3 {
+    font-size: 1.05rem;
+    line-height: 1.25;
+  }
+
+  .bio-twin-header p {
+    line-height: 1.45;
+  }
+
   .bio-avatar-stage {
-    padding-top: 31rem;
+    padding: 22.5rem 0.15rem 0.65rem;
   }
 
   .bio-avatar-image {
-    height: 30rem !important;
-    padding: 2rem 0 1rem;
+    height: 22rem !important;
+    padding: 0.7rem 0 0.35rem;
   }
 
   .bio-avatar-spectrum,
   .bio-avatar-edge-grid {
-    inset: 2rem 10% auto;
-    height: 27rem;
+    inset: 0.7rem 7% auto;
+    height: 20.8rem;
   }
 
   .bio-avatar-glow,
   .bio-stage-grid,
   .bio-particle-field,
   .bio-neural-field {
-    height: 30rem;
+    height: 22rem;
   }
 
   .bio-score-core {
-    width: 7.8rem;
-    height: 7.8rem;
+    width: 6.9rem;
+    height: 6.9rem;
+    margin-bottom: 0.65rem;
   }
 
   .bio-ecg-pulse {
-    top: 9.8rem;
+    top: 7.7rem;
+    width: min(10rem, 46vw);
   }
 
-  .bio-node--head { top: 4.5rem; }
-  .bio-node--heart { top: 11.8rem; }
-  .bio-node--dna { top: 21.8rem; }
-  .bio-node--labs { top: 26.2rem; }
+  .bio-node {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .bio-node--head { top: 2.6rem; }
+  .bio-node--heart { top: 7.9rem; }
+  .bio-node--dna { top: 14.8rem; }
+  .bio-node--labs { top: 19rem; }
 
   .bio-node-tooltip {
     width: min(13.5rem, 82vw);
   }
 
-  .bio-module--age,
-  .bio-module--recovery,
-  .bio-module--biomarkers,
-  .bio-module--labs,
-  .bio-module--core,
-  .bio-module--protocol {
-    width: auto;
-    float: none;
+  .bio-mobile-metrics {
+    gap: 0.55rem;
+    margin: 0.55rem;
+  }
+
+  .bio-mobile-metrics .bio-hud-module {
+    min-height: 8.35rem;
+    padding: 0.7rem;
+  }
+
+  .bio-mobile-metrics .bio-hud-module p.mt-4 {
+    margin-top: 0.7rem;
+  }
+
+  .bio-mobile-metrics .bio-hud-module .truncate {
+    overflow: visible;
+    white-space: normal;
+    text-overflow: clip;
+  }
+
+  .bio-module-status {
+    gap: 0.3rem;
+    padding: 0.2rem 0.35rem;
+    font-size: 7px;
+    white-space: nowrap;
   }
 
   .bio-upgrade-console {
-    margin-top: 0.75rem;
+    margin: 0.55rem;
+    padding: 0.75rem;
+  }
+
+  .bio-module--constraint {
+    margin: 0.55rem;
+    padding: 0.8rem;
+  }
+
+  .bio-module--constraint p.text-lg {
+    font-size: 1rem;
+  }
+
+  .bio-score-core .text-5xl {
+    font-size: 2.6rem;
   }
 }
 

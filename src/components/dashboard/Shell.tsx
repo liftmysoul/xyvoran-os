@@ -32,7 +32,7 @@ export function DashboardShell({ children, email }: { children: React.ReactNode;
   }
 
   return (
-    <div className="min-h-screen bg-obsidian text-chrome">
+    <div className="min-h-screen overflow-x-clip bg-obsidian text-chrome">
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-72 border-r border-signal/10 bg-graphite/90 p-5 backdrop-blur-xl xl:block">
         <Link href="/" className="text-white"><BrandMark /></Link>
         <div className="mt-8 flex items-center justify-between border-y border-signal/10 py-3 text-[10px] uppercase text-muted"><span>{copy.nav.layer}</span><span className="flex items-center gap-2 text-successx"><span className="status-dot" />ONLINE</span></div>
@@ -59,8 +59,8 @@ export function DashboardShell({ children, email }: { children: React.ReactNode;
           })}
         </nav>
       </aside>
-      <main className="xl:pl-72">
-        <header className="sticky top-0 z-10 border-b border-signal/10 bg-obsidian/90 px-4 py-4 backdrop-blur-xl md:px-8">
+      <main className="min-w-0 xl:pl-72">
+        <header className="relative z-10 border-b border-signal/10 bg-obsidian px-4 py-4 md:px-8 xl:sticky xl:top-0 xl:bg-obsidian/90 xl:backdrop-blur-xl">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="system-label flex items-center gap-2"><span className="status-dot" />{copy.nav.system}</p>
@@ -82,7 +82,7 @@ export function DashboardShell({ children, email }: { children: React.ReactNode;
               </button>
             </div>
           </div>
-          <nav className="mobile-command-dock -mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1 xl:hidden">
+          <nav className="mobile-command-dock -mx-4 mt-4 flex max-w-[calc(100vw)] gap-2 overflow-x-auto px-4 pb-1 xl:hidden">
             {nav.map((item) => {
               const active = pathname === item.href;
               const Icon = item.icon;
@@ -104,7 +104,7 @@ export function DashboardShell({ children, email }: { children: React.ReactNode;
             })}
           </nav>
         </header>
-        <div className="mx-auto max-w-[1600px] p-4 md:p-8">{children}</div>
+        <div className="mx-auto min-w-0 max-w-[1600px] overflow-x-clip p-4 md:p-8">{children}</div>
       </main>
     </div>
   );

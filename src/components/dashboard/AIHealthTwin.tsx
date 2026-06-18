@@ -75,7 +75,7 @@ function OrbitModule({ signal, className }: { signal: TwinSignal; className: str
     <div className={`bio-hud-module ${className} group`}>
       <div className="flex items-center justify-between gap-3">
         <Icon className="h-4 w-4 text-signal transition group-hover:text-emeraldx" />
-        <SystemStatus label={signal.status} tone={signal.tone} />
+        <SystemStatus label={signal.status} tone={signal.tone} className="bio-module-status" />
       </div>
       <p className="mt-4 text-[10px] font-semibold uppercase text-muted">{signal.label}</p>
       <p className="mt-1 truncate text-sm font-semibold text-white">{signal.value}</p>
@@ -128,7 +128,7 @@ export function AIHealthTwin({ score, biologicalAge, recoveryStatus, recoverySco
       <div className="health-twin-grid" />
       <div className="twin-orbit twin-orbit-one" />
       <div className="twin-orbit twin-orbit-two" />
-      <div className="relative z-10 border-b border-signal/10 px-4 py-4 md:px-6">
+      <div className="bio-twin-header relative z-10 border-b border-signal/10 px-4 py-4 md:px-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="system-label flex items-center gap-2"><span className="status-dot signal-pulse" />{labels.eyebrow}</p>
@@ -139,7 +139,7 @@ export function AIHealthTwin({ score, biologicalAge, recoveryStatus, recoverySco
         </div>
       </div>
 
-      <div className="relative z-10 min-h-[760px] overflow-hidden px-4 py-5 md:min-h-[820px] md:px-6 lg:min-h-[720px]">
+      <div className="bio-twin-content relative z-10 min-h-[760px] overflow-hidden px-4 py-5 md:min-h-[820px] md:px-6 lg:min-h-[720px]">
         <div className="bio-avatar-stage">
           <div className="bio-stage-grid" aria-hidden />
           <div className="bio-dna-rail bio-dna-rail--left" aria-hidden />
@@ -186,12 +186,14 @@ export function AIHealthTwin({ score, biologicalAge, recoveryStatus, recoverySco
           <BioNode className="bio-node--dna" icon={Dna} title={labels.nodeMetabolicTitle} description={labels.nodeMetabolicDescription} />
           <BioNode className="bio-node--labs" icon={ScanSearch} title={labels.nodeLabsTitle} description={labels.nodeLabsDescription} />
 
-          <MetricModule className="bio-module--age" icon={Sparkles} label={labels.biologicalAge} value={`${biologicalAge ?? "--"} ${labels.years}`} />
-          <MetricModule className="bio-module--recovery" icon={Activity} label={labels.recovery} value={recoveryStatus} meter={recoveryScore} />
-          <OrbitModule signal={signals[0]} className="bio-module--biomarkers" />
-          <OrbitModule signal={signals[2]} className="bio-module--labs" />
-          <OrbitModule signal={signals[1]} className="bio-module--core" />
-          <OrbitModule signal={signals[3]} className="bio-module--protocol" />
+          <div className="bio-mobile-metrics">
+            <MetricModule className="bio-module--age" icon={Sparkles} label={labels.biologicalAge} value={`${biologicalAge ?? "--"} ${labels.years}`} />
+            <MetricModule className="bio-module--recovery" icon={Activity} label={labels.recovery} value={recoveryStatus} meter={recoveryScore} />
+            <OrbitModule signal={signals[0]} className="bio-module--biomarkers" />
+            <OrbitModule signal={signals[2]} className="bio-module--labs" />
+            <OrbitModule signal={signals[1]} className="bio-module--core" />
+            <OrbitModule signal={signals[3]} className="bio-module--protocol" />
+          </div>
 
           <div className="bio-upgrade-console">
             <div className="flex items-center gap-2 text-warningx"><ShieldCheck className="h-4 w-4" /><span className="text-[9px] font-semibold uppercase">{labels.nextUpgrade}</span></div>
