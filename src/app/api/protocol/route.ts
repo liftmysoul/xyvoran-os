@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { generateStructuredProtocol } from "@/lib/protocol";
+import { adaptProtocolToMission, generateAdaptiveMission } from "@/lib/adaptive-protocol-engine";
 import { calculatePillars } from "@/lib/scoring";
 import { applyLabScoreImpacts, mergeLabsIntoBiomarkers } from "@/lib/labs/integrate";
 import { generateBiologicalIntelligence } from "@/lib/biological-intelligence";
 import { createClient } from "@/lib/supabase-server";
 import { getSupabaseAnonKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
-import type { BiomarkerEntry, BiologicalInsightRecord, ChatMessage, LabReport, OnboardingData, PillarScore, ProtocolIntensity } from "@/types/database";
+import type { AdaptiveMissionRecord, BiomarkerEntry, BiologicalInsightRecord, ChatMessage, LabReport, OnboardingData, PillarScore, ProtocolIntensity } from "@/types/database";
 import type { Profile } from "@/types/database";
 import { getDictionary, normalizeLanguage } from "@/lib/i18n";
 import { getServerLanguage } from "@/lib/i18n/server";
@@ -52,7 +53,8 @@ export async function POST(request: Request) {
     { data: storedPillars, error: pillarsError },
     { data: recentMessages, error: messagesError },
     { data: latestLab, error: labError },
-    { data: activeInsights, error: insightsError }
+    { data: activeInsights, error: insightsError },
+    { data: adaptiveMissions }
   ] = await Promise.all([
     dataClient.from("profiles").select("id,email,language_preference").eq("id", auth.user.id).maybeSingle<Profile>(),
     dataClient.from("onboarding_data").select("*").eq("user_id", auth.user.id).maybeSingle<OnboardingData>(),
@@ -60,7 +62,8 @@ export async function POST(request: Request) {
     dataClient.from("pillar_scores").select("pillar,score,status,metrics,suggested_next_action").eq("user_id", auth.user.id).returns<StoredPillar[]>(),
     dataClient.from("ai_chat_messages").select("*").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(6).returns<ChatMessage[]>(),
     dataClient.from("lab_reports").select("*").eq("user_id", auth.user.id).eq("processing_status", "completed").order("created_at", { ascending: false }).limit(1).maybeSingle<LabReport>(),
-    dataClient.from("biological_insights").select("*").eq("user_id", auth.user.id).eq("status", "active").order("created_at", { ascending: false }).limit(10).returns<BiologicalInsightRecord[]>()
+    dataClient.from("biological_insights").select("*").eq("user_id", auth.user.id).eq("status", "active").order("created_at", { ascending: false }).limit(10).returns<BiologicalInsightRecord[]>(),
+    dataClient.from("adaptive_missions").select("*").eq("user_id", auth.user.id).is("completed_at", null).order("created_at", { ascending: false }).limit(3).returns<AdaptiveMissionRecord[]>()
   ]);
   const readError = onboardingError ?? biomarkerError ?? pillarsError ?? messagesError ?? labError ?? insightsError;
   if (readError) return NextResponse.json({ error: `Unable to load protocol context: ${readError.message}` }, { status: 500 });
@@ -87,7 +90,20 @@ export async function POST(request: Request) {
     pillarScores: pillars
   });
 
-  const protocol = generateStructuredProtocol({
+  const adaptiveMission = generateAdaptiveMission({
+    userId: auth.user.id,
+    onboarding,
+    latestBiomarkers: scoreBiomarkers,
+    latestLabReport: latestLab ?? null,
+    previousLabReports: latestLab ? [latestLab] : [],
+    pillarScores: pillars,
+    biologicalInsights: activeInsights ?? [],
+    biologicalIntelligence: intelligence.summary,
+    previousProtocols: [],
+    previousMissions: adaptiveMissions ?? []
+  });
+
+  const protocol = adaptProtocolToMission(generateStructuredProtocol({
     onboarding,
     biomarkers: scoreBiomarkers,
     pillars,
@@ -96,7 +112,7 @@ export async function POST(request: Request) {
     intelligenceSummary: intelligence.summary,
     requestedIntensity,
     language
-  });
+  }), adaptiveMission);
 
   const insertPayload = {
     user_id: auth.user.id,

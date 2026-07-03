@@ -53,6 +53,10 @@ type AIHealthTwinProps = {
     confidence: string;
     activeInsights: string;
     missingSignals: string;
+    currentMission: string;
+    missionProgress: string;
+    nextSignalNeeded: string;
+    currentBottleneck: string;
   };
   connected: {
     biomarkers: boolean;
@@ -66,6 +70,10 @@ type AIHealthTwinProps = {
     topOpportunity?: string | null;
     activeInsightsCount?: number;
     missingSignalsCount?: number;
+    activeMission?: string | null;
+    missionProgress?: number | null;
+    nextSignalNeeded?: string | null;
+    prioritySignals?: string[];
   };
 };
 
@@ -116,11 +124,14 @@ export function AIHealthTwin({ score, biologicalAge, recoveryStatus, recoverySco
   const activeInsightsText = `${intelligence?.activeInsightsCount ?? 0} ${labels.activeInsights}`;
   const primaryConstraint = intelligence?.primaryConstraint ?? weakestPillar;
   const topOpportunity = intelligence?.topOpportunity ?? nextUpgrade;
+  const activeMission = intelligence?.activeMission ?? primaryGoal;
+  const missionProgress = typeof intelligence?.missionProgress === "number" ? `${intelligence.missionProgress}% ${labels.missionProgress}` : activeInsightsText;
+  const nextSignalNeeded = intelligence?.nextSignalNeeded ?? missingSignalsValue;
   const signals: TwinSignal[] = [
     { label: labels.biometricSync, value: connected.biomarkers ? `${score}% ${labels.stable}` : missingSignalsValue, status: connected.biomarkers ? labels.online : labels.syncing, tone: connected.biomarkers ? "active" : "warning", icon: RadioTower },
     { label: labels.intelligenceCore, value: intelligenceConfidence, status: connected.coach ? labels.online : labels.dataMissing, tone: connected.coach ? "intelligence" : "muted", icon: BrainCircuit },
     { label: labels.labIntelligence, value: connected.labs ? labels.stable : labels.dataMissing, status: connected.labs ? labels.online : labels.syncing, tone: connected.labs ? "active" : "warning", icon: ScanSearch },
-    { label: labels.activeProtocol, value: connected.protocol ? labels.optimizing : labels.dataMissing, status: connected.protocol ? labels.optimizing : labels.syncing, tone: connected.protocol ? "intelligence" : "warning", icon: WandSparkles }
+    { label: labels.activeProtocol, value: activeMission, status: connected.protocol ? labels.optimizing : labels.syncing, tone: connected.protocol ? "intelligence" : "warning", icon: WandSparkles }
   ];
 
   return (
@@ -198,12 +209,13 @@ export function AIHealthTwin({ score, biologicalAge, recoveryStatus, recoverySco
           <div className="bio-upgrade-console">
             <div className="flex items-center gap-2 text-warningx"><ShieldCheck className="h-4 w-4" /><span className="text-[9px] font-semibold uppercase">{labels.nextUpgrade}</span></div>
             <p className="mt-2 text-xs leading-5 text-chrome">{topOpportunity}</p>
+            <p className="mt-2 text-[10px] text-emeraldx">{labels.nextSignalNeeded}: {nextSignalNeeded}</p>
           </div>
 
           <div className="bio-hud-module bio-module--constraint">
-            <div className="flex items-center justify-center gap-2 text-warningx"><ShieldCheck className="h-4 w-4" /><span className="text-[9px] font-semibold uppercase">{labels.primaryConstraint}</span></div>
+            <div className="flex items-center justify-center gap-2 text-warningx"><ShieldCheck className="h-4 w-4" /><span className="text-[9px] font-semibold uppercase">{labels.currentBottleneck}</span></div>
             <p className="mt-2 text-center text-lg font-semibold text-white">{primaryConstraint}</p>
-            <p className="mt-1 text-center text-[10px] text-emeraldx">{activeInsightsText}</p>
+            <p className="mt-1 text-center text-[10px] text-emeraldx">{missionProgress}</p>
             <p className="mt-1 text-center text-[10px] text-muted">{labels.longevity}: {longevityProjection} | {longevityScore}/100</p>
           </div>
         </div>

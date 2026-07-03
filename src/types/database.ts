@@ -288,3 +288,19 @@ export type BiologicalInsightRecord = {
   created_at: string;
   updated_at: string;
 };
+
+export type AdaptiveMissionRecord = {
+  id: string;
+  user_id: string;
+  mission_name: string;
+  primary_pillar: PillarName | string;
+  constraint: string;
+  confidence: number;
+  progress: number;
+  phases: Json;
+  actions: Json;
+  tracking_signals: Json;
+  created_at: string;
+  updated_at: string;
+  completed_at?: string | null;
+};

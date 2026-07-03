@@ -11,9 +11,10 @@ import { findWeakestPillar } from "@/lib/protocol";
 import { calculatePillars } from "@/lib/scoring";
 import { applyLabScoreImpacts, mergeLabsIntoBiomarkers } from "@/lib/labs/integrate";
 import { generateBiologicalIntelligence } from "@/lib/biological-intelligence";
+import { generateAdaptiveMission } from "@/lib/adaptive-protocol-engine";
 import { createClient } from "@/lib/supabase-server";
 import { formatDate } from "@/lib/format";
-import type { BiomarkerEntry, BiologicalInsightRecord, LabReport, OnboardingData, Protocol } from "@/types/database";
+import type { AdaptiveMissionRecord, BiomarkerEntry, BiologicalInsightRecord, LabReport, OnboardingData, Protocol } from "@/types/database";
 import { getServerI18n } from "@/lib/i18n/server";
 import { getDictionary, localizeIntensity, localizeLabCategory, localizeLabPriorityAction, localizePillar } from "@/lib/i18n";
 import { localizeGoal } from "@/lib/protocol";
@@ -41,16 +42,18 @@ export default async function DashboardPage() {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect("/auth/login");
 
-  const [{ data: onboarding }, { data: biomarkers }, { data: latestProtocol }, { data: latestLab }, { data: storedInsights }] = await Promise.all([
+  const [{ data: onboarding }, { data: biomarkers }, { data: latestProtocol }, { data: labReports }, { data: storedInsights }, { data: storedMissions, error: missionReadError }] = await Promise.all([
     supabase.from("onboarding_data").select("*").eq("user_id", auth.user.id).maybeSingle<OnboardingData>(),
     supabase.from("biomarker_entries").select("*").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle<BiomarkerEntry>(),
     supabase.from("generated_protocols").select("*").eq("user_id", auth.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle<Protocol>(),
-    supabase.from("lab_reports").select("*").eq("user_id", auth.user.id).eq("processing_status", "completed").order("created_at", { ascending: false }).limit(1).maybeSingle<LabReport>(),
-    supabase.from("biological_insights").select("*").eq("user_id", auth.user.id).eq("status", "active").order("created_at", { ascending: false }).limit(6).returns<BiologicalInsightRecord[]>()
+    supabase.from("lab_reports").select("*").eq("user_id", auth.user.id).eq("processing_status", "completed").order("created_at", { ascending: false }).limit(3).returns<LabReport[]>(),
+    supabase.from("biological_insights").select("*").eq("user_id", auth.user.id).eq("status", "active").order("created_at", { ascending: false }).limit(6).returns<BiologicalInsightRecord[]>(),
+    supabase.from("adaptive_missions").select("*").eq("user_id", auth.user.id).is("completed_at", null).order("created_at", { ascending: false }).limit(3).returns<AdaptiveMissionRecord[]>()
   ]);
 
   if (!onboarding?.disclaimer_confirmed) redirect("/onboarding");
 
+  const latestLab = labReports?.[0] ?? null;
   const scoreBiomarkers = mergeLabsIntoBiomarkers(biomarkers, latestLab?.analysis_json);
   const pillars = applyLabScoreImpacts(calculatePillars(onboarding, scoreBiomarkers, language), latestLab?.analysis_json, language);
   const intelligence = generateBiologicalIntelligence({
@@ -67,6 +70,32 @@ export default async function DashboardPage() {
     created_at: "",
     updated_at: ""
   }));
+  const adaptiveMission = generateAdaptiveMission({
+    userId: auth.user.id,
+    onboarding,
+    latestBiomarkers: scoreBiomarkers,
+    latestLabReport: latestLab,
+    previousLabReports: labReports ?? [],
+    pillarScores: pillars,
+    biologicalInsights: activeInsights as BiologicalInsightRecord[],
+    biologicalIntelligence: intelligenceSummary,
+    previousProtocols: latestProtocol ? [latestProtocol] : [],
+    previousMissions: storedMissions ?? []
+  });
+  const persistedMission = storedMissions?.[0];
+  if (!persistedMission && !missionReadError) {
+    await supabase.from("adaptive_missions").insert({
+      user_id: auth.user.id,
+      mission_name: adaptiveMission.missionName,
+      primary_pillar: adaptiveMission.primaryPillar,
+      constraint: adaptiveMission.constraint,
+      confidence: adaptiveMission.confidence,
+      progress: adaptiveMission.progress,
+      phases: adaptiveMission.phases,
+      actions: adaptiveMission.actions,
+      tracking_signals: adaptiveMission.trackingSignals
+    });
+  }
   const { error: pillarError } = await supabase.from("pillar_scores").upsert(
     pillars.map((pillar) => ({
       user_id: auth.user.id,
@@ -149,18 +178,42 @@ export default async function DashboardPage() {
           nodeLabsDescription: copy.dashboard.nodeLabsDescription,
           confidence: copy.dashboard.confidence,
           activeInsights: copy.dashboard.activeInsights,
-          missingSignals: copy.dashboard.missingSignals
+          missingSignals: copy.dashboard.missingSignals,
+          currentMission: copy.dashboard.currentBiologicalMission,
+          missionProgress: copy.dashboard.missionProgress,
+          nextSignalNeeded: copy.dashboard.nextSignalNeeded,
+          currentBottleneck: copy.dashboard.currentBottleneck
         }}
         intelligence={{
-          primaryConstraint: intelligenceSummary.primaryConstraint ? localizePillar(intelligenceSummary.primaryConstraint.pillar, language) : null,
-          confidenceScore: intelligenceSummary.confidenceScore,
-          topOpportunity: intelligenceSummary.topOpportunity ?? copy.dashboard.limitedIntelligence,
+          primaryConstraint: adaptiveMission.constraint,
+          confidenceScore: adaptiveMission.confidence,
+          topOpportunity: adaptiveMission.nextUpgrade,
           activeInsightsCount: activeInsights.length,
-          missingSignalsCount: intelligenceSummary.missingData.length
+          missingSignalsCount: intelligenceSummary.missingData.length,
+          activeMission: adaptiveMission.missionName,
+          missionProgress: adaptiveMission.progress,
+          nextSignalNeeded: adaptiveMission.nextSignalNeeded,
+          prioritySignals: adaptiveMission.prioritySignals
         }}
       />
 
       <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <Card className="lg:col-span-2">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="system-label">{copy.dashboard.currentBiologicalMission}</p>
+              <h3 className="mt-2 text-xl font-semibold text-white">{adaptiveMission.missionName}</h3>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-chrome">{adaptiveMission.reason}</p>
+            </div>
+            <SystemStatus label={`${adaptiveMission.progress}% ${copy.dashboard.missionProgress}`} tone={adaptiveMission.progress >= 55 ? "active" : "warning"} />
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-4">
+            <div className="command-surface rounded-md p-4"><p className="system-label">{copy.dashboard.currentBottleneck}</p><p className="mt-2 text-white">{adaptiveMission.constraint}</p></div>
+            <div className="command-surface rounded-md p-4"><p className="system-label">{copy.dashboard.nextBiologicalUpgrade}</p><p className="mt-2 text-sm leading-5 text-chrome">{adaptiveMission.nextUpgrade}</p></div>
+            <div className="command-surface rounded-md p-4"><p className="system-label">{copy.dashboard.nextSignalNeeded}</p><p className="mt-2 text-white">{adaptiveMission.nextSignalNeeded}</p></div>
+            <div className="command-surface rounded-md p-4"><p className="system-label">{copy.dashboard.confidence}</p><p className="mt-2 text-white">{adaptiveMission.confidence}%</p></div>
+          </div>
+        </Card>
         <Card>
           <div className="flex items-center justify-between gap-3">
             <div><p className="system-label">{copy.dashboard.intelligenceLayer}</p><h3 className="mt-2 font-semibold text-white">{copy.dashboard.primaryBiologicalConstraint}</h3></div>

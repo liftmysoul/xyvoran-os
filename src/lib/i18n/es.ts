@@ -82,6 +82,7 @@ export const es = {
   },
   dashboard: {
     intelligenceLayer: "Capa de Inteligencia Biologica", primaryBiologicalConstraint: "Limite biologico principal", topOpportunity: "Oportunidad principal de optimizacion", intelligenceConfidence: "Confianza de inteligencia", missingSignals: "Senales pendientes", activeBiologicalInsights: "Insights biologicos activos", limitedIntelligence: "La inteligencia biologica aun es limitada. Registra biomarcadores o carga analisis de sangre para aumentar la precision.", activeInsights: "Insights activos", confidence: "Confianza",
+    currentBiologicalMission: "Mision biologica activa", currentBottleneck: "Cuello de botella biologico", missionProgress: "Progreso de mision", nextSignalNeeded: "Siguiente senal necesaria", recommendedNextAction: "Siguiente accion recomendada",
     missionEyebrow: "Centro de control biológico", missionTitle: "Centro de Control para tu Biología", missionDescription: "Tu vista operativa de preparación, resiliencia, señales biométricas y oportunidades de mayor impacto dentro de tu sistema de optimización.",
     healthScore: "Puntuación de Optimización Humana", biologicalAge: "Edad Biológica", years: "años", experimentalEstimate: "Estimación orientativa de bienestar basada en tus datos actuales; no es una medición clínica.",
     longevityProjection: "Proyección de Longevidad", recoveryStatus: "Estado de Recuperación", trajectoryStrong: "Trayectoria ascendente", trajectoryStable: "Trayectoria estable", trajectoryBuilding: "Construyendo fundamentos",

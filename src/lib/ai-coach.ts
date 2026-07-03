@@ -1,4 +1,5 @@
-import type { BiomarkerEntry, BiologicalInsightRecord, ChatMessage, Json, LabReport, LanguagePreference, OnboardingData, PillarName, Protocol } from "@/types/database";
+import type { AdaptiveMissionRecord, BiomarkerEntry, BiologicalInsightRecord, ChatMessage, Json, LabReport, LanguagePreference, OnboardingData, PillarName, Protocol } from "@/types/database";
+import type { AdaptiveMission } from "@/lib/adaptive-protocol-engine";
 import type { Language } from "@/lib/i18n";
 import type { BiologicalIntelligenceSummary } from "@/lib/biological-intelligence";
 
@@ -31,6 +32,7 @@ Your role:
 - Use pillar-specific intake signals when available, including sleep duration, HRV, resting heart rate, sugar cravings, afternoon energy crashes, fasting pattern, focus, brain fog, caffeine, alcohol, nicotine, hydration, skin quality, current stack, and secondary goals.
 - When a completed lab report is provided, reference actual measured values and their configured optimization status. Distinguish wellness optimization targets from clinical reference ranges.
 - When biological intelligence is provided, use the primary constraint, top opportunity, active insights, missing signals, and latest protocol to answer what to prioritize first and why the score may be limited.
+- When an adaptive biological mission is provided, treat it as the current strategic plan. Explain the current biological bottleneck, mission progress, next signal needed, and why the next action is prioritized.
 - Use clear reasoning, prioritize low-risk foundations, and recommend measurable tracking over time.
 - Be direct, elite, calm, ethical, and actionable. Make advice realistic for the next 24 hours and the next 7 days.
 
@@ -59,6 +61,8 @@ export function buildCoachContext(args: {
   latestLabReport?: LabReport | null;
   latestProtocol?: Protocol | null;
   biologicalIntelligence?: BiologicalIntelligenceSummary | null;
+  adaptiveMission?: AdaptiveMission | null;
+  storedAdaptiveMission?: AdaptiveMissionRecord | null;
   activeInsights?: BiologicalInsightRecord[];
   pillarScores: PersistedPillarScore[];
   history: ChatMessage[];
@@ -84,6 +88,7 @@ export function buildCoachContext(args: {
       hasLatestBiomarkers: Boolean(latestBiomarkers),
       hasLatestLabReport: Boolean(args.latestLabReport?.analysis_json),
       hasBiologicalIntelligence: Boolean(args.biologicalIntelligence),
+      hasAdaptiveMission: Boolean(args.adaptiveMission ?? args.storedAdaptiveMission),
       activeInsightCount: args.activeInsights?.length ?? 0,
       pillarScoreCount: args.pillarScores.length,
       recentMessageCount: args.history.length
@@ -173,6 +178,29 @@ export function buildCoachContext(args: {
       summary: insight.summary,
       recommendedActions: insight.recommended_actions
     })),
+    adaptiveMission: args.adaptiveMission ? {
+      missionName: args.adaptiveMission.missionName,
+      primaryPillar: args.adaptiveMission.primaryPillar,
+      constraint: args.adaptiveMission.constraint,
+      confidence: args.adaptiveMission.confidence,
+      progress: args.adaptiveMission.progress,
+      progressState: args.adaptiveMission.progressState,
+      reason: args.adaptiveMission.reason,
+      nextUpgrade: args.adaptiveMission.nextUpgrade,
+      nextSignalNeeded: args.adaptiveMission.nextSignalNeeded,
+      prioritySignals: args.adaptiveMission.prioritySignals,
+      phases: args.adaptiveMission.phases,
+      safetyNote: args.adaptiveMission.safetyNote
+    } : args.storedAdaptiveMission ? {
+      missionName: args.storedAdaptiveMission.mission_name,
+      primaryPillar: args.storedAdaptiveMission.primary_pillar,
+      constraint: args.storedAdaptiveMission.constraint,
+      confidence: args.storedAdaptiveMission.confidence,
+      progress: args.storedAdaptiveMission.progress,
+      phases: args.storedAdaptiveMission.phases,
+      actions: args.storedAdaptiveMission.actions,
+      trackingSignals: args.storedAdaptiveMission.tracking_signals
+    } : null,
     latestProtocol: args.latestProtocol ? {
       title: args.latestProtocol.title,
       goal: args.latestProtocol.goal,
