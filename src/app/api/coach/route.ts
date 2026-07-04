@@ -8,7 +8,7 @@ import {
   type UserProfile
 } from "@/lib/ai-coach";
 import { generateBiologicalIntelligence } from "@/lib/biological-intelligence";
-import { generateAdaptiveMission } from "@/lib/adaptive-protocol-engine";
+import { generateAdaptiveMission, localizeAdaptiveMission } from "@/lib/adaptive-protocol-engine";
 import { applyLabScoreImpacts, mergeLabsIntoBiomarkers } from "@/lib/labs/integrate";
 import { calculatePillars } from "@/lib/scoring";
 import { createClient } from "@/lib/supabase-server";
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
       latestLabReport: latestLabReport ?? null,
       pillarScores: calculatedPillars
     }).summary;
-    const adaptiveMission = generateAdaptiveMission({
+    const adaptiveMission = localizeAdaptiveMission(generateAdaptiveMission({
       userId: auth.user.id,
       onboarding: onboarding ?? null,
       latestBiomarkers: scoreBiomarkers,
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
       biologicalIntelligence,
       previousProtocols: latestProtocol ? [latestProtocol] : [],
       previousMissions: adaptiveMissions ?? []
-    });
+    }), language);
     const context = buildCoachContext({ profile, onboarding, latestBiomarkers: scoreBiomarkers, latestLabReport, latestProtocol, biologicalIntelligence, adaptiveMission, storedAdaptiveMission: adaptiveMissions?.[0] ?? null, activeInsights: activeInsights ?? [], pillarScores, history, language });
 
     const { error: userMessageError } = await dataClient.from("ai_chat_messages").insert({ user_id: auth.user.id, role: "user", content: message });

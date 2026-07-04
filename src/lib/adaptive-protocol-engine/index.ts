@@ -5,3 +5,4 @@ export * from "@/lib/adaptive-protocol-engine/mission-generator";
 export * from "@/lib/adaptive-protocol-engine/priority-engine";
 export * from "@/lib/adaptive-protocol-engine/protocol-adapter";
 export * from "@/lib/adaptive-protocol-engine/progress-engine";
+export * from "@/lib/adaptive-protocol-engine/localization";

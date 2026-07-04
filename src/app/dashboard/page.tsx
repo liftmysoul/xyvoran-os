@@ -10,8 +10,8 @@ import { SystemStatus } from "@/components/dashboard/SystemStatus";
 import { findWeakestPillar } from "@/lib/protocol";
 import { calculatePillars } from "@/lib/scoring";
 import { applyLabScoreImpacts, mergeLabsIntoBiomarkers } from "@/lib/labs/integrate";
-import { generateBiologicalIntelligence } from "@/lib/biological-intelligence";
-import { generateAdaptiveMission } from "@/lib/adaptive-protocol-engine";
+import { generateBiologicalIntelligence, localizeBiologicalText } from "@/lib/biological-intelligence";
+import { generateAdaptiveMission, localizeAdaptiveMission } from "@/lib/adaptive-protocol-engine";
 import { createClient } from "@/lib/supabase-server";
 import { formatDate } from "@/lib/format";
 import type { AdaptiveMissionRecord, BiomarkerEntry, BiologicalInsightRecord, LabReport, OnboardingData, Protocol } from "@/types/database";
@@ -70,7 +70,7 @@ export default async function DashboardPage() {
     created_at: "",
     updated_at: ""
   }));
-  const adaptiveMission = generateAdaptiveMission({
+  const adaptiveMission = localizeAdaptiveMission(generateAdaptiveMission({
     userId: auth.user.id,
     onboarding,
     latestBiomarkers: scoreBiomarkers,
@@ -81,7 +81,7 @@ export default async function DashboardPage() {
     biologicalIntelligence: intelligenceSummary,
     previousProtocols: latestProtocol ? [latestProtocol] : [],
     previousMissions: storedMissions ?? []
-  });
+  }), language);
   const persistedMission = storedMissions?.[0];
   if (!persistedMission && !missionReadError) {
     await supabase.from("adaptive_missions").insert({
@@ -221,7 +221,7 @@ export default async function DashboardPage() {
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             <div className="command-surface rounded-md p-4"><p className="system-label">{copy.dashboard.primaryBiologicalConstraint}</p><p className="mt-2 text-white">{intelligenceSummary.primaryConstraint ? localizePillar(intelligenceSummary.primaryConstraint.pillar, language) : copy.common.notSet}</p></div>
-            <div className="command-surface rounded-md p-4"><p className="system-label">{copy.dashboard.topOpportunity}</p><p className="mt-2 text-sm leading-5 text-chrome">{intelligenceSummary.topOpportunity ?? copy.dashboard.limitedIntelligence}</p></div>
+            <div className="command-surface rounded-md p-4"><p className="system-label">{copy.dashboard.topOpportunity}</p><p className="mt-2 text-sm leading-5 text-chrome">{localizeBiologicalText(intelligenceSummary.topOpportunity, language) || copy.dashboard.limitedIntelligence}</p></div>
             <div className="command-surface rounded-md p-4"><p className="system-label">{copy.dashboard.missingSignals}</p><p className="mt-2 text-white">{intelligenceSummary.missingData.length}</p></div>
           </div>
         </Card>
@@ -231,7 +231,7 @@ export default async function DashboardPage() {
             {activeInsights.length ? activeInsights.slice(0, 3).map((insight) => (
               <div key={insight.id} className="rounded-md border border-signal/10 bg-signal/[0.03] p-3 text-sm">
                 <p className="font-semibold text-white">{localizePillar(String(insight.pillar), language)}</p>
-                <p className="mt-1 leading-5 text-chrome">{String(insight.summary)}</p>
+                <p className="mt-1 leading-5 text-chrome">{localizeBiologicalText(String(insight.summary), language)}</p>
               </div>
             )) : <p className="text-sm leading-6 text-chrome">{copy.dashboard.limitedIntelligence}</p>}
           </div>

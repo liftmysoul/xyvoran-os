@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { generateStructuredProtocol } from "@/lib/protocol";
-import { adaptProtocolToMission, generateAdaptiveMission } from "@/lib/adaptive-protocol-engine";
+import { adaptProtocolToMission, generateAdaptiveMission, localizeAdaptiveMission } from "@/lib/adaptive-protocol-engine";
 import { calculatePillars } from "@/lib/scoring";
 import { applyLabScoreImpacts, mergeLabsIntoBiomarkers } from "@/lib/labs/integrate";
 import { generateBiologicalIntelligence } from "@/lib/biological-intelligence";
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
     pillarScores: pillars
   });
 
-  const adaptiveMission = generateAdaptiveMission({
+  const adaptiveMission = localizeAdaptiveMission(generateAdaptiveMission({
     userId: auth.user.id,
     onboarding,
     latestBiomarkers: scoreBiomarkers,
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
     biologicalIntelligence: intelligence.summary,
     previousProtocols: [],
     previousMissions: adaptiveMissions ?? []
-  });
+  }), language);
 
   const protocol = adaptProtocolToMission(generateStructuredProtocol({
     onboarding,
@@ -112,7 +112,7 @@ export async function POST(request: Request) {
     intelligenceSummary: intelligence.summary,
     requestedIntensity,
     language
-  }), adaptiveMission);
+  }), adaptiveMission, language);
 
   const insertPayload = {
     user_id: auth.user.id,
