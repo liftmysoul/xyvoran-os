@@ -5,7 +5,7 @@ create table if not exists public.adaptive_missions (
   user_id uuid not null references auth.users(id) on delete cascade,
   mission_name text not null,
   primary_pillar text not null,
-  constraint text not null,
+  "constraint" text not null,
   confidence integer not null default 0 check (confidence >= 0 and confidence <= 100),
   progress integer not null default 0 check (progress >= 0 and progress <= 100),
   phases jsonb not null default '[]'::jsonb,
