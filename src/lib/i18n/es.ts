@@ -48,7 +48,8 @@ export const es = {
     secureAccess: "Acceso seguro para miembros", privateEnrollment: "Registro privado de membresía", loginDescription: "Autentícate para acceder a tu entorno privado de inteligencia biológica, prioridades de optimización e historial de protocolos.", signupDescription: "Inicializa tu identidad privada de miembro y comienza a construir un modelo operativo longitudinal de tu biología.", encryptedSession: "Sesión de miembro cifrada", signalIdentity: "Identidad de miembro verificada", signalBiometrics: "Inteligencia biométrica privada", signalIntelligence: "Optimización contextual con IA",
     newHere: "¿Primera vez aquí?", createProfile: "Crea tu perfil", signupTitle: "Crea tu perfil de optimización",
     creating: "Creando...", already: "¿Ya tienes acceso?", loginFailed: "No se pudo iniciar sesión", signupFailed: "No se pudo crear la cuenta",
-    confirmEmail: "Tu cuenta fue creada. Revisa tu correo para confirmarla y luego vuelve al proceso de incorporación."
+    confirmEmail: "Tu cuenta fue creada. Revisa tu correo para confirmarla y luego vuelve al proceso de incorporación.",
+    continueWithGoogle: "Continuar con Google"
   },
   nav: {
     dashboard: "Centro de Control", biomarkers: "Señales Biométricas", labs: "Inteligencia de Laboratorio", coach: "Núcleo de Inteligencia", protocols: "Motor de Protocolos",

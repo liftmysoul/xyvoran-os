@@ -10,3 +10,6 @@ where protocol_json is null;
 
 create index if not exists generated_protocols_user_status_idx
 on public.generated_protocols (user_id, status, created_at desc);
+-- LEGACY XYVORAN OS LOCAL MIGRATION.
+-- Do not run directly against the shared xyvoran.com Supabase backend.
+-- Review and apply approved changes through Lovable Cloud migrations only.

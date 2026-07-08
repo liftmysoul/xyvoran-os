@@ -12,7 +12,7 @@ import { generateAdaptiveMission, localizeAdaptiveMission } from "@/lib/adaptive
 import { applyLabScoreImpacts, mergeLabsIntoBiomarkers } from "@/lib/labs/integrate";
 import { calculatePillars } from "@/lib/scoring";
 import { createClient } from "@/lib/supabase-server";
-import { getSupabaseAnonKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
+import { getSupabasePublishableKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
 import type { AdaptiveMissionRecord, BiomarkerEntry, BiologicalInsightRecord, ChatMessage, LabReport, OnboardingData, Protocol } from "@/types/database";
 import { getDictionary, normalizeLanguage } from "@/lib/i18n";
 import { getServerLanguage } from "@/lib/i18n/server";
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     if (!auth.user) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     const dataClient =
       useBearerClient && bearerToken
-        ? createSupabaseClient(getSupabaseUrl(), getSupabaseAnonKey(), {
+        ? createSupabaseClient(getSupabaseUrl(), getSupabasePublishableKey(), {
             global: {
               headers: {
                 Authorization: `Bearer ${bearerToken}`

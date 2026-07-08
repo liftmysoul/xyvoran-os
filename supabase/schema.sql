@@ -585,3 +585,6 @@ create policy "Health goals self managed" on public.health_goals for all to auth
 
 -- member_admin_metadata intentionally has no authenticated policy.
 -- Service-role/admin tooling may access it later without exposing admin notes to members.
+-- LEGACY XYVORAN OS LOCAL SCHEMA.
+-- Do not run directly against the shared xyvoran.com Supabase backend.
+-- Review and apply approved changes through Lovable Cloud migrations only.

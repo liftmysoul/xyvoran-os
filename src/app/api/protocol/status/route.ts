@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase-server";
-import { getSupabaseAnonKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
+import { getSupabasePublishableKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
 import type { ProtocolStatus } from "@/types/database";
 
 export async function PATCH(request: Request) {
@@ -24,7 +24,7 @@ export async function PATCH(request: Request) {
   if (!auth.user) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   const dataClient =
     useBearerClient && bearerToken
-      ? createSupabaseClient(getSupabaseUrl(), getSupabaseAnonKey(), {
+      ? createSupabaseClient(getSupabaseUrl(), getSupabasePublishableKey(), {
           global: { headers: { Authorization: `Bearer ${bearerToken}` } },
           auth: { persistSession: false, autoRefreshToken: false }
         })

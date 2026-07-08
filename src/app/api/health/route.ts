@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { getSupabaseAnonKey, getSupabaseProjectRef, getSupabaseUrl, isSupabaseConfigured } from "@/lib/supabase-config";
+import { getSupabaseProjectRef, getSupabasePublishableKey, getSupabaseUrl, isSupabaseConfigured } from "@/lib/supabase-config";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +10,7 @@ export async function GET() {
   let phase8Schema = false;
 
   if (supabaseConfigured) {
-    const supabase = createSupabaseClient(getSupabaseUrl(), getSupabaseAnonKey(), { auth: { persistSession: false } });
+    const supabase = createSupabaseClient(getSupabaseUrl(), getSupabasePublishableKey(), { auth: { persistSession: false } });
     const [{ error: phase7Error }, { error: profileError }, { error: membershipError }, { error: consentError }] = await Promise.all([
       supabase.from("profiles").select("language_preference").limit(1),
       supabase.from("profiles").select("member_id,first_name,last_name,date_of_birth").limit(1),

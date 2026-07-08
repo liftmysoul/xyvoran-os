@@ -8,7 +8,7 @@ import { calculatePillars } from "@/lib/scoring";
 import { generateBiologicalIntelligence } from "@/lib/biological-intelligence";
 import { upsertInsights } from "@/app/api/biological-intelligence/_utils";
 import { createClient } from "@/lib/supabase-server";
-import { getSupabaseAnonKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
+import { getSupabasePublishableKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
 import type { BiomarkerEntry, LabReport, OnboardingData } from "@/types/database";
 import type { Profile } from "@/types/database";
 import { getDictionary, normalizeLanguage } from "@/lib/i18n";
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   const { data: auth, error: authError } = useBearerClient ? await supabase.auth.getUser(bearerToken) : await supabase.auth.getUser();
   if (authError || !auth.user) return NextResponse.json({ error: copy.labs.signInUpload }, { status: 401 });
   const dataClient = useBearerClient && bearerToken
-    ? createSupabaseClient(getSupabaseUrl(), getSupabaseAnonKey(), {
+    ? createSupabaseClient(getSupabaseUrl(), getSupabasePublishableKey(), {
         global: { headers: { Authorization: `Bearer ${bearerToken}` } },
         auth: { persistSession: false, autoRefreshToken: false }
       })

@@ -1,16 +1,20 @@
 const placeholderUrl = "https://placeholder.supabase.co";
-const placeholderAnonKey = "placeholder-anon-key";
+const placeholderPublishableKey = "placeholder-publishable-key";
 
 export function getSupabaseUrl() {
   return process.env.NEXT_PUBLIC_SUPABASE_URL || placeholderUrl;
 }
 
+export function getSupabasePublishableKey() {
+  return process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || placeholderPublishableKey;
+}
+
 export function getSupabaseAnonKey() {
-  return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || placeholderAnonKey;
+  return getSupabasePublishableKey();
 }
 
 export function isSupabaseConfigured() {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && getSupabasePublishableKey() !== placeholderPublishableKey);
 }
 
 export function getSupabaseProjectRef() {
@@ -22,5 +26,5 @@ export function getSupabaseProjectRef() {
 }
 
 export function supabaseConfigMessage() {
-  return "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local, then restart the dev server.";
+  return "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY to .env.local, then restart the dev server.";
 }

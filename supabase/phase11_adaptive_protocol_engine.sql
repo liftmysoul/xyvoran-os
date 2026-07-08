@@ -70,3 +70,6 @@ on public.adaptive_missions
 for delete
 to authenticated
 using (auth.uid() = user_id);
+-- LEGACY XYVORAN OS LOCAL MIGRATION.
+-- Do not run directly against the shared xyvoran.com Supabase backend.
+-- Review and apply approved changes through Lovable Cloud migrations only.

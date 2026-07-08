@@ -34,3 +34,6 @@ create policy "Lab files select own" on storage.objects for select to authentica
 create policy "Lab files insert own" on storage.objects for insert to authenticated with check (bucket_id = 'lab-reports' and (storage.foldername(name))[1] = auth.uid()::text);
 create policy "Lab files update own" on storage.objects for update to authenticated using (bucket_id = 'lab-reports' and (storage.foldername(name))[1] = auth.uid()::text) with check (bucket_id = 'lab-reports' and (storage.foldername(name))[1] = auth.uid()::text);
 create policy "Lab files delete own" on storage.objects for delete to authenticated using (bucket_id = 'lab-reports' and (storage.foldername(name))[1] = auth.uid()::text);
+-- LEGACY XYVORAN OS LOCAL MIGRATION.
+-- Do not run directly against the shared xyvoran.com Supabase backend.
+-- Review and apply approved changes through Lovable Cloud migrations only.

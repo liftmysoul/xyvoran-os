@@ -87,3 +87,6 @@ where connamespace = 'public'::regnamespace
     'public.health_goals'::regclass
   )
 order by table_name::text, constraint_name;
+-- LEGACY XYVORAN OS LOCAL VERIFICATION SCRIPT.
+-- Do not run directly against the shared xyvoran.com Supabase backend.
+-- Review and adapt for Lovable Cloud migrations only.

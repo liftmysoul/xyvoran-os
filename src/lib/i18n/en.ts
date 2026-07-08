@@ -46,7 +46,8 @@ export const en = {
     secureAccess: "Secure member access", privateEnrollment: "Private member enrollment", loginDescription: "Authenticate to access your private biological intelligence environment, optimization priorities, and protocol history.", signupDescription: "Initialize your private member identity and begin building a longitudinal operating model of your biology.", encryptedSession: "Encrypted member session", signalIdentity: "Verified member identity", signalBiometrics: "Private biometric intelligence", signalIntelligence: "Contextual AI optimization",
     newHere: "New here?", createProfile: "Create your profile", signupTitle: "Create your optimization profile",
     creating: "Creating...", already: "Already have access?", loginFailed: "Login failed", signupFailed: "Signup failed",
-    confirmEmail: "Signup succeeded. Check your email to confirm your account, then return to onboarding."
+    confirmEmail: "Signup succeeded. Check your email to confirm your account, then return to onboarding.",
+    continueWithGoogle: "Continue with Google"
   },
   nav: {
     dashboard: "Mission Control", biomarkers: "Biometric Signals", labs: "Lab Intelligence", coach: "Intelligence Core", protocols: "Protocol Engine",

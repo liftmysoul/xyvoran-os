@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { ageConfirmedValue, ageGateCookieName } from "@/lib/age-gate";
-import { getSupabaseAnonKey, getSupabaseUrl, isSupabaseConfigured } from "@/lib/supabase-config";
+import { getSupabasePublishableKey, getSupabaseUrl, isSupabaseConfigured } from "@/lib/supabase-config";
 
 type CookieToSet = {
   name: string;
@@ -28,7 +28,7 @@ export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
   if (!isSupabaseConfigured()) return response;
 
-  const supabase = createServerClient(getSupabaseUrl(), getSupabaseAnonKey(), {
+  const supabase = createServerClient(getSupabaseUrl(), getSupabasePublishableKey(), {
     cookies: {
       getAll() {
         return request.cookies.getAll();

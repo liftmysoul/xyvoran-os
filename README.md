@@ -17,26 +17,33 @@ Create `.env.local` in the project root:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
 OPENAI_API_KEY=sk-your-openai-api-key
 OPENAI_MODEL=gpt-4o-mini
 ```
 
 Only the first three variables are required in Vercel. `OPENAI_MODEL` is optional. `OPENAI_API_KEY` is read only by server routes and must never use a `NEXT_PUBLIC_` prefix.
 
+XYVORAN OS now targets the shared Supabase backend used by `xyvoran.com`:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://vnmzouindahoqvtizyjo.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_C6sADhHJ9gP-88jwL7ezXw_sAgBYCjL
+```
+
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` is still accepted as a temporary fallback for older environments, but new local, preview, and production deployments should use `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+
 `SUPABASE_SERVICE_ROLE_KEY` is not used or required. Do not add one unless a future server-only administrative workflow genuinely needs to bypass Row Level Security.
 
 ## Supabase Setup
 
-1. Create a Supabase project at `https://supabase.com`.
-2. Open the Supabase project dashboard.
-3. Go to Project Settings -> API.
-4. Copy the Project URL into `NEXT_PUBLIC_SUPABASE_URL`.
-5. Copy the anon public key into `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-6. Open SQL Editor.
-7. Paste and run the full contents of `supabase/schema.sql`.
-8. Go to Authentication -> URL Configuration.
-9. Add these redirect URLs:
+1. Use the shared Supabase project `vnmzouindahoqvtizyjo` owned by the public `xyvoran.com` backend.
+2. Go to Project Settings -> API.
+3. Copy the Project URL into `NEXT_PUBLIC_SUPABASE_URL`.
+4. Copy the publishable key into `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+5. Do not run local OS migrations directly against the shared backend. Any missing OS-specific tables must be reviewed and applied through Lovable Cloud migrations by the owner.
+6. Go to Authentication -> URL Configuration.
+7. Add these redirect URLs:
 
 ```text
 http://localhost:3001/auth/callback
@@ -47,7 +54,19 @@ https://your-vercel-preview-domain.vercel.app/auth/callback
 
 Set the Supabase Auth Site URL to `https://os.xyvoran.com` for production. For changing Vercel preview URLs, Supabase also supports an allow-list pattern such as `https://*-your-team-slug.vercel.app/**`; keep the production callback exact.
 
-10. For easiest local MVP testing, you may disable email confirmation under Authentication -> Providers -> Email. If email confirmation remains enabled, signup will require confirming the email before onboarding can save.
+8. For easiest local MVP testing, you may disable email confirmation under Authentication -> Providers -> Email. If email confirmation remains enabled, signup will require confirming the email before onboarding can save.
+
+The shared backend already owns role infrastructure:
+
+- `user_roles`
+- enum `app_role` with `admin` and `member`
+- security-definer RPC `has_role(_user_id uuid, _role app_role)`
+
+Do not recreate those objects from XYVORAN OS migrations.
+
+## Shared Backend Migration Boundary
+
+The SQL files under `supabase/` document the historical XYVORAN OS schema and proposed OS-specific tables. They are not automatically safe to run against the shared `xyvoran.com` backend. For the shared backend, review missing objects first, then apply approved changes from Lovable Cloud.
 
 ## Phase 4 Protocol Migration
 
@@ -234,7 +253,7 @@ The coach system prompt is in `src/lib/ai-coach.ts`. It requires educational wel
 
 ```text
 NEXT_PUBLIC_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 OPENAI_API_KEY
 ```
 
@@ -264,7 +283,7 @@ After the domain is active:
 - Dashboard layouts and API operations require a verified Supabase user session.
 - Every application table has owner-only Row Level Security policies.
 - The `lab-reports` Storage bucket is private and restricts objects to the authenticated user's folder.
-- The browser receives only the Supabase project URL and anon key. Authorization is enforced by RLS.
+- The browser receives only the Supabase project URL and publishable key. Authorization is enforced by RLS.
 - OpenAI requests and lab extraction run server-side. The OpenAI key is never returned by `/api/health` or sent to browser components.
 - `.env.local` and `.env` are excluded by `.gitignore`; `.env.example` contains placeholders only.
 - Baseline response headers disable framing, MIME sniffing, camera, microphone, and location access.

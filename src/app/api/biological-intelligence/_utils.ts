@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { calculatePillars } from "@/lib/scoring";
 import { createClient } from "@/lib/supabase-server";
-import { getSupabaseAnonKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
+import { getSupabasePublishableKey, getSupabaseUrl, isSupabaseConfigured, supabaseConfigMessage } from "@/lib/supabase-config";
 import { isMissingSchemaError } from "@/lib/supabase-errors";
 import { generateBiologicalIntelligence, type BiologicalInsight } from "@/lib/biological-intelligence";
 import type { BiomarkerEntry, BiologicalInsightRecord, LabReport, OnboardingData, PillarScore } from "@/types/database";
@@ -19,7 +19,7 @@ export async function getIntelligenceClient(request: Request) {
   if (!auth.user) return { error: NextResponse.json({ error: "Unauthorized." }, { status: 401 }) };
   const dataClient =
     useBearerClient && bearerToken
-      ? createSupabaseClient(getSupabaseUrl(), getSupabaseAnonKey(), {
+      ? createSupabaseClient(getSupabaseUrl(), getSupabasePublishableKey(), {
           global: { headers: { Authorization: `Bearer ${bearerToken}` } },
           auth: { persistSession: false, autoRefreshToken: false }
         })

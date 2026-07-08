@@ -17,6 +17,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -35,6 +36,21 @@ export default function LoginPage() {
     router.refresh();
   }
 
+  async function signInWithGoogle() {
+    if (!isSupabaseConfigured()) {
+      setError(supabaseConfigMessage());
+      return;
+    }
+    setOauthLoading(true);
+    setError("");
+    const { error: authError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` }
+    });
+    setOauthLoading(false);
+    if (authError) setError(`${copy.auth.loginFailed}: ${authError.message}`);
+  }
+
   return (
     <SecureAccessFrame eyebrow={copy.auth.secureAccess} title={copy.auth.loginTitle} description={copy.auth.loginDescription} statusLabel={copy.auth.encryptedSession} signalLabels={[copy.auth.signalIdentity, copy.auth.signalBiometrics, copy.auth.signalIntelligence]}>
         <form onSubmit={submit} className="space-y-4">
@@ -43,6 +59,7 @@ export default function LoginPage() {
           {!isSupabaseConfigured() && <p className="text-sm text-amber-200">{supabaseConfigMessage()}</p>}
           {error && <p className="text-sm text-red-300">{error}</p>}
           <Button className="w-full" disabled={loading}>{loading ? copy.auth.authenticating : copy.auth.login}</Button>
+          <Button type="button" className="w-full border-signal/30 bg-white/5 text-white hover:bg-signal/10" disabled={oauthLoading} onClick={signInWithGoogle}>{oauthLoading ? copy.auth.authenticating : copy.auth.continueWithGoogle}</Button>
         </form>
         <p className="mt-5 text-sm text-chrome">{copy.auth.newHere} <Link className="font-semibold text-emeraldx" href="/auth/signup">{copy.auth.createProfile}</Link></p>
     </SecureAccessFrame>

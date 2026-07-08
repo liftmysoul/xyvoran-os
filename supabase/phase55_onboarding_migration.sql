@@ -38,3 +38,6 @@ begin
     alter table public.onboarding_data add constraint onboarding_hydration_level_range check (hydration_level is null or hydration_level between 1 and 10);
   end if;
 end $$;
+-- LEGACY XYVORAN OS LOCAL MIGRATION.
+-- Do not run directly against the shared xyvoran.com Supabase backend.
+-- Review and apply approved changes through Lovable Cloud migrations only.
